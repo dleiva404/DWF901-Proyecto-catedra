@@ -1,0 +1,4 @@
+db.url=jdbc:mysql://localhost:3306/nombreDB?useSSL=false&serverTimezone=UTC
+# TODO: cambiar "nombreDB" por el nombre real de la base de datos
+db.user=root
+db.password=tu_password
