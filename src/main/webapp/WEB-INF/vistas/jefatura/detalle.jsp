@@ -7,121 +7,126 @@
 <head>
     <meta charset="UTF-8">
     <title>Detalle de solicitud</title>
+
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/css/estilos.css">
 </head>
 
 <body>
 
-<h1>Detalle de la solicitud</h1>
+<div class="contenedor">
 
-<c:if test="${not empty error}">
-    <p>${error}</p>
-</c:if>
+    <h1>Detalle de la solicitud</h1>
 
-<c:if test="${not empty solicitud}">
+    <c:if test="${not empty error}">
+        <p class="mensaje-error">
+            <c:out value="${error}"/>
+        </p>
+    </c:if>
 
-    <p>
-        <strong>ID:</strong>
-        ${solicitud.idSolicitud}
-    </p>
+    <c:if test="${not empty solicitud}">
 
-    <p>
-        <strong>ID empleado:</strong>
-        ${solicitud.idEmpleado}
-    </p>
+        <p>
+            <strong>ID:</strong>
+            <c:out value="${solicitud.idSolicitud}"/>
+        </p>
 
-    <p>
-        <strong>Tipo de solicitud:</strong>
-        ${solicitud.idTipoSolicitud}
-    </p>
+        <p>
+            <strong>ID empleado:</strong>
+            <c:out value="${solicitud.idEmpleado}"/>
+        </p>
 
-    <p>
-        <strong>Fecha de inicio:</strong>
-        ${solicitud.fechaInicio}
-    </p>
+        <p>
+            <strong>Tipo de solicitud:</strong>
+            <c:out value="${solicitud.idTipoSolicitud}"/>
+        </p>
 
-    <p>
-        <strong>Fecha de fin:</strong>
-        ${solicitud.fechaFin}
-    </p>
+        <p>
+            <strong>Fecha de inicio:</strong>
+            <c:out value="${solicitud.fechaInicio}"/>
+        </p>
 
-    <p>
-        <strong>Días solicitados:</strong>
-        ${solicitud.diasSolicitados}
-    </p>
+        <p>
+            <strong>Fecha de fin:</strong>
+            <c:out value="${solicitud.fechaFin}"/>
+        </p>
 
-    <p>
-        <strong>Motivo:</strong>
-        ${solicitud.motivo}
-    </p>
+        <p>
+            <strong>Días solicitados:</strong>
+            <c:out value="${solicitud.diasSolicitados}"/>
+        </p>
 
-    <p>
-        <strong>Estado:</strong>
-        ${solicitud.estado}
-    </p>
+        <p>
+            <strong>Motivo:</strong>
+            <c:out value="${solicitud.motivo}"/>
+        </p>
 
-    <hr>
+        <p>
+            <strong>Estado:</strong>
+            <span class="estado-pendiente">
+                <c:out value="${solicitud.estado}"/>
+            </span>
+        </p>
 
-    <h2>Acciones de jefatura</h2>
+        <hr>
 
-    <form action="${pageContext.request.contextPath}/jefatura"
-          method="post">
+        <h2>Acciones de jefatura</h2>
 
-        <input type="hidden"
-               name="accion"
-               value="aprobar">
+        <form action="${pageContext.request.contextPath}/jefatura"
+              method="post">
 
-        <input type="hidden"
-               name="idSolicitud"
-               value="${solicitud.idSolicitud}">
+            <input type="hidden"
+                   name="accion"
+                   value="aprobar">
 
-        <button type="submit">
-            Aprobar solicitud
-        </button>
+            <input type="hidden"
+                   name="idSolicitud"
+                   value="${solicitud.idSolicitud}">
 
-    </form>
+            <button type="submit">
+                Aprobar solicitud
+            </button>
+
+        </form>
+
+        <form action="${pageContext.request.contextPath}/jefatura"
+              method="post">
+
+            <input type="hidden"
+                   name="accion"
+                   value="rechazar">
+
+            <input type="hidden"
+                   name="idSolicitud"
+                   value="${solicitud.idSolicitud}">
+
+            <label for="motivoRechazo">
+                Motivo del rechazo:
+            </label>
+
+            <textarea id="motivoRechazo"
+                      name="motivoRechazo"
+                      required
+                      minlength="5"
+                      maxlength="250"
+                      rows="4"
+                      placeholder="Explique el motivo del rechazo"></textarea>
+
+            <button type="submit">
+                Rechazar solicitud
+            </button>
+
+        </form>
+
+    </c:if>
 
     <br>
 
-    <form action="${pageContext.request.contextPath}/jefatura"
-          method="post">
+    <a href="${pageContext.request.contextPath}/jefatura">
+        Volver a solicitudes pendientes
+    </a>
 
-        <input type="hidden"
-               name="accion"
-               value="rechazar">
-
-        <input type="hidden"
-               name="idSolicitud"
-               value="${solicitud.idSolicitud}">
-
-        <label for="motivoRechazo">
-            Motivo del rechazo:
-        </label>
-
-        <br>
-
-        <textarea id="motivoRechazo"
-                  name="motivoRechazo"
-                  required
-                  minlength="5"
-                  maxlength="250"
-                  rows="4"
-                  cols="50"></textarea>
-
-        <br>
-
-        <button type="submit">
-            Rechazar solicitud
-        </button>
-
-    </form>
-
-</c:if>
-
-<br>
-
-<a href="${pageContext.request.contextPath}/jefatura">
-    Volver a solicitudes pendientes
-</a>
+</div>
 
 </body>
 

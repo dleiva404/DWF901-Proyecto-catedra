@@ -7,87 +7,130 @@
 <head>
     <meta charset="UTF-8">
     <title>Solicitudes pendientes - Jefatura</title>
+
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/css/estilos.css">
 </head>
 
 <body>
 
-<h1>Solicitudes pendientes de jefatura</h1>
+<div class="contenedor">
 
-<c:if test="${param.resultado eq 'aprobada'}">
-    <p>La solicitud fue aprobada correctamente.</p>
-</c:if>
+    <header>
+        <h1>Solicitudes pendientes de jefatura</h1>
 
-<c:if test="${param.resultado eq 'rechazada'}">
-    <p>La solicitud fue rechazada correctamente.</p>
-</c:if>
+        <c:if test="${not empty sessionScope.empleado}">
+            <p>
+                Bienvenido(a),
+                <strong>
+                    <c:out value="${sessionScope.empleado.nombre}"/>
+                    <c:out value="${sessionScope.empleado.apellido}"/>
+                </strong>
+            </p>
+        </c:if>
+    </header>
 
-<c:if test="${not empty error}">
-    <p>${error}</p>
-</c:if>
+    <c:if test="${param.resultado eq 'aprobada'}">
+        <p class="info-saldo">
+            La solicitud fue aprobada correctamente.
+        </p>
+    </c:if>
 
-<c:choose>
+    <c:if test="${param.resultado eq 'rechazada'}">
+        <p class="info-saldo">
+            La solicitud fue rechazada correctamente.
+        </p>
+    </c:if>
 
-    <c:when test="${empty solicitudes}">
-        <p>No hay solicitudes pendientes para revisar.</p>
-    </c:when>
+    <c:if test="${not empty error}">
+        <p class="mensaje-error">
+            <c:out value="${error}"/>
+        </p>
+    </c:if>
 
-    <c:otherwise>
+    <c:choose>
 
-        <table border="1">
+        <c:when test="${empty solicitudes}">
+            <p>No hay solicitudes pendientes para revisar.</p>
+        </c:when>
 
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Empleado</th>
-                <th>Tipo de solicitud</th>
-                <th>Fecha inicio</th>
-                <th>Fecha fin</th>
-                <th>Días solicitados</th>
-                <th>Motivo</th>
-                <th>Estado</th>
-                <th>Acción</th>
-            </tr>
-            </thead>
+        <c:otherwise>
 
-            <tbody>
+            <table>
 
-            <c:forEach var="solicitud" items="${solicitudes}">
-
+                <thead>
                 <tr>
-
-                    <td>${solicitud.idSolicitud}</td>
-
-                    <td>${solicitud.idEmpleado}</td>
-
-                    <td>${solicitud.idTipoSolicitud}</td>
-
-                    <td>${solicitud.fechaInicio}</td>
-
-                    <td>${solicitud.fechaFin}</td>
-
-                    <td>${solicitud.diasSolicitados}</td>
-
-                    <td>${solicitud.motivo}</td>
-
-                    <td>${solicitud.estado}</td>
-
-                    <td>
-                        <a href="${pageContext.request.contextPath}/jefatura?accion=ver&id=${solicitud.idSolicitud}">
-                            Ver detalle
-                        </a>
-                    </td>
-
+                    <th>ID</th>
+                    <th>Empleado</th>
+                    <th>Tipo</th>
+                    <th>Fecha inicio</th>
+                    <th>Fecha fin</th>
+                    <th>Días</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
                 </tr>
+                </thead>
 
-            </c:forEach>
+                <tbody>
 
-            </tbody>
+                <c:forEach var="solicitud" items="${solicitudes}">
 
-        </table>
+                    <tr>
 
-    </c:otherwise>
+                        <td>
+                            <c:out value="${solicitud.idSolicitud}"/>
+                        </td>
 
-</c:choose>
+                        <td>
+                            <c:out value="${solicitud.idEmpleado}"/>
+                        </td>
+
+                        <td>
+                            <c:out value="${solicitud.idTipoSolicitud}"/>
+                        </td>
+
+                        <td>
+                            <c:out value="${solicitud.fechaInicio}"/>
+                        </td>
+
+                        <td>
+                            <c:out value="${solicitud.fechaFin}"/>
+                        </td>
+
+                        <td>
+                            <c:out value="${solicitud.diasSolicitados}"/>
+                        </td>
+
+                        <td>
+                            <c:out value="${solicitud.motivo}"/>
+                        </td>
+
+                        <td>
+                            <span class="estado-pendiente">
+                                <c:out value="${solicitud.estado}"/>
+                            </span>
+                        </td>
+
+                        <td>
+                            <a href="${pageContext.request.contextPath}/jefatura?accion=ver&id=${solicitud.idSolicitud}">
+                                Ver detalle
+                            </a>
+                        </td>
+
+                    </tr>
+
+                </c:forEach>
+
+                </tbody>
+
+            </table>
+
+        </c:otherwise>
+
+    </c:choose>
+
+</div>
 
 </body>
 
