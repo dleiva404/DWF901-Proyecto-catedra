@@ -1,0 +1,80 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    color: #222;
+}
+
+.contenedor, .contenedor-login {
+    max-width: 900px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 24px 32px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.contenedor-login {
+    max-width: 360px;
+}
+
+h1 { color: #1a3c5e; }
+
+form label {
+    display: block;
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+form input, form select, form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    margin-top: 16px;
+    padding: 8px 16px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th { background-color: #f0f2f5; }
+
+.mensaje-error {
+    background-color: #fdecea;
+    color: #d93025;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.info-saldo {
+    background-color: #e8f0fe;
+    color: #1a3c5e;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.estado-pendiente { color: #b26a00; font-weight: bold; }
+.estado-aprobada { color: #1e8e3e; font-weight: bold; }
+.estado-rechazada { color: #d93025; font-weight: bold; }
+.estado-cancelada { color: #888; font-weight: bold; }
