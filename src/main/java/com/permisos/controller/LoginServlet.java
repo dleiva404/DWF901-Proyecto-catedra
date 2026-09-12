@@ -86,8 +86,16 @@ public class LoginServlet extends HttpServlet {
 
             // Este Servlet cubre el flujo de EMPLEADO; si el rol no es
             // EMPLEADO, igual lo dejamos pasar a /solicitudes por ahora
-            // (los otros roles los manejan los Servlets de sus compañeros).
-            response.sendRedirect(request.getContextPath() + "/solicitudes");
+           // Valida el rol del usuario para decidir a qué pantalla enviarlo
+            if (rol != null && "JEFATURA".equalsIgnoreCase(rol.getNombre())) {
+
+                // Si el rol es jefe, lo redirige al Servlet de jefatura
+                response.sendRedirect(request.getContextPath() + "/jefatura");
+            } else {
+                // Si es un empleado común u otro rol, va a sus solicitudes personales
+                response.sendRedirect(request.getContextPath() + "/solicitudes");
+            }
+
 
         } catch (SQLException e) {
             request.setAttribute("error", "Error de conexión con la base de datos.");

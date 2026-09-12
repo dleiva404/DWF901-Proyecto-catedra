@@ -15,16 +15,24 @@
 <body>
     <header class="app-header">
         <div class="app-header-logo-chip">
-            <<img src="${pageContext.request.contextPath}/img/logo.png" alt="Invercalma">
+            <img src="${pageContext.request.contextPath}/img/logo.png" alt="Invercalma">
         </div>
         <div class="app-header-usuario">
             <span>
                 <c:out value="${sessionScope.empleado.nombre} ${sessionScope.empleado.apellido}"/>
                 &middot; <c:out value="${sessionScope.rol.nombre}"/>
             </span>
+
+            <c:if test="${fn:toLowerCase(sessionScope.rol.nombre) eq 'jefatura'}">
+                &middot;
+                <a class="app-header-salir" href="${pageContext.request.contextPath}/jefatura">Modulo Jefatura</a>
+            </c:if>
+
+            &middot;
             <a class="app-header-salir" href="${pageContext.request.contextPath}/logout">Cerrar sesión</a>
         </div>
     </header>
+
 
     <main class="app-contenido">
         <h1>Mis solicitudes de permiso</h1>
