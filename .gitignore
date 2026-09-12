@@ -22,5 +22,3 @@ buildNumber.properties
 *.iml
 .smarttomcat/
 
-# Configuración sensible del proyecto
-db.properties
