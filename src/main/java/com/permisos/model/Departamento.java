@@ -1,7 +1,7 @@
-package com.rrhh.modelo;
+package com.permisos.model;
 
 //Clase para heredar los datos básicos
-public abstract class Departamento {
+public class Departamento {
     protected String codigo;
     protected String nombres;
     protected String apellidos;
@@ -11,6 +11,9 @@ public abstract class Departamento {
         this.codigo = codigo;
         this.nombres = nombres;
         this.apellidos = apellidos;
+    }
+
+    public Departamento(int idDepartamento, String nombre, String descripcion, boolean activo) {
     }
 
     // Métodos Getters y Setters

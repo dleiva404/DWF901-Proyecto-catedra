@@ -76,7 +76,7 @@ public class SolicitudServlet extends HttpServlet {
     }
 
     private void mostrarFormularioEHistorial(HttpServletRequest request, HttpServletResponse response,
-                                             Usuario usuario) throws ServletException, IOException {
+                                              Usuario usuario) throws ServletException, IOException {
         try {
             List<Solicitud> historial = solicitudDAO.listarPorEmpleado(usuario.getIdEmpleado());
             List<TipoSolicitud> tipos = tipoSolicitudDAO.listarActivos();
@@ -184,7 +184,7 @@ public class SolicitudServlet extends HttpServlet {
     }
 
     private void reenviarConError(HttpServletRequest request, HttpServletResponse response,
-                                  Usuario usuario, String mensaje) throws ServletException, IOException {
+                                   Usuario usuario, String mensaje) throws ServletException, IOException {
         try {
             List<TipoSolicitud> tipos = tipoSolicitudDAO.listarActivos();
 

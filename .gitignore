@@ -20,6 +20,7 @@ buildNumber.properties
 # IntelliJ IDEA
 .idea/
 *.iml
+.smarttomcat/
 
 # Configuración sensible del proyecto
 db.properties

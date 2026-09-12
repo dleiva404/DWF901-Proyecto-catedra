@@ -14,7 +14,7 @@ public class DepartamentoDAO {
 
     private static final String SQL_LISTAR_ACTIVOS =
             "SELECT id_departamento, nombre, descripcion, activo FROM departamentos " +
-            "WHERE activo = TRUE ORDER BY nombre";
+                    "WHERE activo = TRUE ORDER BY nombre";
 
     private static final String SQL_BUSCAR_POR_ID =
             "SELECT id_departamento, nombre, descripcion, activo FROM departamentos WHERE id_departamento = ?";

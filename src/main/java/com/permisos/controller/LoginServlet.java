@@ -90,7 +90,6 @@ public class LoginServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/solicitudes");
 
         } catch (SQLException e) {
-            e.printStackTrace();
             request.setAttribute("error", "Error de conexión con la base de datos.");
             request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
         }

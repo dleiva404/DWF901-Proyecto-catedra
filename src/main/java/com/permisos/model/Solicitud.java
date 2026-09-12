@@ -1,4 +1,4 @@
-apackage com.permisos.model;
+package com.permisos.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
