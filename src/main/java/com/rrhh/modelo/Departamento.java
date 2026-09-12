@@ -1,13 +1,13 @@
 package com.rrhh.modelo;
 
 //Clase para heredar los datos básicos
-public abstract class Persona {
+public abstract class Departamento {
     protected String codigo;
     protected String nombres;
     protected String apellidos;
 
     // Constructor principal
-    public Persona(String codigo, String nombres, String apellidos) {
+    public Departamento(String codigo, String nombres, String apellidos) {
         this.codigo = codigo;
         this.nombres = nombres;
         this.apellidos = apellidos;

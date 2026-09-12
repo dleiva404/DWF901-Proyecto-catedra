@@ -1,72 +1,76 @@
-package com.rrhh.modelo;
+apackage com.permisos.model;
 
-// Clase para registrar las diferentes solicitudes y permisos del personal
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+/**
+ * Solicitud de un empleado (vacaciones, incapacidad o ausencia) y su ciclo
+ * de vida: PENDIENTE -> APROBADA / RECHAZADA / CANCELADA.
+ */
 public class Solicitud {
-    private String idSolicitud;
-    private Empleado empleado;
-    private String empresa;
-    private String sucursalArea;
-    private String tipoSolicitud;
 
-    // Datos generales
-    private String fechaInicio;
-    private String fechaFin;
+    public static final String ESTADO_PENDIENTE = "PENDIENTE";
+    public static final String ESTADO_APROBADA = "APROBADA";
+    public static final String ESTADO_RECHAZADA = "RECHAZADA";
+    public static final String ESTADO_CANCELADA = "CANCELADA";
+
+    private int idSolicitud;
+    private int idEmpleado;
+    private int idTipoSolicitud;
+    private LocalDateTime fechaSolicitud;
+    private LocalDate fechaInicio;
+    private LocalDate fechaFin;
+    private int diasSolicitados;
     private String motivo;
+    private String estado;
+    private String motivoRechazo;
+    private LocalDateTime fechaRespuesta;
+    private Integer idJefaturaRespuesta;
+    private String observacionesRrhh;
+    private LocalDateTime fechaRecepcionRrhh;
 
-    // Campos exclusivos de permisos
-    private boolean conGoceSueldo;
-    private boolean esPermisoISSS;
-
-    // Campos exclusivos de vacaciones
-    private String diasPendientes;
-    private String tareasCriticas;
-    private String personaSustituta;
-
-    public Solicitud(String idSolicitud, Empleado empleado, String empresa, String sucursalArea, String tipoSolicitud) {
-        this.idSolicitud = idSolicitud;
-        this.empleado = empleado;
-        this.empresa = empresa;
-        this.sucursalArea = sucursalArea;
-        this.tipoSolicitud = tipoSolicitud;
+    public Solicitud() {
     }
 
-    // Getters y Setters
-    public String getIdSolicitud() { return idSolicitud; }
-    public void setIdSolicitud(String idSolicitud) { this.idSolicitud = idSolicitud; }
+    public int getIdSolicitud() { return idSolicitud; }
+    public void setIdSolicitud(int idSolicitud) { this.idSolicitud = idSolicitud; }
 
-    public Empleado getEmpleado() { return empleado; }
-    public void setEmpleado(Empleado empleado) { this.empleado = empleado; }
+    public int getIdEmpleado() { return idEmpleado; }
+    public void setIdEmpleado(int idEmpleado) { this.idEmpleado = idEmpleado; }
 
-    public String getEmpresa() { return empresa; }
-    public void setEmpresa(String empresa) { this.empresa = empresa; }
+    public int getIdTipoSolicitud() { return idTipoSolicitud; }
+    public void setIdTipoSolicitud(int idTipoSolicitud) { this.idTipoSolicitud = idTipoSolicitud; }
 
-    public String getSucursalArea() { return sucursalArea; }
-    public void setSucursalArea(String sucursalArea) { this.sucursalArea = sucursalArea; }
+    public LocalDateTime getFechaSolicitud() { return fechaSolicitud; }
+    public void setFechaSolicitud(LocalDateTime fechaSolicitud) { this.fechaSolicitud = fechaSolicitud; }
 
-    public String getTipoSolicitud() { return tipoSolicitud; }
-    public void setTipoSolicitud(String tipoSolicitud) { this.tipoSolicitud = tipoSolicitud; }
+    public LocalDate getFechaInicio() { return fechaInicio; }
+    public void setFechaInicio(LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
 
-    public String getFechaInicio() { return fechaInicio; }
-    public void setFechaInicio(String fechaInicio) { this.fechaInicio = fechaInicio; }
+    public LocalDate getFechaFin() { return fechaFin; }
+    public void setFechaFin(LocalDate fechaFin) { this.fechaFin = fechaFin; }
 
-    public String getFechaFin() { return fechaFin; }
-    public void setFechaFin(String fechaFin) { this.fechaFin = fechaFin; }
+    public int getDiasSolicitados() { return diasSolicitados; }
+    public void setDiasSolicitados(int diasSolicitados) { this.diasSolicitados = diasSolicitados; }
 
     public String getMotivo() { return motivo; }
     public void setMotivo(String motivo) { this.motivo = motivo; }
 
-    public boolean isConGoceSueldo() { return conGoceSueldo; }
-    public void setConGoceSueldo(boolean conGoceSueldo) { this.conGoceSueldo = conGoceSueldo; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 
-    public boolean isEsPermisoISSS() { return esPermisoISSS; }
-    public void setEsPermisoISSS(boolean esPermisoISSS) { this.esPermisoISSS = esPermisoISSS; }
+    public String getMotivoRechazo() { return motivoRechazo; }
+    public void setMotivoRechazo(String motivoRechazo) { this.motivoRechazo = motivoRechazo; }
 
-    public String getDiasPendientes() { return diasPendientes; }
-    public void setDiasPendientes(String diasPendientes) { this.diasPendientes = diasPendientes; }
+    public LocalDateTime getFechaRespuesta() { return fechaRespuesta; }
+    public void setFechaRespuesta(LocalDateTime fechaRespuesta) { this.fechaRespuesta = fechaRespuesta; }
 
-    public String getTareasCriticas() { return tareasCriticas; }
-    public void setTareasCriticas(String tareasCriticas) { this.tareasCriticas = tareasCriticas; }
+    public Integer getIdJefaturaRespuesta() { return idJefaturaRespuesta; }
+    public void setIdJefaturaRespuesta(Integer idJefaturaRespuesta) { this.idJefaturaRespuesta = idJefaturaRespuesta; }
 
-    public String getPersonaSustituta() { return personaSustituta; }
-    public void setPersonaSustituta(String personaSustituta) { this.personaSustituta = personaSustituta; }
+    public String getObservacionesRrhh() { return observacionesRrhh; }
+    public void setObservacionesRrhh(String observacionesRrhh) { this.observacionesRrhh = observacionesRrhh; }
+
+    public LocalDateTime getFechaRecepcionRrhh() { return fechaRecepcionRrhh; }
+    public void setFechaRecepcionRrhh(LocalDateTime fechaRecepcionRrhh) { this.fechaRecepcionRrhh = fechaRecepcionRrhh; }
 }
