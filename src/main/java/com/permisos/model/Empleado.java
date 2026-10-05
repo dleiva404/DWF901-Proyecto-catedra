@@ -3,10 +3,7 @@ package com.permisos.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-/**
- * Empleado de la empresa. Se guarda en sesion al iniciar sesion
- * (LoginServlet), por eso implementa Serializable.
- */
+
 public class Empleado implements Serializable {
 
     private int idEmpleado;
@@ -20,12 +17,13 @@ public class Empleado implements Serializable {
     private String cargo;
     private LocalDate fechaIngreso;
     private boolean activo;
+    private String empresa;
 
     public Empleado() {
     }
 
     public Empleado(String nombre, String apellido, String dui, String correo, String telefono,
-                    int idSucursalArea, int idDepartamento, String cargo, LocalDate fechaIngreso) {
+                    int idSucursalArea, int idDepartamento, String cargo, LocalDate fechaIngreso, String empresa) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.dui = dui;
@@ -36,6 +34,7 @@ public class Empleado implements Serializable {
         this.cargo = cargo;
         this.fechaIngreso = fechaIngreso;
         this.activo = true;
+        this.empresa = empresa;
     }
 
     public int getIdEmpleado() { return idEmpleado; }
@@ -70,4 +69,8 @@ public class Empleado implements Serializable {
 
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
+
+    // --- GETTERS Y SETTERS DE EMPRESA AGREGADOS ---
+    public String getEmpresa() { return empresa; }
+    public void setEmpresa(String empresa) { this.empresa = empresa; }
 }

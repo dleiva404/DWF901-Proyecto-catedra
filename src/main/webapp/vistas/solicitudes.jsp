@@ -12,29 +12,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Public+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css">
 </head>
-<body>
-    <header class="app-header">
-        <div class="app-header-logo-chip">
-            <img src="${pageContext.request.contextPath}/img/logo.png" alt="Invercalma">
-        </div>
-        <div class="app-header-usuario">
-            <span>
-                <c:out value="${sessionScope.empleado.nombre} ${sessionScope.empleado.apellido}"/>
-                &middot; <c:out value="${sessionScope.rol.nombre}"/>
-            </span>
+<body style="margin: 0; background-color: #f0f2f5; font-family: 'Public Sans', sans-serif;">
 
-            <c:if test="${fn:toLowerCase(sessionScope.rol.nombre) eq 'jefatura'}">
-                &middot;
-                <a class="app-header-salir" href="${pageContext.request.contextPath}/jefatura">Modulo Jefatura</a>
-            </c:if>
-
-            &middot;
-            <a class="app-header-salir" href="${pageContext.request.contextPath}/logout">Cerrar sesión</a>
-        </div>
-    </header>
-
-
-    <main class="app-contenido">
+    <jsp:include page="/vistas/header.jsp" />
+    <jsp:include page="/vistas/sidebar.jsp" />
+    <main class="app-contenido" style="margin-left: 260px; padding-top: 90px; padding-left: 30px; padding-right: 30px; padding-bottom: 40px; box-sizing: border-box;">
         <h1>Mis solicitudes de permiso</h1>
 
         <c:if test="${not empty error}">
@@ -78,39 +60,6 @@
 
                 <button type="submit">Enviar solicitud</button>
             </form>
-        </section>
-
-        <section class="tarjeta">
-            <h2>Historial</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Inicio</th>
-                    <th>Fin</th>
-                    <th>Días</th>
-                    <th>Motivo</th>
-                    <th>Estado</th>
-                    <th>Motivo de rechazo</th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="s" items="${historial}">
-                    <tr>
-                        <td><c:out value="${tiposPorId[s.idTipoSolicitud]}"/></td>
-                        <td>${s.fechaInicio}</td>
-                        <td>${s.fechaFin}</td>
-                        <td>${s.diasSolicitados}</td>
-                        <td><c:out value="${s.motivo}"/></td>
-                        <td><span class="badge badge-${fn:toLowerCase(s.estado)}"><c:out value="${s.estado}"/></span></td>
-                        <td><c:out value="${s.motivoRechazo}"/></td>
-                    </tr>
-                </c:forEach>
-                <c:if test="${empty historial}">
-                    <tr><td colspan="7">Aún no tiene solicitudes registradas.</td></tr>
-                </c:if>
-                </tbody>
-            </table>
         </section>
     </main>
 </body>

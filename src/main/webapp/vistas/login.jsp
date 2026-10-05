@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Public+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css">
 </head>
-<body>
+<body class="login-page">
     <div class="login-pantalla">
         <div class="login-tarjeta">
             <div class="login-marca">

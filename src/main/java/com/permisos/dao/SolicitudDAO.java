@@ -20,42 +20,63 @@ public class SolicitudDAO {
 
     private static final String SQL_INSERTAR =
             "INSERT INTO solicitudes (id_empleado, id_tipo_solicitud, fecha_inicio, fecha_fin, " +
-            "dias_solicitados, motivo, estado) VALUES (?, ?, ?, ?, ?, ?, 'PENDIENTE')";
+                    "dias_solicitados, motivo, estado) VALUES (?, ?, ?, ?, ?, ?, 'PENDIENTE')";
 
     private static final String SQL_LISTAR_POR_EMPLEADO =
             "SELECT id_solicitud, id_empleado, id_tipo_solicitud, fecha_solicitud, fecha_inicio, fecha_fin, " +
-            "dias_solicitados, motivo, estado, motivo_rechazo, fecha_respuesta, id_jefatura_respuesta, " +
-            "observaciones_rrhh, fecha_recepcion_rrhh " +
-            "FROM solicitudes WHERE id_empleado = ? ORDER BY fecha_solicitud DESC";
+                    "dias_solicitados, motivo, estado, motivo_rechazo, fecha_respuesta, id_jefatura_respuesta, " +
+                    "observaciones_rrhh, fecha_recepcion_rrhh " +
+                    "FROM solicitudes WHERE id_empleado = ? ORDER BY fecha_solicitud DESC";
 
     private static final String SQL_LISTAR_PENDIENTES_POR_JEFATURA =
             "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, " +
-            "s.fecha_fin, s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, " +
-            "s.id_jefatura_respuesta, s.observaciones_rrhh, s.fecha_recepcion_rrhh " +
-            "FROM solicitudes s " +
-            "JOIN empleados e ON s.id_empleado = e.id_empleado " +
-            "JOIN jefaturas j ON j.id_departamento = e.id_departamento " +
-            "WHERE j.id_empleado = ? AND j.activo = TRUE AND s.estado = 'PENDIENTE' " +
-            "ORDER BY s.fecha_solicitud ASC";
+                    "s.fecha_fin, s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, " +
+                    "s.id_jefatura_respuesta, s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
+                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
+                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
+                    "FROM solicitudes s " +
+                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
+                    "JOIN jefaturas j ON j.id_departamento = e.id_departamento " +
+                    "WHERE j.id_empleado = ? AND j.activo = TRUE AND s.estado = 'PENDIENTE' " +
+                    "ORDER BY s.fecha_solicitud ASC";
+
+    private static final String SQL_LISTAR_TODAS_GLOBAL =
+            "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, s.fecha_fin, " +
+                    "s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, s.id_jefatura_respuesta, " +
+                    "s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
+                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
+                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
+                    "FROM solicitudes s " +
+                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
+                    "ORDER BY s.fecha_solicitud DESC";
 
     private static final String SQL_LISTAR_PARA_RRHH =
-            "SELECT id_solicitud, id_empleado, id_tipo_solicitud, fecha_solicitud, fecha_inicio, fecha_fin, " +
-            "dias_solicitados, motivo, estado, motivo_rechazo, fecha_respuesta, id_jefatura_respuesta, " +
-            "observaciones_rrhh, fecha_recepcion_rrhh " +
-            "FROM solicitudes WHERE estado IN ('APROBADA','RECHAZADA') ORDER BY fecha_respuesta DESC";
+            "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, s.fecha_fin, " +
+                    "s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, s.id_jefatura_respuesta, " +
+                    "s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
+                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
+                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
+                    "FROM solicitudes s " +
+                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
+                    "WHERE s.estado IN ('APROBADA','RECHAZADA') ORDER BY s.fecha_respuesta DESC";
 
     private static final String SQL_BUSCAR_POR_ID =
-            "SELECT id_solicitud, id_empleado, id_tipo_solicitud, fecha_solicitud, fecha_inicio, fecha_fin, " +
-            "dias_solicitados, motivo, estado, motivo_rechazo, fecha_respuesta, id_jefatura_respuesta, " +
-            "observaciones_rrhh, fecha_recepcion_rrhh FROM solicitudes WHERE id_solicitud = ?";
+            "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, s.fecha_fin, " +
+                    "s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, s.id_jefatura_respuesta, " +
+                    "s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
+                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
+                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
+                    "FROM solicitudes s " +
+                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
+                    "WHERE s.id_solicitud = ?";
 
     private static final String SQL_APROBAR =
             "UPDATE solicitudes SET estado = 'APROBADA', fecha_respuesta = NOW(), id_jefatura_respuesta = ? " +
-            "WHERE id_solicitud = ?";
+                    "WHERE id_solicitud = ?";
 
     private static final String SQL_RECHAZAR =
             "UPDATE solicitudes SET estado = 'RECHAZADA', fecha_respuesta = NOW(), id_jefatura_respuesta = ?, " +
-            "motivo_rechazo = ? WHERE id_solicitud = ?";
+                    "motivo_rechazo = ? WHERE id_solicitud = ?";
 
     private static final String SQL_CANCELAR =
             "UPDATE solicitudes SET estado = 'CANCELADA' WHERE id_solicitud = ? AND estado = 'PENDIENTE'";
@@ -119,6 +140,20 @@ public class SolicitudDAO {
         return lista;
     }
 
+    public List<Solicitud> listarTodasGlobal() throws SQLException {
+        List<Solicitud> lista = new ArrayList<>();
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(SQL_LISTAR_TODAS_GLOBAL);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
+        }
+        return lista;
+    }
+
     public List<Solicitud> listarParaRRHH() throws SQLException {
         List<Solicitud> lista = new ArrayList<>();
 
@@ -147,10 +182,26 @@ public class SolicitudDAO {
         return null;
     }
 
-    /**
-     * Aprueba una solicitud y registra el historial en la misma transacción,
-     * para que ambos cambios se confirmen (o fallen) juntos.
-     */
+    public List<Solicitud> obtenerHistorialPorTipo(int idEmpleado, String tipoFiltro) throws SQLException {
+        List<Solicitud> lista = new ArrayList<>();
+        String sql = "SELECT id_solicitud, id_empleado, id_tipo_solicitud, fecha_solicitud, fecha_inicio, fecha_fin, " +
+                "dias_solicitados, motivo, estado, motivo_rechazo, fecha_respuesta, id_jefatura_respuesta, " +
+                "observaciones_rrhh, fecha_recepcion_rrhh " +
+                "FROM solicitudes WHERE id_empleado = ? ORDER BY fecha_solicitud DESC";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idEmpleado);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapear(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     public void aprobar(int idSolicitud, int idEmpleadoJefe, int idUsuarioJefatura) throws SQLException {
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
@@ -171,10 +222,6 @@ public class SolicitudDAO {
         }
     }
 
-    /**
-     * Rechaza una solicitud (exige motivo) y registra el historial en la
-     * misma transacción.
-     */
     public void rechazar(int idSolicitud, int idEmpleadoJefe, String motivoRechazo, int idUsuarioJefatura)
             throws SQLException {
         try (Connection con = DBConnection.getConnection()) {
@@ -198,10 +245,6 @@ public class SolicitudDAO {
         }
     }
 
-    /**
-     * Cancela una solicitud propia, solo si sigue PENDIENTE
-     * (no se puede cancelar algo que ya fue aprobado o rechazado).
-     */
     public boolean cancelar(int idSolicitud, int idUsuario) throws SQLException {
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
@@ -225,7 +268,6 @@ public class SolicitudDAO {
         }
     }
 
-    /** RRHH marca una solicitud ya resuelta como "recibida/procesada" con sus observaciones. */
     public void marcarRecibidaPorRRHH(int idSolicitud, String observaciones) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(SQL_MARCAR_RECIBIDA_RRHH)) {
@@ -273,6 +315,19 @@ public class SolicitudDAO {
         Timestamp fechaRecepcionRrhh = rs.getTimestamp("fecha_recepcion_rrhh");
         if (fechaRecepcionRrhh != null) {
             s.setFechaRecepcionRrhh(fechaRecepcionRrhh.toLocalDateTime());
+        }
+
+
+        try {
+            s.setNombreEmpleado(rs.getString("nombre_empleado"));
+        } catch (Exception e) {
+            s.setNombreEmpleado("Empleado #" + s.getIdEmpleado());
+        }
+
+        try {
+            s.setNombreEmpresa(rs.getString("nombre_empresa"));
+        } catch (Exception e) {
+            s.setNombreEmpresa("Invercalma");
         }
 
         return s;

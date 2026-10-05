@@ -11,50 +11,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Public+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css">
 </head>
-<body>
-    <header class="app-header">
-        <div class="app-header-logo-chip">
-            <img src="${pageContext.request.contextPath}/img/logo.png" alt="Invercalma">
-        </div>
-        <div class="app-header-usuario">
-            <span>
-                <c:out value="${sessionScope.empleado.nombre} ${sessionScope.empleado.apellido}"/>
-                &middot; <c:out value="${sessionScope.rol.nombre}"/>
-            </span>
-            <a class="app-header-salir" href="${pageContext.request.contextPath}/logout">Cerrar sesión</a>
-        </div>
-    </header>
+<body style="display: flex; margin: 0; min-height: 100vh;">
 
-    <main class="app-contenido">
-        <h1>Registrar incapacidad</h1>
+    <!-- 1. Menú lateral modular -->
+    <jsp:include page="/vistas/sidebar.jsp" />
 
-        <c:if test="${not empty error}">
-            <p class="mensaje-error">${error}</p>
-        </c:if>
+    <div style="display: flex; flex-direction: column; flex-grow: 1;">
 
-        <section class="tarjeta">
-            <form method="post" action="${pageContext.request.contextPath}/incapacidad">
-                <label for="numeroDocumento">Número de documento (ISSS):</label>
-                <input type="text" id="numeroDocumento" name="numeroDocumento" maxlength="100" required>
+        <!-- 2. Header superior modular -->
+        <jsp:include page="/vistas/header.jsp" />
 
-                <label for="fechaInicio">Fecha inicio:</label>
-                <input type="date" id="fechaInicio" name="fechaInicio" required>
+        <!-- 3. Contenido principal de la vista -->
+        <main class="app-contenido" style="flex-grow: 1; padding: 30px;">
+            <h1>Registrar incapacidad</h1>
 
-                <label for="fechaFin">Fecha fin:</label>
-                <input type="date" id="fechaFin" name="fechaFin" required>
+            <c:if test="${not empty error}">
+                <p class="mensaje-error">${error}</p>
+            </c:if>
 
-                <label for="observaciones">Observaciones:</label>
-                <textarea id="observaciones" name="observaciones" maxlength="500"
-                          placeholder="Detalle adicional (opcional)"></textarea>
+            <section class="tarjeta">
+                <form method="post" action="${pageContext.request.contextPath}/incapacidad">
+                    <label for="numeroDocumento">Número de documento (ISSS):</label>
+                    <input type="text" id="numeroDocumento" name="numeroDocumento" maxlength="100" required>
 
-                <p class="nota">
-                    La carga del documento PDF del ISSS se habilitará en una fase posterior;
-                    por ahora solo se registra el número de documento.
-                </p>
+                    <label for="fechaInicio">Fecha inicio:</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" required>
 
-                <button type="submit">Registrar incapacidad</button>
-            </form>
-        </section>
-    </main>
+                    <label for="fechaFin">Fecha fin:</label>
+                    <input type="date" id="fechaFin" name="fechaFin" required>
+
+                    <label for="observaciones">Observaciones:</label>
+                    <textarea id="observaciones" name="observaciones" maxlength="500"
+                              placeholder="Detalle adicional (opcional)"></textarea>
+
+                    <p class="nota">
+                        La carga del documento PDF del ISSS se habilitará en una fase posterior;
+                        por ahora solo se registra el número de documento.
+                    </p>
+
+                    <button type="submit">Registrar incapacidad</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
 </body>
 </html>

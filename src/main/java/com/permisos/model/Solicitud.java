@@ -17,6 +17,7 @@ public class Solicitud {
     private int idSolicitud;
     private int idEmpleado;
     private int idTipoSolicitud;
+    private String tipo;
     private LocalDateTime fechaSolicitud;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
@@ -29,6 +30,10 @@ public class Solicitud {
     private String observacionesRrhh;
     private LocalDateTime fechaRecepcionRrhh;
 
+    // NUEVOS CAMPOS: Nombre del empleado y Empresa
+    private String nombreEmpleado;
+    private String nombreEmpresa;
+
     public Solicitud() {
     }
 
@@ -40,6 +45,9 @@ public class Solicitud {
 
     public int getIdTipoSolicitud() { return idTipoSolicitud; }
     public void setIdTipoSolicitud(int idTipoSolicitud) { this.idTipoSolicitud = idTipoSolicitud; }
+
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
 
     public LocalDateTime getFechaSolicitud() { return fechaSolicitud; }
     public void setFechaSolicitud(LocalDateTime fechaSolicitud) { this.fechaSolicitud = fechaSolicitud; }
@@ -73,4 +81,11 @@ public class Solicitud {
 
     public LocalDateTime getFechaRecepcionRrhh() { return fechaRecepcionRrhh; }
     public void setFechaRecepcionRrhh(LocalDateTime fechaRecepcionRrhh) { this.fechaRecepcionRrhh = fechaRecepcionRrhh; }
+
+    // GETTERS Y SETTERS AÑADIDOS PARA EL NOMBRE Y LA EMPRESA
+    public String getNombreEmpleado() { return nombreEmpleado; }
+    public void setNombreEmpleado(String nombreEmpleado) { this.nombreEmpleado = nombreEmpleado; }
+
+    public String getNombreEmpresa() { return nombreEmpresa; }
+    public void setNombreEmpresa(String nombreEmpresa) { this.nombreEmpresa = nombreEmpresa; }
 }
