@@ -1,13 +1,23 @@
 package com.permisos.model;
 
-/**
- * Catalogo de sucursales / areas de la empresa.
- */
+import javax.persistence.*;
+
+@Entity
+@Table(name = "sucursales_areas")
 public class SucursalArea {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_sucursal_area")
     private int idSucursalArea;
+
+    @Column(name = "nombre", nullable = false, length = 150)
     private String nombre;
+
+    @Column(name = "descripcion", length = 255)
     private String descripcion;
+
+    @Column(name = "activo", nullable = false)
     private boolean activo;
 
     public SucursalArea() {
@@ -20,15 +30,35 @@ public class SucursalArea {
         this.activo = activo;
     }
 
-    public int getIdSucursalArea() { return idSucursalArea; }
-    public void setIdSucursalArea(int idSucursalArea) { this.idSucursalArea = idSucursalArea; }
+    public int getIdSucursalArea() {
+        return idSucursalArea;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setIdSucursalArea(int idSucursalArea) {
+        this.idSucursalArea = idSucursalArea;
+    }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
 }
