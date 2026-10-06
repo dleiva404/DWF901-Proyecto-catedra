@@ -1,74 +1,97 @@
 package com.permisos.dao;
 
 import com.permisos.model.HistorialSolicitud;
-import com.permisos.util.DBConnection;
+import com.permisos.util.JPAUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import javax.persistence.EntityManager;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 public class HistorialSolicitudDAO {
 
-    private static final String SQL_INSERTAR =
-            "INSERT INTO historial_solicitud (id_solicitud, estado_anterior, estado_nuevo, comentario, id_usuario) " +
-            "VALUES (?, ?, ?, ?, ?)";
+    public int insertar(HistorialSolicitud historial)
+            throws SQLException {
 
-    private static final String SQL_LISTAR_POR_SOLICITUD =
-            "SELECT id_historial, id_solicitud, estado_anterior, estado_nuevo, comentario, id_usuario, fecha " +
-            "FROM historial_solicitud WHERE id_solicitud = ? ORDER BY fecha ASC";
+        EntityManager em = JPAUtil.getEntityManager();
 
-    /**
-     * Inserta usando una conexión ya abierta por el llamador (por ejemplo,
-     * dentro de la misma transacción de SolicitudDAO.aprobar()/rechazar()),
-     * para que el cambio de estado y el historial se confirmen juntos.
-     */
-    public void insertar(Connection con, HistorialSolicitud h) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement(SQL_INSERTAR)) {
-            ps.setInt(1, h.getIdSolicitud());
-            ps.setString(2, h.getEstadoAnterior());
-            ps.setString(3, h.getEstadoNuevo());
-            ps.setString(4, h.getComentario());
-            ps.setInt(5, h.getIdUsuario());
-            ps.executeUpdate();
-        }
-    }
+        try {
+            em.getTransaction().begin();
 
-    /** Versión independiente, que abre y cierra su propia conexión. */
-    public void insertar(HistorialSolicitud h) throws SQLException {
-        try (Connection con = DBConnection.getConnection()) {
-            insertar(con, h);
-        }
-    }
+            em.persist(historial);
 
-    public List<HistorialSolicitud> listarPorSolicitud(int idSolicitud) throws SQLException {
-        List<HistorialSolicitud> lista = new ArrayList<>();
+            em.getTransaction().commit();
 
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_LISTAR_POR_SOLICITUD)) {
+            return historial.getIdHistorial();
 
-            ps.setInt(1, idSolicitud);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    HistorialSolicitud h = new HistorialSolicitud();
-                    h.setIdHistorial(rs.getInt("id_historial"));
-                    h.setIdSolicitud(rs.getInt("id_solicitud"));
-                    h.setEstadoAnterior(rs.getString("estado_anterior"));
-                    h.setEstadoNuevo(rs.getString("estado_nuevo"));
-                    h.setComentario(rs.getString("comentario"));
-                    h.setIdUsuario(rs.getInt("id_usuario"));
+        } catch (RuntimeException ex) {
 
-                    Timestamp fecha = rs.getTimestamp("fecha");
-                    if (fecha != null) {
-                        h.setFecha(fecha.toLocalDateTime());
-                    }
-                    lista.add(h);
-                }
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
             }
+
+            throw new SQLException(
+                    "No se pudo registrar el historial.",
+                    ex
+            );
+
+        } finally {
+            em.close();
         }
-        return lista;
+    }
+
+    public List<HistorialSolicitud> listarPorSolicitud(
+            int idSolicitud) throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            return em.createQuery(
+                            "SELECT h FROM HistorialSolicitud h " +
+                                    "WHERE h.solicitud.idSolicitud = :idSolicitud " +
+                                    "ORDER BY h.fecha DESC",
+                            HistorialSolicitud.class
+                    )
+                    .setParameter("idSolicitud", idSolicitud)
+                    .getResultList();
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<HistorialSolicitud> listarPorEmpleado(
+            int idEmpleado) throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            return em.createQuery(
+                            "SELECT h FROM HistorialSolicitud h " +
+                                    "WHERE h.solicitud.empleado.idEmpleado = :idEmpleado " +
+                                    "ORDER BY h.fecha DESC",
+                            HistorialSolicitud.class
+                    )
+                    .setParameter("idEmpleado", idEmpleado)
+                    .getResultList();
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public HistorialSolicitud buscarPorId(
+            int idHistorial) throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            return em.find(
+                    HistorialSolicitud.class,
+                    idHistorial
+            );
+
+        } finally {
+            em.close();
+        }
     }
 }

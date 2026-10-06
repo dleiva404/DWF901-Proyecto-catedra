@@ -1,57 +1,40 @@
 package com.permisos.dao;
 
 import com.permisos.model.Rol;
-import com.permisos.util.DBConnection;
+import com.permisos.util.JPAUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import javax.persistence.EntityManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RolDAO {
 
-    private static final String SQL_LISTAR_ACTIVOS =
-            "SELECT id_rol, nombre, descripcion, activo FROM roles WHERE activo = TRUE ORDER BY nombre";
-
-    private static final String SQL_BUSCAR_POR_ID =
-            "SELECT id_rol, nombre, descripcion, activo FROM roles WHERE id_rol = ?";
-
     public List<Rol> listarActivos() throws SQLException {
-        List<Rol> lista = new ArrayList<>();
 
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_LISTAR_ACTIVOS);
-             ResultSet rs = ps.executeQuery()) {
+        EntityManager em = JPAUtil.getEntityManager();
 
-            while (rs.next()) {
-                lista.add(mapear(rs));
-            }
+        try {
+            return em.createQuery(
+                    "SELECT r FROM Rol r " +
+                            "WHERE r.activo = true " +
+                            "ORDER BY r.nombre",
+                    Rol.class
+            ).getResultList();
+
+        } finally {
+            em.close();
         }
-        return lista;
     }
 
     public Rol buscarPorId(int idRol) throws SQLException {
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_BUSCAR_POR_ID)) {
 
-            ps.setInt(1, idRol);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapear(rs);
-                }
-            }
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            return em.find(Rol.class, idRol);
+
+        } finally {
+            em.close();
         }
-        return null;
-    }
-
-    private Rol mapear(ResultSet rs) throws SQLException {
-        return new Rol(
-                rs.getInt("id_rol"),
-                rs.getString("nombre"),
-                rs.getString("descripcion"),
-                rs.getBoolean("activo")
-        );
     }
 }

@@ -1,43 +1,64 @@
 package com.permisos.model;
 
-//Clase para heredar los datos básicos
-public class Departamento {
-    protected String codigo;
-    protected String nombres;
-    protected String apellidos;
+import javax.persistence.*;
 
-    // Constructor principal
-    public Departamento(String codigo, String nombres, String apellidos) {
-        this.codigo = codigo;
-        this.nombres = nombres;
-        this.apellidos = apellidos;
+@Entity
+@Table(name = "departamentos")
+public class Departamento {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_departamento")
+    private int idDepartamento;
+
+    @Column(name = "nombre", nullable = false, unique = true, length = 100)
+    private String nombre;
+
+    @Column(name = "descripcion", length = 255)
+    private String descripcion;
+
+    @Column(name = "activo", nullable = false)
+    private boolean activo;
+
+    public Departamento() {
     }
 
     public Departamento(int idDepartamento, String nombre, String descripcion, boolean activo) {
+        this.idDepartamento = idDepartamento;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.activo = activo;
     }
 
-    // Métodos Getters y Setters
-    public String getCodigo() {
-        return codigo;
+    public int getIdDepartamento() {
+        return idDepartamento;
     }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
+    public void setIdDepartamento(int idDepartamento) {
+        this.idDepartamento = idDepartamento;
     }
 
-    public String getNombres() {
-        return nombres;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-    public String getApellidos() {
-        return apellidos;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }
