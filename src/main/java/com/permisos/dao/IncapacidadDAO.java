@@ -63,7 +63,7 @@ public class IncapacidadDAO {
         try {
             return em.createQuery(
                             "SELECT i FROM Incapacidad i " +
-                                    "WHERE i.empleado.idEmpleado = :idEmpleado " +
+                                    "WHERE i.solicitud.empleado.idEmpleado = :idEmpleado " +
                                     "ORDER BY i.fechaInicio DESC",
                             Incapacidad.class
                     )
