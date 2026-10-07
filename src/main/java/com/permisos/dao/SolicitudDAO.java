@@ -1,5 +1,6 @@
 package com.permisos.dao;
 
+import com.permisos.model.Empleado;
 import com.permisos.model.HistorialSolicitud;
 import com.permisos.model.Solicitud;
 import com.permisos.util.JPAUtil;
@@ -11,77 +12,6 @@ import java.util.List;
 
 public class SolicitudDAO {
 
-<<<<<<< HEAD
-    private final HistorialSolicitudDAO historialDAO = new HistorialSolicitudDAO();
-
-    private static final String SQL_INSERTAR =
-            "INSERT INTO solicitudes (id_empleado, id_tipo_solicitud, fecha_inicio, fecha_fin, " +
-                    "dias_solicitados, motivo, estado) VALUES (?, ?, ?, ?, ?, ?, 'PENDIENTE')";
-
-    private static final String SQL_LISTAR_POR_EMPLEADO =
-            "SELECT id_solicitud, id_empleado, id_tipo_solicitud, fecha_solicitud, fecha_inicio, fecha_fin, " +
-                    "dias_solicitados, motivo, estado, motivo_rechazo, fecha_respuesta, id_jefatura_respuesta, " +
-                    "observaciones_rrhh, fecha_recepcion_rrhh " +
-                    "FROM solicitudes WHERE id_empleado = ? ORDER BY fecha_solicitud DESC";
-
-    private static final String SQL_LISTAR_PENDIENTES_POR_JEFATURA =
-            "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, " +
-                    "s.fecha_fin, s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, " +
-                    "s.id_jefatura_respuesta, s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
-                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
-                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
-                    "FROM solicitudes s " +
-                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
-                    "JOIN jefaturas j ON j.id_departamento = e.id_departamento " +
-                    "WHERE j.id_empleado = ? AND j.activo = TRUE AND s.estado = 'PENDIENTE' " +
-                    "ORDER BY s.fecha_solicitud ASC";
-
-    private static final String SQL_LISTAR_TODAS_GLOBAL =
-            "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, s.fecha_fin, " +
-                    "s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, s.id_jefatura_respuesta, " +
-                    "s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
-                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
-                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
-                    "FROM solicitudes s " +
-                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
-                    "ORDER BY s.fecha_solicitud DESC";
-
-    private static final String SQL_LISTAR_PARA_RRHH =
-            "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, s.fecha_fin, " +
-                    "s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, s.id_jefatura_respuesta, " +
-                    "s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
-                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
-                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
-                    "FROM solicitudes s " +
-                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
-                    "WHERE s.estado IN ('APROBADA','RECHAZADA') ORDER BY s.fecha_respuesta DESC";
-
-    private static final String SQL_BUSCAR_POR_ID =
-            "SELECT s.id_solicitud, s.id_empleado, s.id_tipo_solicitud, s.fecha_solicitud, s.fecha_inicio, s.fecha_fin, " +
-                    "s.dias_solicitados, s.motivo, s.estado, s.motivo_rechazo, s.fecha_respuesta, s.id_jefatura_respuesta, " +
-                    "s.observaciones_rrhh, s.fecha_recepcion_rrhh, " +
-                    "CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado, " +
-                    "COALESCE(e.empresa, 'Invercalma') AS nombre_empresa " +
-                    "FROM solicitudes s " +
-                    "JOIN empleados e ON s.id_empleado = e.id_empleado " +
-                    "WHERE s.id_solicitud = ?";
-
-    private static final String SQL_APROBAR =
-            "UPDATE solicitudes SET estado = 'APROBADA', fecha_respuesta = NOW(), id_jefatura_respuesta = ? " +
-                    "WHERE id_solicitud = ?";
-
-    private static final String SQL_RECHAZAR =
-            "UPDATE solicitudes SET estado = 'RECHAZADA', fecha_respuesta = NOW(), id_jefatura_respuesta = ?, " +
-                    "motivo_rechazo = ? WHERE id_solicitud = ?";
-
-    private static final String SQL_CANCELAR =
-            "UPDATE solicitudes SET estado = 'CANCELADA' WHERE id_solicitud = ? AND estado = 'PENDIENTE'";
-
-    private static final String SQL_MARCAR_RECIBIDA_RRHH =
-            "UPDATE solicitudes SET observaciones_rrhh = ?, fecha_recepcion_rrhh = NOW() WHERE id_solicitud = ?";
-
-=======
->>>>>>> origin/main
     public int insertar(Solicitud s) throws SQLException {
 
         EntityManager em = JPAUtil.getEntityManager();
@@ -158,7 +88,7 @@ public class SolicitudDAO {
              *
              * En JPA podemos navegar por las relaciones.
              */
-            return em.createQuery(
+            List<Solicitud> lista = em.createQuery(
                             "SELECT s FROM Solicitud s " +
                                     "JOIN s.empleado e " +
                                     "JOIN Jefatura j ON j.departamento.idDepartamento = " +
@@ -173,23 +103,12 @@ public class SolicitudDAO {
                     .setParameter("estado", Solicitud.ESTADO_PENDIENTE)
                     .getResultList();
 
+            completarDatos(lista);
+            return lista;
+
         } finally {
             em.close();
         }
-    }
-
-    public List<Solicitud> listarTodasGlobal() throws SQLException {
-        List<Solicitud> lista = new ArrayList<>();
-
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_LISTAR_TODAS_GLOBAL);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                lista.add(mapear(rs));
-            }
-        }
-        return lista;
     }
 
     public List<Solicitud> listarParaRRHH() throws SQLException {
@@ -197,7 +116,7 @@ public class SolicitudDAO {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
-            return em.createQuery(
+            List<Solicitud> lista = em.createQuery(
                             "SELECT s FROM Solicitud s " +
                                     "WHERE s.estado IN (:aprobada, :rechazada) " +
                                     "ORDER BY s.fechaRespuesta DESC",
@@ -207,79 +126,113 @@ public class SolicitudDAO {
                     .setParameter("rechazada", Solicitud.ESTADO_RECHAZADA)
                     .getResultList();
 
-<<<<<<< HEAD
-    public Solicitud buscarPorId(int idSolicitud) throws SQLException {
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_BUSCAR_POR_ID)) {
+            completarDatos(lista);
+            return lista;
 
-            ps.setInt(1, idSolicitud);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapear(rs);
-                }
-            }
-        }
-        return null;
-    }
-
-    public List<Solicitud> obtenerHistorialPorTipo(int idEmpleado, String tipoFiltro) throws SQLException {
-        List<Solicitud> lista = new ArrayList<>();
-        String sql = "SELECT id_solicitud, id_empleado, id_tipo_solicitud, fecha_solicitud, fecha_inicio, fecha_fin, " +
-                "dias_solicitados, motivo, estado, motivo_rechazo, fecha_respuesta, id_jefatura_respuesta, " +
-                "observaciones_rrhh, fecha_recepcion_rrhh " +
-                "FROM solicitudes WHERE id_empleado = ? ORDER BY fecha_solicitud DESC";
-
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, idEmpleado);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    lista.add(mapear(rs));
-                }
-            }
-        }
-        return lista;
-    }
-
-    public void aprobar(int idSolicitud, int idEmpleadoJefe, int idUsuarioJefatura) throws SQLException {
-        try (Connection con = DBConnection.getConnection()) {
-            con.setAutoCommit(false);
-            try (PreparedStatement ps = con.prepareStatement(SQL_APROBAR)) {
-                ps.setInt(1, idEmpleadoJefe);
-                ps.setInt(2, idSolicitud);
-                ps.executeUpdate();
-            }
-
-            HistorialSolicitud h = new HistorialSolicitud();
-            h.setIdSolicitud(idSolicitud);
-            h.setEstadoAnterior("PENDIENTE");
-            h.setEstadoNuevo("APROBADA");
-            h.setIdUsuario(idUsuarioJefatura);
-            historialDAO.insertar(con, h);
-
-            con.commit();
-        }
-    }
-
-    public void rechazar(int idSolicitud, int idEmpleadoJefe, String motivoRechazo, int idUsuarioJefatura)
-=======
         } finally {
             em.close();
         }
     }
 
     public Solicitud buscarPorId(int idSolicitud)
->>>>>>> origin/main
             throws SQLException {
 
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
-            return em.find(Solicitud.class, idSolicitud);
+            Solicitud solicitud = em.find(Solicitud.class, idSolicitud);
+
+            if (solicitud != null) {
+                completarDatos(solicitud);
+            }
+            return solicitud;
 
         } finally {
             em.close();
+        }
+    }
+
+    public List<Solicitud> listarTodasGlobal() throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            List<Solicitud> lista = em.createQuery(
+                            "SELECT s FROM Solicitud s " +
+                                    "ORDER BY s.fechaSolicitud DESC",
+                            Solicitud.class
+                    )
+                    .getResultList();
+
+            completarDatos(lista);
+            return lista;
+
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Historial de un empleado. Si tipoFiltro es "todos" (o viene vacío)
+     * devuelve todas; si no, solo las del tipo indicado (VACACIONES,
+     * INCAPACIDAD, AUSENCIA).
+     */
+    public List<Solicitud> obtenerHistorialPorTipo(
+            int idEmpleado,
+            String tipoFiltro) throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            boolean filtrar = tipoFiltro != null
+                    && !tipoFiltro.trim().isEmpty()
+                    && !"todos".equalsIgnoreCase(tipoFiltro.trim());
+
+            String jpql = "SELECT s FROM Solicitud s " +
+                    "WHERE s.empleado.idEmpleado = :idEmpleado " +
+                    (filtrar ? "AND UPPER(s.tipoSolicitud.nombre) = :tipo " : "") +
+                    "ORDER BY s.fechaSolicitud DESC";
+
+            javax.persistence.TypedQuery<Solicitud> query =
+                    em.createQuery(jpql, Solicitud.class)
+                            .setParameter("idEmpleado", idEmpleado);
+
+            if (filtrar) {
+                query.setParameter("tipo", tipoFiltro.trim().toUpperCase());
+            }
+
+            List<Solicitud> lista = query.getResultList();
+
+            completarDatos(lista);
+            return lista;
+
+        } finally {
+            em.close();
+        }
+    }
+
+    /*
+     * Llena los campos de apoyo para las vistas (tipo, nombre del
+     * empleado y empresa). Debe llamarse con el EntityManager abierto,
+     * porque las relaciones son LAZY.
+     */
+    private void completarDatos(List<Solicitud> lista) {
+        for (Solicitud s : lista) {
+            completarDatos(s);
+        }
+    }
+
+    private void completarDatos(Solicitud s) {
+        Empleado e = s.getEmpleado();
+
+        if (e != null) {
+            s.setNombreEmpleado(e.getNombre() + " " + e.getApellido());
+            s.setNombreEmpresa(
+                    e.getEmpresa() != null ? e.getEmpresa() : "Invercalma");
+        }
+
+        if (s.getTipoSolicitud() != null) {
+            s.setTipo(s.getTipoSolicitud().getNombre());
         }
     }
 
@@ -412,15 +365,6 @@ public class SolicitudDAO {
         }
     }
 
-<<<<<<< HEAD
-    public boolean cancelar(int idSolicitud, int idUsuario) throws SQLException {
-        try (Connection con = DBConnection.getConnection()) {
-            con.setAutoCommit(false);
-            int filas;
-            try (PreparedStatement ps = con.prepareStatement(SQL_CANCELAR)) {
-                ps.setInt(1, idSolicitud);
-                filas = ps.executeUpdate();
-=======
     /**
      * Cancela una solicitud solamente si está PENDIENTE.
      * El cambio y el historial se guardan en la misma transacción.
@@ -443,7 +387,6 @@ public class SolicitudDAO {
 
                 em.getTransaction().rollback();
                 return false;
->>>>>>> origin/main
             }
 
             solicitud.setEstado(Solicitud.ESTADO_CANCELADA);
@@ -478,73 +421,6 @@ public class SolicitudDAO {
         }
     }
 
-<<<<<<< HEAD
-    public void marcarRecibidaPorRRHH(int idSolicitud, String observaciones) throws SQLException {
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_MARCAR_RECIBIDA_RRHH)) {
-            ps.setString(1, observaciones);
-            ps.setInt(2, idSolicitud);
-            ps.executeUpdate();
-        }
-    }
-
-    private Solicitud mapear(ResultSet rs) throws SQLException {
-        Solicitud s = new Solicitud();
-        s.setIdSolicitud(rs.getInt("id_solicitud"));
-        s.setIdEmpleado(rs.getInt("id_empleado"));
-        s.setIdTipoSolicitud(rs.getInt("id_tipo_solicitud"));
-
-        Timestamp fechaSolicitud = rs.getTimestamp("fecha_solicitud");
-        if (fechaSolicitud != null) {
-            s.setFechaSolicitud(fechaSolicitud.toLocalDateTime());
-        }
-
-        Date fechaInicio = rs.getDate("fecha_inicio");
-        if (fechaInicio != null) {
-            s.setFechaInicio(fechaInicio.toLocalDate());
-        }
-        Date fechaFin = rs.getDate("fecha_fin");
-        if (fechaFin != null) {
-            s.setFechaFin(fechaFin.toLocalDate());
-        }
-
-        s.setDiasSolicitados(rs.getInt("dias_solicitados"));
-        s.setMotivo(rs.getString("motivo"));
-        s.setEstado(rs.getString("estado"));
-        s.setMotivoRechazo(rs.getString("motivo_rechazo"));
-
-        Timestamp fechaRespuesta = rs.getTimestamp("fecha_respuesta");
-        if (fechaRespuesta != null) {
-            s.setFechaRespuesta(fechaRespuesta.toLocalDateTime());
-        }
-
-        int idJefaturaRespuesta = rs.getInt("id_jefatura_respuesta");
-        s.setIdJefaturaRespuesta(rs.wasNull() ? null : idJefaturaRespuesta);
-
-        s.setObservacionesRrhh(rs.getString("observaciones_rrhh"));
-
-        Timestamp fechaRecepcionRrhh = rs.getTimestamp("fecha_recepcion_rrhh");
-        if (fechaRecepcionRrhh != null) {
-            s.setFechaRecepcionRrhh(fechaRecepcionRrhh.toLocalDateTime());
-        }
-
-
-        try {
-            s.setNombreEmpleado(rs.getString("nombre_empleado"));
-        } catch (Exception e) {
-            s.setNombreEmpleado("Empleado #" + s.getIdEmpleado());
-        }
-
-        try {
-            s.setNombreEmpresa(rs.getString("nombre_empresa"));
-        } catch (Exception e) {
-            s.setNombreEmpresa("Invercalma");
-        }
-
-        return s;
-    }
-}
-=======
     /**
      * RRHH marca una solicitud ya resuelta como recibida/procesada.
      */
@@ -585,4 +461,3 @@ public class SolicitudDAO {
         }
     }
 }
->>>>>>> origin/main
