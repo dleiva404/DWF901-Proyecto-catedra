@@ -1,9 +1,3 @@
--- =========================================================
--- SISTEMA DE SOLICITUD DE PERMISOS
--- Base de datos MySQL
--- Arquitectura prevista: MVC
--- =========================================================
-
 DROP DATABASE IF EXISTS sistema_permisos;
 
 CREATE DATABASE sistema_permisos
@@ -12,9 +6,6 @@ CREATE DATABASE sistema_permisos
 
 USE sistema_permisos;
 
--- =========================================================
--- 1. SUCURSALES / ÁREAS
--- =========================================================
 CREATE TABLE sucursales_areas (
     id_sucursal_area INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
@@ -22,9 +13,6 @@ CREATE TABLE sucursales_areas (
     activo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
--- =========================================================
--- 2. DEPARTAMENTOS
--- =========================================================
 CREATE TABLE departamentos (
     id_departamento INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -32,9 +20,6 @@ CREATE TABLE departamentos (
     activo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
--- =========================================================
--- 3. EMPLEADOS
--- =========================================================
 CREATE TABLE empleados (
     id_empleado INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -43,6 +28,7 @@ CREATE TABLE empleados (
     correo VARCHAR(150) UNIQUE,
     telefono VARCHAR(20),
     id_sucursal_area INT NOT NULL,
+    empresa VARCHAR(100) NULL,
     id_departamento INT NOT NULL,
     cargo VARCHAR(100),
     fecha_ingreso DATE NOT NULL,
@@ -51,9 +37,6 @@ CREATE TABLE empleados (
     FOREIGN KEY (id_departamento) REFERENCES departamentos(id_departamento)
 );
 
--- =========================================================
--- 4. ROLES
--- =========================================================
 CREATE TABLE roles (
     id_rol INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
@@ -61,9 +44,6 @@ CREATE TABLE roles (
     activo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
--- =========================================================
--- 5. USUARIOS
--- =========================================================
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -77,9 +57,6 @@ CREATE TABLE usuarios (
     FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
 );
 
--- =========================================================
--- 6. JEFATURAS
--- =========================================================
 CREATE TABLE jefaturas (
     id_jefatura INT AUTO_INCREMENT PRIMARY KEY,
     id_empleado INT NOT NULL,
@@ -91,9 +68,6 @@ CREATE TABLE jefaturas (
     FOREIGN KEY (id_sucursal_area) REFERENCES sucursales_areas(id_sucursal_area)
 );
 
--- =========================================================
--- 7. TIPOS DE SOLICITUD
--- =========================================================
 CREATE TABLE tipos_solicitud (
     id_tipo_solicitud INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
@@ -101,9 +75,6 @@ CREATE TABLE tipos_solicitud (
     activo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
--- =========================================================
--- 8. SOLICITUDES
--- =========================================================
 CREATE TABLE solicitudes (
     id_solicitud INT AUTO_INCREMENT PRIMARY KEY,
     id_empleado INT NOT NULL,
@@ -126,9 +97,6 @@ CREATE TABLE solicitudes (
     CHECK (fecha_fin >= fecha_inicio)
 );
 
--- =========================================================
--- 9. VACACIONES DE EMPLEADOS
--- =========================================================
 CREATE TABLE vacaciones_empleado (
     id_vacaciones INT AUTO_INCREMENT PRIMARY KEY,
     id_empleado INT NOT NULL,
@@ -143,9 +111,6 @@ CREATE TABLE vacaciones_empleado (
     CHECK (dias_disponibles >= 0)
 );
 
--- =========================================================
--- 10. INCAPACIDADES
--- =========================================================
 CREATE TABLE incapacidades (
     id_incapacidad INT AUTO_INCREMENT PRIMARY KEY,
     id_solicitud INT NOT NULL UNIQUE,
@@ -159,9 +124,6 @@ CREATE TABLE incapacidades (
     CHECK (fecha_fin >= fecha_inicio)
 );
 
--- =========================================================
--- 11. HISTORIAL DE SOLICITUDES
--- =========================================================
 CREATE TABLE historial_solicitud (
     id_historial INT AUTO_INCREMENT PRIMARY KEY,
     id_solicitud INT NOT NULL,
@@ -174,54 +136,73 @@ CREATE TABLE historial_solicitud (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 
--- =========================================================
--- DATOS INICIALES
--- =========================================================
+CREATE TABLE constancias (
+    id_constancia INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    tipo VARCHAR(50) NULL,
+    institucion_destino VARCHAR(150) NOT NULL,
+    motivo TEXT,
+    salario_referencia DECIMAL(10,2) NOT NULL,
+    empresa_emisora VARCHAR(100) NOT NULL,
+    token_verificacion VARCHAR(50) NOT NULL UNIQUE,
+    estado VARCHAR(20) NULL,
+    fecha_solicitud TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_aprobacion TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
+);
 
--- ROLES
 INSERT INTO roles (nombre, descripcion) VALUES
     ('ADMIN', 'Administrador del sistema'),
     ('EMPLEADO', 'Empleado que puede realizar solicitudes'),
     ('JEFATURA', 'Jefatura encargada de aprobar o rechazar solicitudes'),
     ('RRHH', 'Personal de Recursos Humanos');
 
--- TIPOS DE SOLICITUD
 INSERT INTO tipos_solicitud (nombre, descripcion) VALUES
     ('VACACIONES', 'Solicitud de días de vacaciones'),
     ('INCAPACIDAD', 'Solicitud por incapacidad médica'),
     ('AUSENCIA', 'Solicitud de ausencia laboral');
 
--- SUCURSALES / ÁREAS
 INSERT INTO sucursales_areas (nombre, descripcion) VALUES
-    ('Sucursal Central', 'Oficina principal'),
-    ('Sucursal San Salvador', 'Sucursal de San Salvador'),
-    ('Sucursal Santa Ana', 'Sucursal de Santa Ana');
+    ('Didelco Santa Ana', 'Sucursal Santa Ana'),
+    ('Didelco Apopa', 'Sucursal Apopa'),
+    ('Didelco Metapán', 'Sucursal Metapán');
 
--- DEPARTAMENTOS
 INSERT INTO departamentos (nombre, descripcion) VALUES
     ('Recursos Humanos', 'Departamento de Recursos Humanos'),
     ('Administración', 'Departamento Administrativo'),
     ('Ventas', 'Departamento de Ventas'),
     ('Informática', 'Departamento de Informática');
 
--- EMPLEADOS DE PRUEBA
 INSERT INTO empleados
-    (nombre, apellido, dui, correo, telefono, id_sucursal_area, id_departamento, cargo, fecha_ingreso)
+    (nombre, apellido, dui, correo, telefono, id_sucursal_area, empresa, id_departamento, cargo, fecha_ingreso)
 VALUES
-    ('Juan', 'Pérez', '01234567-8', 'juan.perez@empresa.com', '70000000', 1, 4, 'Analista de Sistemas', '2024-01-15'),
-    ('Carlos', 'Gómez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, 4, 'Jefe de Informática', '2020-03-10'),
-    ('Ana', 'Martínez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, 1, 'Analista de Recursos Humanos', '2021-06-01');
+    ('Juan', 'Pérez', '01234567-8', 'juan.perez@empresa.com', '70000000', 1, NULL, 4, 'Analista de Sistemas', '2024-01-15'),
+    ('Carlos', 'Gómez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, NULL, 4, 'Jefe de Informática', '2020-03-10'),
+    ('Ana', 'Martínez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, NULL, 1, 'Analista de Recursos Humanos', '2021-06-01'),
+    ('Carlos', 'Cornejo', '34567890-1', 'carlos.cornejo@empresa.com', '73333333', 1, NULL, 4, 'Jefe de Informática', '2021-02-01'),
+    ('David', 'Leiva', '45678901-2', 'david.leiva@empresa.com', '74444444', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
+    ('Moisés', 'García', '56789012-3', 'moises.garcia@empresa.com', '75555555', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
+    ('Alcyr', 'Figueroa', '67890123-4', 'alcyr.figueroa@empresa.com', '76666666', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
+    ('Nelson', 'Solano', '78901234-5', 'nelson.solano@empresa.com', '77777777', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01');
 
--- JEFATURA (Carlos será jefe de Informática)
 INSERT INTO jefaturas (id_empleado, id_departamento, id_sucursal_area) VALUES
-    (2, 4, 1);
+    (2, 4, 1),
+    (4, 4, 1);
 
--- USUARIOS DE PRUEBA
 INSERT INTO usuarios (username, password, id_empleado, id_rol) VALUES
     ('juan', '123456', 1, 2),
     ('carlos', '123456', 2, 3),
-    ('ana', '123456', 3, 4);
+    ('ana', '123456', 3, 4),
+    ('carlos.cornejo', '123456', 4, 3),
+    ('david.leiva', '123456', 5, 2),
+    ('moises.garcia', '123456', 6, 2),
+    ('alcyr.figueroa', '123456', 7, 2),
+    ('nelson.solano', '123456', 8, 2);
 
--- VACACIONES DEL AÑO ACTUAL
 INSERT INTO vacaciones_empleado (id_empleado, anio, dias_asignados, dias_utilizados, dias_disponibles) VALUES
-    (1, YEAR(CURDATE()), 15, 0, 15);
+    (1, YEAR(CURDATE()), 15, 0, 15),
+    (4, YEAR(CURDATE()), 15, 0, 15),
+    (5, YEAR(CURDATE()), 15, 0, 15),
+    (6, YEAR(CURDATE()), 15, 0, 15),
+    (7, YEAR(CURDATE()), 15, 0, 15),
+    (8, YEAR(CURDATE()), 15, 0, 15);
