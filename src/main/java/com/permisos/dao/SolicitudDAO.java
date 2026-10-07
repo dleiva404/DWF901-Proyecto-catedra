@@ -1,5 +1,6 @@
 package com.permisos.dao;
 
+import com.permisos.model.Empleado;
 import com.permisos.model.HistorialSolicitud;
 import com.permisos.model.Solicitud;
 import com.permisos.util.JPAUtil;
@@ -87,7 +88,7 @@ public class SolicitudDAO {
              *
              * En JPA podemos navegar por las relaciones.
              */
-            return em.createQuery(
+            List<Solicitud> lista = em.createQuery(
                             "SELECT s FROM Solicitud s " +
                                     "JOIN s.empleado e " +
                                     "JOIN Jefatura j ON j.departamento.idDepartamento = " +
@@ -102,6 +103,9 @@ public class SolicitudDAO {
                     .setParameter("estado", Solicitud.ESTADO_PENDIENTE)
                     .getResultList();
 
+            completarDatos(lista);
+            return lista;
+
         } finally {
             em.close();
         }
@@ -112,7 +116,7 @@ public class SolicitudDAO {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
-            return em.createQuery(
+            List<Solicitud> lista = em.createQuery(
                             "SELECT s FROM Solicitud s " +
                                     "WHERE s.estado IN (:aprobada, :rechazada) " +
                                     "ORDER BY s.fechaRespuesta DESC",
@@ -121,6 +125,9 @@ public class SolicitudDAO {
                     .setParameter("aprobada", Solicitud.ESTADO_APROBADA)
                     .setParameter("rechazada", Solicitud.ESTADO_RECHAZADA)
                     .getResultList();
+
+            completarDatos(lista);
+            return lista;
 
         } finally {
             em.close();
@@ -133,10 +140,99 @@ public class SolicitudDAO {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
-            return em.find(Solicitud.class, idSolicitud);
+            Solicitud solicitud = em.find(Solicitud.class, idSolicitud);
+
+            if (solicitud != null) {
+                completarDatos(solicitud);
+            }
+            return solicitud;
 
         } finally {
             em.close();
+        }
+    }
+
+    public List<Solicitud> listarTodasGlobal() throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            List<Solicitud> lista = em.createQuery(
+                            "SELECT s FROM Solicitud s " +
+                                    "ORDER BY s.fechaSolicitud DESC",
+                            Solicitud.class
+                    )
+                    .getResultList();
+
+            completarDatos(lista);
+            return lista;
+
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Historial de un empleado. Si tipoFiltro es "todos" (o viene vacío)
+     * devuelve todas; si no, solo las del tipo indicado (VACACIONES,
+     * INCAPACIDAD, AUSENCIA).
+     */
+    public List<Solicitud> obtenerHistorialPorTipo(
+            int idEmpleado,
+            String tipoFiltro) throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            boolean filtrar = tipoFiltro != null
+                    && !tipoFiltro.trim().isEmpty()
+                    && !"todos".equalsIgnoreCase(tipoFiltro.trim());
+
+            String jpql = "SELECT s FROM Solicitud s " +
+                    "WHERE s.empleado.idEmpleado = :idEmpleado " +
+                    (filtrar ? "AND UPPER(s.tipoSolicitud.nombre) = :tipo " : "") +
+                    "ORDER BY s.fechaSolicitud DESC";
+
+            javax.persistence.TypedQuery<Solicitud> query =
+                    em.createQuery(jpql, Solicitud.class)
+                            .setParameter("idEmpleado", idEmpleado);
+
+            if (filtrar) {
+                query.setParameter("tipo", tipoFiltro.trim().toUpperCase());
+            }
+
+            List<Solicitud> lista = query.getResultList();
+
+            completarDatos(lista);
+            return lista;
+
+        } finally {
+            em.close();
+        }
+    }
+
+    /*
+     * Llena los campos de apoyo para las vistas (tipo, nombre del
+     * empleado y empresa). Debe llamarse con el EntityManager abierto,
+     * porque las relaciones son LAZY.
+     */
+    private void completarDatos(List<Solicitud> lista) {
+        for (Solicitud s : lista) {
+            completarDatos(s);
+        }
+    }
+
+    private void completarDatos(Solicitud s) {
+        Empleado e = s.getEmpleado();
+
+        if (e != null) {
+            s.setNombreEmpleado(e.getNombre() + " " + e.getApellido());
+            s.setNombreEmpresa(
+                    e.getEmpresa() != null ? e.getEmpresa() : "Invercalma");
+        }
+
+        if (s.getTipoSolicitud() != null) {
+            s.setTipo(s.getTipoSolicitud().getNombre());
         }
     }
 

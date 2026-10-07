@@ -84,9 +84,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("rol", rol);
             session.setAttribute("empleado", empleado);
 
-            // Este Servlet cubre el flujo de EMPLEADO; si el rol no es
-            // EMPLEADO, igual lo dejamos pasar a /solicitudes por ahora
-           // Valida el rol del usuario para decidir a qué pantalla enviarlo
+
             if (rol != null && "JEFATURA".equalsIgnoreCase(rol.getNombre())) {
 
                 // Si el rol es jefe, lo redirige al Servlet de jefatura

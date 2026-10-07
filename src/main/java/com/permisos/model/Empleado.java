@@ -47,6 +47,9 @@ public class Empleado implements Serializable {
     @Column(name = "activo", nullable = false)
     private boolean activo;
 
+    @Column(name = "empresa", length = 100)
+    private String empresa;
+
     public Empleado() {
     }
 
@@ -178,5 +181,13 @@ public class Empleado implements Serializable {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public String getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(String empresa) {
+        this.empresa = empresa;
     }
 }
