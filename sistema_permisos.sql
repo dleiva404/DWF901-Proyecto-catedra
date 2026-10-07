@@ -175,6 +175,37 @@ CREATE TABLE historial_solicitud (
 );
 
 -- =========================================================
+-- 12. SALARIOS DE EMPLEADOS
+-- =========================================================
+CREATE TABLE salarios_empleado (
+    id_salario INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    salario DECIMAL(10,2) NOT NULL,
+    fecha_actualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado),
+    CHECK (salario >= 0)
+);
+
+-- =========================================================
+-- 13. CONSTANCIAS
+-- =========================================================
+CREATE TABLE constancias (
+    id_constancia INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    tipo_constancia VARCHAR(50) NOT NULL,
+    fecha_solicitud DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado ENUM('PENDIENTE', 'APROBADA', 'RECHAZADA')
+        NOT NULL DEFAULT 'PENDIENTE',
+    fecha_respuesta DATETIME NULL,
+    id_usuario_rrhh INT NULL,
+    motivo_rechazo TEXT,
+    observaciones_rrhh TEXT,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado),
+    FOREIGN KEY (id_usuario_rrhh) REFERENCES usuarios(id_usuario)
+);
+
+-- =========================================================
 -- DATOS INICIALES
 -- =========================================================
 
@@ -225,3 +256,9 @@ INSERT INTO usuarios (username, password, id_empleado, id_rol) VALUES
 -- VACACIONES DEL AÑO ACTUAL
 INSERT INTO vacaciones_empleado (id_empleado, anio, dias_asignados, dias_utilizados, dias_disponibles) VALUES
     (1, YEAR(CURDATE()), 15, 0, 15);
+
+-- SALARIO DE PRUEBA
+INSERT INTO salarios_empleado
+(id_empleado, salario, activo)
+VALUES
+    (1, 1200.00, TRUE);
