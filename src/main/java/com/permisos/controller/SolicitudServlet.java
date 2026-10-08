@@ -7,6 +7,8 @@ import com.permisos.model.Solicitud;
 import com.permisos.model.TipoSolicitud;
 import com.permisos.model.Usuario;
 import com.permisos.model.VacacionesEmpleado;
+import com.permisos.service.ReglaNegocioException;
+import com.permisos.service.SolicitudService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,6 +42,7 @@ public class SolicitudServlet extends HttpServlet {
     private final SolicitudDAO solicitudDAO = new SolicitudDAO();
     private final TipoSolicitudDAO tipoSolicitudDAO = new TipoSolicitudDAO();
     private final VacacionesEmpleadoDAO vacacionesDAO = new VacacionesEmpleadoDAO();
+    private final SolicitudService solicitudService = new SolicitudService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -153,12 +156,12 @@ public class SolicitudServlet extends HttpServlet {
             if (errores.length() == 0 && tipoSeleccionado != null
                     && NOMBRE_TIPO_VACACIONES.equals(tipoSeleccionado.getNombre())) {
 
-                VacacionesEmpleado saldo = vacacionesDAO.buscarPorEmpleadoYAnio(
-                        usuario.getIdEmpleado(), inicio.getYear());
-
-                if (saldo == null || saldo.getDiasDisponibles() < diasSolicitados) {
-                    errores.append("No tiene suficientes días de vacaciones disponibles. ");
+                try {
+                    solicitudService.validarVacaciones(usuario.getIdEmpleado(), inicio, fin);
+                } catch (ReglaNegocioException e) {
+                    errores.append(e.getMessage()).append(" ");
                 }
+
             }
 
             if (errores.length() > 0) {

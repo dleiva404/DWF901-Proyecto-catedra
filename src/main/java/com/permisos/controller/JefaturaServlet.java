@@ -5,6 +5,8 @@ import com.permisos.model.Empleado;
 import com.permisos.model.Rol;
 import com.permisos.model.Solicitud;
 import com.permisos.model.Usuario;
+import com.permisos.service.ReglaNegocioException;
+import com.permisos.service.SolicitudService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,6 +23,7 @@ import java.util.List;
 public class JefaturaServlet extends HttpServlet {
 
     private final SolicitudDAO solicitudDAO = new SolicitudDAO();
+    private final SolicitudService solicitudService = new SolicitudService();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -234,7 +237,7 @@ public class JefaturaServlet extends HttpServlet {
             int idEmpleadoJefe = empleado.getIdEmpleado();
             int idUsuarioJefatura = usuario.getIdUsuario();
 
-            solicitudDAO.aprobar(idSolicitud, idEmpleadoJefe, idUsuarioJefatura);
+            solicitudService.aprobar(idSolicitud, idEmpleadoJefe, idUsuarioJefatura);
 
             response.sendRedirect(
                     request.getContextPath() + "/jefatura?resultado=aprobada"
@@ -242,6 +245,9 @@ public class JefaturaServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             request.setAttribute("error", "El identificador de la solicitud no es válido.");
+            listarPendientes(request, response);
+        } catch (ReglaNegocioException e) {
+            request.setAttribute("error", e.getMessage());
             listarPendientes(request, response);
         } catch (SQLException e) {
             request.setAttribute("error", "No fue posible aprobar la solicitud.");
