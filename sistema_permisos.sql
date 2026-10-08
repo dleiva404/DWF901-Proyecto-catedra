@@ -136,19 +136,36 @@ CREATE TABLE historial_solicitud (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 
+-- =========================================================
+-- SALARIOS DE EMPLEADOS
+-- =========================================================
+CREATE TABLE salarios_empleado (
+    id_salario INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    salario DECIMAL(10,2) NOT NULL,
+    fecha_actualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado),
+    CHECK (salario >= 0)
+);
 CREATE TABLE constancias (
     id_constancia INT AUTO_INCREMENT PRIMARY KEY,
     id_empleado INT NOT NULL,
-    tipo VARCHAR(50) NULL,
+    tipo VARCHAR(50) NOT NULL,
     institucion_destino VARCHAR(150) NOT NULL,
     motivo TEXT,
     salario_referencia DECIMAL(10,2) NOT NULL,
     empresa_emisora VARCHAR(100) NOT NULL,
     token_verificacion VARCHAR(50) NOT NULL UNIQUE,
-    estado VARCHAR(20) NULL,
-    fecha_solicitud TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    fecha_aprobacion TIMESTAMP NULL DEFAULT NULL,
-    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
+    estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
+    fecha_solicitud DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_aprobacion DATETIME NULL,
+    fecha_respuesta DATETIME NULL,
+    id_usuario_rrhh INT NULL,
+    motivo_rechazo TEXT,
+    observaciones_rrhh TEXT,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado),
+    FOREIGN KEY (id_usuario_rrhh) REFERENCES usuarios(id_usuario)
 );
 
 INSERT INTO roles (nombre, descripcion) VALUES
@@ -158,30 +175,30 @@ INSERT INTO roles (nombre, descripcion) VALUES
     ('RRHH', 'Personal de Recursos Humanos');
 
 INSERT INTO tipos_solicitud (nombre, descripcion) VALUES
-    ('VACACIONES', 'Solicitud de días de vacaciones'),
-    ('INCAPACIDAD', 'Solicitud por incapacidad médica'),
+    ('VACACIONES', 'Solicitud de dÃƒÂ­as de vacaciones'),
+    ('INCAPACIDAD', 'Solicitud por incapacidad mÃƒÂ©dica'),
     ('AUSENCIA', 'Solicitud de ausencia laboral');
 
 INSERT INTO sucursales_areas (nombre, descripcion) VALUES
     ('Didelco Santa Ana', 'Sucursal Santa Ana'),
     ('Didelco Apopa', 'Sucursal Apopa'),
-    ('Didelco Metapán', 'Sucursal Metapán');
+    ('Didelco MetapÃƒÂ¡n', 'Sucursal MetapÃƒÂ¡n');
 
 INSERT INTO departamentos (nombre, descripcion) VALUES
     ('Recursos Humanos', 'Departamento de Recursos Humanos'),
-    ('Administración', 'Departamento Administrativo'),
+    ('AdministraciÃƒÂ³n', 'Departamento Administrativo'),
     ('Ventas', 'Departamento de Ventas'),
-    ('Informática', 'Departamento de Informática');
+    ('InformÃƒÂ¡tica', 'Departamento de InformÃƒÂ¡tica');
 
 INSERT INTO empleados
     (nombre, apellido, dui, correo, telefono, id_sucursal_area, empresa, id_departamento, cargo, fecha_ingreso)
 VALUES
-    ('Juan', 'Pérez', '01234567-8', 'juan.perez@empresa.com', '70000000', 1, NULL, 4, 'Analista de Sistemas', '2024-01-15'),
-    ('Carlos', 'Gómez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, NULL, 4, 'Jefe de Informática', '2020-03-10'),
-    ('Ana', 'Martínez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, NULL, 1, 'Analista de Recursos Humanos', '2021-06-01'),
-    ('Carlos', 'Cornejo', '34567890-1', 'carlos.cornejo@empresa.com', '73333333', 1, NULL, 4, 'Jefe de Informática', '2021-02-01'),
+    ('Juan', 'PÃƒÂ©rez', '01234567-8', 'juan.perez@empresa.com', '70000000', 1, NULL, 4, 'Analista de Sistemas', '2024-01-15'),
+    ('Carlos', 'GÃƒÂ³mez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, NULL, 4, 'Jefe de InformÃƒÂ¡tica', '2020-03-10'),
+    ('Ana', 'MartÃƒÂ­nez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, NULL, 1, 'Analista de Recursos Humanos', '2021-06-01'),
+    ('Carlos', 'Cornejo', '34567890-1', 'carlos.cornejo@empresa.com', '73333333', 1, NULL, 4, 'Jefe de InformÃƒÂ¡tica', '2021-02-01'),
     ('David', 'Leiva', '45678901-2', 'david.leiva@empresa.com', '74444444', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
-    ('Moisés', 'García', '56789012-3', 'moises.garcia@empresa.com', '75555555', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
+    ('MoisÃƒÂ©s', 'GarcÃƒÂ­a', '56789012-3', 'moises.garcia@empresa.com', '75555555', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
     ('Alcyr', 'Figueroa', '67890123-4', 'alcyr.figueroa@empresa.com', '76666666', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
     ('Nelson', 'Solano', '78901234-5', 'nelson.solano@empresa.com', '77777777', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01');
 
@@ -206,3 +223,11 @@ INSERT INTO vacaciones_empleado (id_empleado, anio, dias_asignados, dias_utiliza
     (6, YEAR(CURDATE()), 15, 0, 15),
     (7, YEAR(CURDATE()), 15, 0, 15),
     (8, YEAR(CURDATE()), 15, 0, 15);
+
+-- =========================================================
+-- SALARIO INICIAL DE PRUEBA
+-- =========================================================
+INSERT INTO salarios_empleado
+(id_empleado, salario, activo)
+VALUES
+    (1, 1200.00, TRUE);
