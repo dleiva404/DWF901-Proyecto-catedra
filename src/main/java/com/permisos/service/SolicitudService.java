@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 
 public class SolicitudService {
 
-    /
-     * @throws ReglaNegocioException si el rango es inválido o no alcanza el saldo
-     * @throws SQLException          si falla la consulta
-     */
+  /**
+ * @throws ReglaNegocioException si el rango es inválido o no alcanza el saldo
+ * @throws SQLException          si falla la consulta
+ */
     public void validarVacaciones(int idEmpleado, LocalDate inicio, LocalDate fin)
             throws ReglaNegocioException, SQLException {
 
