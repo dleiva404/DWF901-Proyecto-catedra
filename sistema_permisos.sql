@@ -136,19 +136,36 @@ CREATE TABLE historial_solicitud (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 
+-- =========================================================
+-- SALARIOS DE EMPLEADOS
+-- =========================================================
+CREATE TABLE salarios_empleado (
+    id_salario INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    salario DECIMAL(10,2) NOT NULL,
+    fecha_actualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado),
+    CHECK (salario >= 0)
+);
 CREATE TABLE constancias (
     id_constancia INT AUTO_INCREMENT PRIMARY KEY,
     id_empleado INT NOT NULL,
-    tipo VARCHAR(50) NULL,
+    tipo VARCHAR(50) NOT NULL,
     institucion_destino VARCHAR(150) NOT NULL,
     motivo TEXT,
     salario_referencia DECIMAL(10,2) NOT NULL,
     empresa_emisora VARCHAR(100) NOT NULL,
     token_verificacion VARCHAR(50) NOT NULL UNIQUE,
-    estado VARCHAR(20) NULL,
-    fecha_solicitud TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    fecha_aprobacion TIMESTAMP NULL DEFAULT NULL,
-    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
+    estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
+    fecha_solicitud DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_aprobacion DATETIME NULL,
+    fecha_respuesta DATETIME NULL,
+    id_usuario_rrhh INT NULL,
+    motivo_rechazo TEXT,
+    observaciones_rrhh TEXT,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado),
+    FOREIGN KEY (id_usuario_rrhh) REFERENCES usuarios(id_usuario)
 );
 
 INSERT INTO roles (nombre, descripcion) VALUES
@@ -206,3 +223,11 @@ INSERT INTO vacaciones_empleado (id_empleado, anio, dias_asignados, dias_utiliza
     (6, YEAR(CURDATE()), 15, 0, 15),
     (7, YEAR(CURDATE()), 15, 0, 15),
     (8, YEAR(CURDATE()), 15, 0, 15);
+
+-- =========================================================
+-- SALARIO INICIAL DE PRUEBA
+-- =========================================================
+INSERT INTO salarios_empleado
+(id_empleado, salario, activo)
+VALUES
+    (1, 1200.00, TRUE);
