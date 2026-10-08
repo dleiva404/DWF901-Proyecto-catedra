@@ -45,7 +45,7 @@ public class ConstanciaDAO {
             );
 
             /*
-             * Si la constancia es salarial, obtiene autom?ticamente
+             * Si la constancia es salarial, obtiene automáticamente
              * el salario activo registrado para el empleado.
              */
             if (constancia.getTipo() != null
@@ -94,7 +94,7 @@ public class ConstanciaDAO {
     }
 
     /*
-     * M?todo utilizado por PDF y otras funcionalidades existentes.
+     * Método utilizado por PDF y otras funcionalidades existentes.
      */
     public Constancia obtenerPorId(int idConstancia) {
 
@@ -109,7 +109,7 @@ public class ConstanciaDAO {
     }
 
     /*
-     * Mantiene compatibilidad con el c?digo anterior.
+     * Mantiene compatibilidad con el código anterior.
      */
     public Constancia buscarPorId(int idConstancia)
             throws SQLException {
@@ -145,7 +145,7 @@ public class ConstanciaDAO {
     }
 
     /*
-     * M?todo utilizado por la vista del empleado.
+     * Método utilizado por la vista del empleado.
      */
     public List<Constancia> obtenerPorEmpleado(int idEmpleado) {
 
@@ -167,7 +167,7 @@ public class ConstanciaDAO {
     }
 
     /*
-     * Alias de compatibilidad con la implementaci?n JPA original.
+     * Alias de compatibilidad con la implementación JPA original.
      */
     public List<Constancia> listarPorEmpleado(int idEmpleado)
             throws SQLException {
@@ -242,7 +242,7 @@ public class ConstanciaDAO {
     }
 
     /*
-     * Mantiene el m?todo utilizado actualmente por
+     * Mantiene el método utilizado actualmente por
      * AdminConstanciaServlet.
      */
     public boolean actualizarEstado(
@@ -263,7 +263,7 @@ public class ConstanciaDAO {
             }
 
             /*
-             * Unificamos los estados utilizados por el c?digo anterior
+             * Unificamos los estados utilizados por el código anterior
              * con los estados definidos en la entidad.
              */
             if ("APROBADO".equalsIgnoreCase(nuevoEstado)
@@ -312,7 +312,7 @@ public class ConstanciaDAO {
     }
 
     /*
-     * Aprobaci?n completa registrando al usuario de RRHH.
+     * Aprobación completa registrando al usuario de RRHH.
      */
     public void aprobar(
             int idConstancia,
@@ -329,7 +329,7 @@ public class ConstanciaDAO {
 
             if (constancia == null) {
                 throw new SQLException(
-                        "No se encontr? la constancia."
+                        "No se encontró la constancia."
                 );
             }
 
@@ -407,7 +407,7 @@ public class ConstanciaDAO {
 
             if (constancia == null) {
                 throw new SQLException(
-                        "No se encontr? la constancia."
+                        "No se encontró la constancia."
                 );
             }
 

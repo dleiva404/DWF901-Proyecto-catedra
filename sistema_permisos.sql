@@ -175,30 +175,30 @@ INSERT INTO roles (nombre, descripcion) VALUES
     ('RRHH', 'Personal de Recursos Humanos');
 
 INSERT INTO tipos_solicitud (nombre, descripcion) VALUES
-    ('VACACIONES', 'Solicitud de dÃƒÂ­as de vacaciones'),
-    ('INCAPACIDAD', 'Solicitud por incapacidad mÃƒÂ©dica'),
+    ('VACACIONES', 'Solicitud de días de vacaciones'),
+    ('INCAPACIDAD', 'Solicitud por incapacidad médica'),
     ('AUSENCIA', 'Solicitud de ausencia laboral');
 
 INSERT INTO sucursales_areas (nombre, descripcion) VALUES
     ('Didelco Santa Ana', 'Sucursal Santa Ana'),
     ('Didelco Apopa', 'Sucursal Apopa'),
-    ('Didelco MetapÃƒÂ¡n', 'Sucursal MetapÃƒÂ¡n');
+    ('Didelco Metapán', 'Sucursal Metapán');
 
 INSERT INTO departamentos (nombre, descripcion) VALUES
     ('Recursos Humanos', 'Departamento de Recursos Humanos'),
-    ('AdministraciÃƒÂ³n', 'Departamento Administrativo'),
+    ('Administración', 'Departamento Administrativo'),
     ('Ventas', 'Departamento de Ventas'),
-    ('InformÃƒÂ¡tica', 'Departamento de InformÃƒÂ¡tica');
+    ('Informática', 'Departamento de Informática');
 
 INSERT INTO empleados
     (nombre, apellido, dui, correo, telefono, id_sucursal_area, empresa, id_departamento, cargo, fecha_ingreso)
 VALUES
-    ('Juan', 'PÃƒÂ©rez', '01234567-8', 'juan.perez@empresa.com', '70000000', 1, NULL, 4, 'Analista de Sistemas', '2024-01-15'),
-    ('Carlos', 'GÃƒÂ³mez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, NULL, 4, 'Jefe de InformÃƒÂ¡tica', '2020-03-10'),
-    ('Ana', 'MartÃƒÂ­nez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, NULL, 1, 'Analista de Recursos Humanos', '2021-06-01'),
-    ('Carlos', 'Cornejo', '34567890-1', 'carlos.cornejo@empresa.com', '73333333', 1, NULL, 4, 'Jefe de InformÃƒÂ¡tica', '2021-02-01'),
+    ('Juan', 'Pérez', '01234567-8', 'juan.perez@empresa.com', '70000000', 1, NULL, 4, 'Analista de Sistemas', '2024-01-15'),
+    ('Carlos', 'Gómez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, NULL, 4, 'Jefe de Informática', '2020-03-10'),
+    ('Ana', 'Martínez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, NULL, 1, 'Analista de Recursos Humanos', '2021-06-01'),
+    ('Carlos', 'Cornejo', '34567890-1', 'carlos.cornejo@empresa.com', '73333333', 1, NULL, 4, 'Jefe de Informática', '2021-02-01'),
     ('David', 'Leiva', '45678901-2', 'david.leiva@empresa.com', '74444444', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
-    ('MoisÃƒÂ©s', 'GarcÃƒÂ­a', '56789012-3', 'moises.garcia@empresa.com', '75555555', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
+    ('Moisés', 'García', '56789012-3', 'moises.garcia@empresa.com', '75555555', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
     ('Alcyr', 'Figueroa', '67890123-4', 'alcyr.figueroa@empresa.com', '76666666', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
     ('Nelson', 'Solano', '78901234-5', 'nelson.solano@empresa.com', '77777777', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01');
 
