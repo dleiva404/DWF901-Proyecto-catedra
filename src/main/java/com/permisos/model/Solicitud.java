@@ -67,6 +67,20 @@ public class Solicitud implements Serializable {
     @Column(name = "fecha_recepcion_rrhh")
     private LocalDateTime fechaRecepcionRrhh;
 
+
+    /*
+     * Campos de apoyo para las vistas (no son columnas de la tabla).
+     * El DAO los llena al consultar.
+     */
+    @Transient
+    private String tipo;
+
+    @Transient
+    private String nombreEmpleado;
+
+    @Transient
+    private String nombreEmpresa;
+
     public Solicitud() {
     }
 
@@ -219,5 +233,29 @@ public class Solicitud implements Serializable {
 
     public void setFechaRecepcionRrhh(LocalDateTime fechaRecepcionRrhh) {
         this.fechaRecepcionRrhh = fechaRecepcionRrhh;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getNombreEmpleado() {
+        return nombreEmpleado;
+    }
+
+    public void setNombreEmpleado(String nombreEmpleado) {
+        this.nombreEmpleado = nombreEmpleado;
+    }
+
+    public String getNombreEmpresa() {
+        return nombreEmpresa;
+    }
+
+    public void setNombreEmpresa(String nombreEmpresa) {
+        this.nombreEmpresa = nombreEmpresa;
     }
 }

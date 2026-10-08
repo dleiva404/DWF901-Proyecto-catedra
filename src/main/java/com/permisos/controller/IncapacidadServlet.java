@@ -1,12 +1,12 @@
 package com.permisos.controller;
 
 import com.permisos.dao.IncapacidadDAO;
-import com.permisos.dao.SolicitudDAO;
 import com.permisos.dao.TipoSolicitudDAO;
 import com.permisos.model.Incapacidad;
 import com.permisos.model.Solicitud;
 import com.permisos.model.TipoSolicitud;
 import com.permisos.model.Usuario;
+import com.permisos.dao.SolicitudDAO;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

@@ -2,6 +2,7 @@ package com.permisos.controller;
 
 import com.permisos.dao.SolicitudDAO;
 import com.permisos.model.Empleado;
+import com.permisos.model.Rol;
 import com.permisos.model.Solicitud;
 import com.permisos.model.Usuario;
 
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "JefaturaServlet", urlPatterns = {"/jefatura"})
@@ -33,7 +35,7 @@ public class JefaturaServlet extends HttpServlet {
         if (usuario == null || empleado == null) {
             request.setAttribute(
                     "error",
-                    "Debe iniciar sesión para acceder al módulo de jefatura."
+                    "Debe iniciar sesión para acceder a este módulo."
             );
 
             request.getRequestDispatcher(
@@ -80,20 +82,14 @@ public class JefaturaServlet extends HttpServlet {
         String accion = limpiar(request.getParameter("accion"));
 
         if ("aprobar".equalsIgnoreCase(accion)) {
-
             aprobarSolicitud(request, response);
-
         } else if ("rechazar".equalsIgnoreCase(accion)) {
-
             rechazarSolicitud(request, response);
-
         } else {
-
             request.setAttribute(
                     "error",
                     "La acción solicitada no es válida."
             );
-
             listarPendientes(request, response);
         }
     }
@@ -105,11 +101,12 @@ public class JefaturaServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         Empleado empleado = obtenerEmpleadoSesion(session);
+        Rol rol = (session != null) ? (Rol) session.getAttribute("rol") : null;
 
-        if (empleado == null) {
+        if (empleado == null || rol == null) {
             request.setAttribute(
                     "error",
-                    "No se pudo identificar al empleado de la sesión."
+                    "No se pudo identificar la sesión del usuario."
             );
 
             request.getRequestDispatcher(
@@ -120,18 +117,41 @@ public class JefaturaServlet extends HttpServlet {
         }
 
         try {
+            String nombreRol = rol.getNombre() != null ? rol.getNombre().toUpperCase() : "";
+            List<Solicitud> solicitudes;
 
-            int idEmpleadoJefe = empleado.getIdEmpleado();
+            // Si es RRHH o ADMIN, ven todas las solicitudes globales
+            if (nombreRol.contains("RRHH") || nombreRol.contains("ADMIN")) {
+                solicitudes = solicitudDAO.listarTodasGlobal();
+            } else {
+                // Si es Jefatura, filtra por las de su equipo
+                int idEmpleadoJefe = empleado.getIdEmpleado();
+                solicitudes = solicitudDAO.listarPendientesPorJefatura(idEmpleadoJefe);
+            }
 
-            List<Solicitud> solicitudes =
-                    solicitudDAO.listarPendientesPorJefatura(
-                            idEmpleadoJefe
-                    );
+            // APLICAR FILTRO DE BÚSQUEDA (por nombre, apellido, empresa o motivo)
+            String busqueda = limpiar(request.getParameter("busqueda"));
+            if (!busqueda.isEmpty()) {
+                String filtro = busqueda.toLowerCase();
+                List<Solicitud> filtradas = new ArrayList<>();
+
+                for (Solicitud s : solicitudes) {
+                    String nom = (s.getNombreEmpleado() != null) ? s.getNombreEmpleado().toLowerCase() : "";
+                    String emp = (s.getNombreEmpresa() != null) ? s.getNombreEmpresa().toLowerCase() : "";
+                    String mot = (s.getMotivo() != null) ? s.getMotivo().toLowerCase() : "";
+                    String est = (s.getEstado() != null) ? s.getEstado().toLowerCase() : "";
+
+                    if (nom.contains(filtro) || emp.contains(filtro) || mot.contains(filtro) || est.contains(filtro)) {
+                        filtradas.add(s);
+                    }
+                }
+                solicitudes = filtradas;
+                request.setAttribute("busquedaActual", busqueda);
+            }
 
             request.setAttribute("solicitudes", solicitudes);
 
         } catch (SQLException e) {
-
             request.setAttribute(
                     "error",
                     "No fue posible consultar las solicitudes pendientes."
@@ -150,56 +170,31 @@ public class JefaturaServlet extends HttpServlet {
         String id = limpiar(request.getParameter("id"));
 
         if (id.isEmpty()) {
-
-            request.setAttribute(
-                    "error",
-                    "Debe indicar una solicitud válida."
-            );
-
+            request.setAttribute("error", "Debe indicar una solicitud válida.");
             listarPendientes(request, response);
             return;
         }
 
         try {
-
             int idSolicitud = Integer.parseInt(id);
-
-            Solicitud solicitud =
-                    solicitudDAO.buscarPorId(idSolicitud);
+            Solicitud solicitud = solicitudDAO.buscarPorId(idSolicitud);
 
             if (solicitud == null) {
-
-                request.setAttribute(
-                        "error",
-                        "La solicitud indicada no existe."
-                );
-
+                request.setAttribute("error", "La solicitud indicada no existe.");
                 listarPendientes(request, response);
                 return;
             }
 
             request.setAttribute("solicitud", solicitud);
-
             request.getRequestDispatcher(
                     "/WEB-INF/vistas/jefatura/detalle.jsp"
             ).forward(request, response);
 
         } catch (NumberFormatException e) {
-
-            request.setAttribute(
-                    "error",
-                    "El identificador de la solicitud no es válido."
-            );
-
+            request.setAttribute("error", "El identificador de la solicitud no es válido.");
             listarPendientes(request, response);
-
         } catch (SQLException e) {
-
-            request.setAttribute(
-                    "error",
-                    "No fue posible consultar el detalle de la solicitud."
-            );
-
+            request.setAttribute("error", "No fue posible consultar el detalle de la solicitud.");
             listarPendientes(request, response);
         }
     }
@@ -208,94 +203,48 @@ public class JefaturaServlet extends HttpServlet {
                                   HttpServletResponse response)
             throws ServletException, IOException {
 
-        String id = limpiar(
-                request.getParameter("idSolicitud")
-        );
+        String id = limpiar(request.getParameter("idSolicitud"));
 
         if (id.isEmpty()) {
-
-            request.setAttribute(
-                    "error",
-                    "Debe indicar la solicitud que desea aprobar."
-            );
-
+            request.setAttribute("error", "Debe indicar la solicitud que desea aprobar.");
             listarPendientes(request, response);
             return;
         }
 
         try {
-
             int idSolicitud = Integer.parseInt(id);
-
-            Solicitud solicitud =
-                    solicitudDAO.buscarPorId(idSolicitud);
+            Solicitud solicitud = solicitudDAO.buscarPorId(idSolicitud);
 
             if (solicitud == null) {
-
-                request.setAttribute(
-                        "error",
-                        "La solicitud indicada no existe."
-                );
-
+                request.setAttribute("error", "La solicitud indicada no existe.");
                 listarPendientes(request, response);
                 return;
             }
 
-            if (!"PENDIENTE".equalsIgnoreCase(
-                    solicitud.getEstado()
-            )) {
-
-                request.setAttribute(
-                        "error",
-                        "Solo se pueden aprobar solicitudes pendientes."
-                );
-
+            if (!"PENDIENTE".equalsIgnoreCase(solicitud.getEstado())) {
+                request.setAttribute("error", "Solo se pueden aprobar solicitudes pendientes.");
                 listarPendientes(request, response);
                 return;
             }
 
-            HttpSession session =
-                    request.getSession(false);
+            HttpSession session = request.getSession(false);
+            Empleado empleado = obtenerEmpleadoSesion(session);
+            Usuario usuario = obtenerUsuarioSesion(session);
 
-            Empleado empleado =
-                    obtenerEmpleadoSesion(session);
+            int idEmpleadoJefe = empleado.getIdEmpleado();
+            int idUsuarioJefatura = usuario.getIdUsuario();
 
-            Usuario usuario =
-                    obtenerUsuarioSesion(session);
-
-            int idEmpleadoJefe =
-                    empleado.getIdEmpleado();
-
-            int idUsuarioJefatura =
-                    usuario.getIdUsuario();
-
-            solicitudDAO.aprobar(
-                    idSolicitud,
-                    idEmpleadoJefe,
-                    idUsuarioJefatura
-            );
+            solicitudDAO.aprobar(idSolicitud, idEmpleadoJefe, idUsuarioJefatura);
 
             response.sendRedirect(
-                    request.getContextPath()
-                            + "/jefatura?resultado=aprobada"
+                    request.getContextPath() + "/jefatura?resultado=aprobada"
             );
 
         } catch (NumberFormatException e) {
-
-            request.setAttribute(
-                    "error",
-                    "El identificador de la solicitud no es válido."
-            );
-
+            request.setAttribute("error", "El identificador de la solicitud no es válido.");
             listarPendientes(request, response);
-
         } catch (SQLException e) {
-
-            request.setAttribute(
-                    "error",
-                    "No fue posible aprobar la solicitud."
-            );
-
+            request.setAttribute("error", "No fue posible aprobar la solicitud.");
             listarPendientes(request, response);
         }
     }
@@ -304,167 +253,78 @@ public class JefaturaServlet extends HttpServlet {
                                    HttpServletResponse response)
             throws ServletException, IOException {
 
-        String id = limpiar(
-                request.getParameter("idSolicitud")
-        );
-
-        String motivoRechazo = limpiar(
-                request.getParameter("motivoRechazo")
-        );
+        String id = limpiar(request.getParameter("idSolicitud"));
+        String motivoRechazo = limpiar(request.getParameter("motivoRechazo"));
 
         if (id.isEmpty()) {
-
-            request.setAttribute(
-                    "error",
-                    "Debe indicar la solicitud que desea rechazar."
-            );
-
+            request.setAttribute("error", "Debe indicar la solicitud que desea rechazar.");
             listarPendientes(request, response);
             return;
         }
 
         if (motivoRechazo.isEmpty()) {
-
-            request.setAttribute(
-                    "error",
-                    "Debe indicar el motivo del rechazo."
-            );
-
+            request.setAttribute("error", "Debe indicar el motivo del rechazo.");
             listarPendientes(request, response);
             return;
         }
 
-        if (motivoRechazo.length() < 5
-                || motivoRechazo.length() > 250) {
-
-            request.setAttribute(
-                    "error",
-                    "El motivo del rechazo debe tener entre 5 y 250 caracteres."
-            );
-
+        if (motivoRechazo.length() < 5 || motivoRechazo.length() > 250) {
+            request.setAttribute("error", "El motivo del rechazo debe tener entre 5 y 250 caracteres.");
             listarPendientes(request, response);
             return;
         }
 
         try {
-
-            int idSolicitud =
-                    Integer.parseInt(id);
-
-            Solicitud solicitud =
-                    solicitudDAO.buscarPorId(idSolicitud);
+            int idSolicitud = Integer.parseInt(id);
+            Solicitud solicitud = solicitudDAO.buscarPorId(idSolicitud);
 
             if (solicitud == null) {
-
-                request.setAttribute(
-                        "error",
-                        "La solicitud indicada no existe."
-                );
-
+                request.setAttribute("error", "La solicitud indicada no existe.");
                 listarPendientes(request, response);
                 return;
             }
 
-            if (!"PENDIENTE".equalsIgnoreCase(
-                    solicitud.getEstado()
-            )) {
-
-                request.setAttribute(
-                        "error",
-                        "Solo se pueden rechazar solicitudes pendientes."
-                );
-
+            if (!"PENDIENTE".equalsIgnoreCase(solicitud.getEstado())) {
+                request.setAttribute("error", "Solo se pueden rechazar solicitudes pendientes.");
                 listarPendientes(request, response);
                 return;
             }
 
-            HttpSession session =
-                    request.getSession(false);
+            HttpSession session = request.getSession(false);
+            Empleado empleado = obtenerEmpleadoSesion(session);
+            Usuario usuario = obtenerUsuarioSesion(session);
 
-            Empleado empleado =
-                    obtenerEmpleadoSesion(session);
+            int idEmpleadoJefe = empleado.getIdEmpleado();
+            int idUsuarioJefatura = usuario.getIdUsuario();
 
-            Usuario usuario =
-                    obtenerUsuarioSesion(session);
-
-            int idEmpleadoJefe =
-                    empleado.getIdEmpleado();
-
-            int idUsuarioJefatura =
-                    usuario.getIdUsuario();
-
-            solicitudDAO.rechazar(
-                    idSolicitud,
-                    idEmpleadoJefe,
-                    motivoRechazo,
-                    idUsuarioJefatura
-            );
+            solicitudDAO.rechazar(idSolicitud, idEmpleadoJefe, motivoRechazo, idUsuarioJefatura);
 
             response.sendRedirect(
-                    request.getContextPath()
-                            + "/jefatura?resultado=rechazada"
+                    request.getContextPath() + "/jefatura?resultado=rechazada"
             );
 
         } catch (NumberFormatException e) {
-
-            request.setAttribute(
-                    "error",
-                    "El identificador de la solicitud no es válido."
-            );
-
+            request.setAttribute("error", "El identificador de la solicitud no es válido.");
             listarPendientes(request, response);
-
         } catch (SQLException e) {
-
-            request.setAttribute(
-                    "error",
-                    "No fue posible rechazar la solicitud."
-            );
-
+            request.setAttribute("error", "No fue posible rechazar la solicitud.");
             listarPendientes(request, response);
         }
     }
 
-    private Usuario obtenerUsuarioSesion(
-            HttpSession session) {
-
-        if (session == null) {
-            return null;
-        }
-
-        Object usuario =
-                session.getAttribute("usuario");
-
-        if (usuario instanceof Usuario) {
-            return (Usuario) usuario;
-        }
-
-        return null;
+    private Usuario obtenerUsuarioSesion(HttpSession session) {
+        if (session == null) return null;
+        Object usuario = session.getAttribute("usuario");
+        return (usuario instanceof Usuario) ? (Usuario) usuario : null;
     }
 
-    private Empleado obtenerEmpleadoSesion(
-            HttpSession session) {
-
-        if (session == null) {
-            return null;
-        }
-
-        Object empleado =
-                session.getAttribute("empleado");
-
-        if (empleado instanceof Empleado) {
-            return (Empleado) empleado;
-        }
-
-        return null;
+    private Empleado obtenerEmpleadoSesion(HttpSession session) {
+        if (session == null) return null;
+        Object empleado = session.getAttribute("empleado");
+        return (empleado instanceof Empleado) ? (Empleado) empleado : null;
     }
 
     private String limpiar(String valor) {
-
-        if (valor == null) {
-            return "";
-        }
-
-        return valor.trim();
+        return (valor == null) ? "" : valor.trim();
     }
 }

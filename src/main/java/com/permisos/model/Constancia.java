@@ -2,6 +2,7 @@ package com.permisos.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,8 +24,23 @@ public class Constancia implements Serializable {
     @JoinColumn(name = "id_empleado", nullable = false)
     private Empleado empleado;
 
-    @Column(name = "tipo_constancia", nullable = false, length = 50)
-    private String tipoConstancia;
+    @Column(name = "tipo", nullable = false, length = 50)
+    private String tipo;
+
+    @Column(name = "institucion_destino", length = 150)
+    private String institucion;
+
+    @Column(name = "motivo", columnDefinition = "TEXT")
+    private String motivo;
+
+    @Column(name = "salario_referencia", precision = 10, scale = 2)
+    private BigDecimal salarioReferencia;
+
+    @Column(name = "empresa_emisora", length = 150)
+    private String empresaEmisora;
+
+    @Column(name = "token_verificacion", length = 100)
+    private String tokenVerificacion;
 
     @Column(name = "fecha_solicitud", nullable = false)
     private LocalDateTime fechaSolicitud;
@@ -75,12 +91,60 @@ public class Constancia implements Serializable {
         this.empleado = empleado;
     }
 
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
     public String getTipoConstancia() {
-        return tipoConstancia;
+        return tipo;
     }
 
     public void setTipoConstancia(String tipoConstancia) {
-        this.tipoConstancia = tipoConstancia;
+        this.tipo = tipoConstancia;
+    }
+
+    public String getInstitucion() {
+        return institucion;
+    }
+
+    public void setInstitucion(String institucion) {
+        this.institucion = institucion;
+    }
+
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
+
+    public BigDecimal getSalarioReferencia() {
+        return salarioReferencia;
+    }
+
+    public void setSalarioReferencia(BigDecimal salarioReferencia) {
+        this.salarioReferencia = salarioReferencia;
+    }
+
+    public String getEmpresaEmisora() {
+        return empresaEmisora;
+    }
+
+    public void setEmpresaEmisora(String empresaEmisora) {
+        this.empresaEmisora = empresaEmisora;
+    }
+
+    public String getTokenVerificacion() {
+        return tokenVerificacion;
+    }
+
+    public void setTokenVerificacion(String tokenVerificacion) {
+        this.tokenVerificacion = tokenVerificacion;
     }
 
     public LocalDateTime getFechaSolicitud() {
@@ -89,6 +153,18 @@ public class Constancia implements Serializable {
 
     public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
         this.fechaSolicitud = fechaSolicitud;
+    }
+
+    public java.sql.Date getFechaCreacion() {
+        return fechaSolicitud != null
+                ? java.sql.Date.valueOf(fechaSolicitud.toLocalDate())
+                : null;
+    }
+
+    public void setFechaCreacion(java.sql.Date fechaCreacion) {
+        this.fechaSolicitud = fechaCreacion != null
+                ? fechaCreacion.toLocalDate().atStartOfDay()
+                : null;
     }
 
     public String getEstado() {
