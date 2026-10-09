@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+
+<ui:composition template="/WEB-INF/templates/template.xhtml">
+    <ui:param name="activo" value="solicitudes"/>
+
+    <ui:define name="contenido">
+
+        <div>
+            <h1 class="rh-titulo">Mis solicitudes</h1>
+        </div>
+
+        <h:messages globalOnly="true" layout="list" errorClass="rh-msg rh-msg-error" infoClass="rh-msg rh-msg-ok"/>
+
+        <div class="rh-bloque">
+
+            <h:panelGroup layout="block" styleClass="rh-hero" rendered="#{solicitudesBean.hayHero}">
+                <div class="rh-hero-texto">
+                    <div class="rh-hero-etiqueta">VACACIONES #{solicitudesBean.anio}</div>
+                    <h2 class="rh-hero-titulo">#{solicitudesBean.heroTitulo}</h2>
+                </div>
+                <div class="rh-anillo">
+                    <svg width="140" height="140" viewBox="0 0 120 120" aria-hidden="true">
+                        <circle cx="60" cy="60" r="48" fill="none" stroke="#343e57" stroke-width="12"/>
+                        <circle cx="60" cy="60" r="48" fill="none" stroke="#f2792e" stroke-width="12" stroke-linecap="round" stroke-dasharray="#{solicitudesBean.dashArray}" transform="rotate(-90 60 60)"/>
+                    </svg>
+                    <div class="rh-anillo-centro">
+                        <div class="rh-anillo-num">#{solicitudesBean.diasDisponibles}</div>
+                        <div class="rh-anillo-sub">de #{solicitudesBean.diasAsignados} días</div>
+                    </div>
+                </div>
+            </h:panelGroup>
+
+            <div class="rh-tiles">
+                <div class="rh-tile">
+                    <div class="rh-tile-etq">Pendientes de aprobación</div>
+                    <div class="rh-tile-num">#{solicitudesBean.pendientes}</div>
+                    <div class="rh-tile-pie">Esperando a tu jefatura</div>
+                </div>
+                <div class="rh-tile">
+                    <div class="rh-tile-etq">Aprobadas este año</div>
+                    <div class="rh-tile-num">#{solicitudesBean.aprobadasAnio}</div>
+                    <div class="rh-tile-pie">#{solicitudesBean.ultimaAprobada}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rh-dos-col">
+
+            <section class="rh-col-act">
+                <h2 class="rh-h2">Actividad reciente</h2>
+
+                <h:panelGroup layout="block" styleClass="rh-vacio" rendered="#{empty solicitudesBean.actividad}">
+                    Aún no has enviado solicitudes.
+                </h:panelGroup>
+
+                <div class="rh-grid-act">
+                    <ui:repeat value="#{solicitudesBean.actividad}" var="a">
+                        <article class="rh-card-act">
+                            <div class="rh-card-fila">
+                                <span class="rh-card-tipo">#{a.tipo}</span>
+                                <span class="rh-chip rh-chip-#{a.claseEstado}"><span class="rh-punto"></span>#{a.estado}</span>
+                            </div>
+                            <div class="rh-card-fecha">#{a.rango} · #{a.diasTexto}</div>
+                            <h:panelGroup layout="block" styleClass="rh-tl rh-tl-#{a.claseEstado}" rendered="#{a.enProceso}">
+                                <span class="rh-dot"></span>Enviada<span class="rh-tl-linea"></span><span class="rh-dot rh-dot-fin"></span>#{a.etiquetaFinal}
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="rh-card-rechazo" rendered="#{a.rechazadaConMotivo}">
+                                Motivo: #{a.motivoRechazo}
+                            </h:panelGroup>
+                        </article>
+                    </ui:repeat>
+                </div>
+            </section>
+
+            <section class="rh-col-form" id="nueva-solicitud">
+                <h2 class="rh-h2">Nueva solicitud</h2>
+
+                <h:form id="formSolicitud" styleClass="rh-form">
+
+                    <h:selectOneRadio id="tipo" value="#{solicitudesBean.idTipo}" styleClass="rh-pills"
+                                      required="true" requiredMessage="Debe seleccionar un tipo de solicitud.">
+                        <f:selectItems value="#{solicitudesBean.tipos}"/>
+                        <f:ajax render="resumen"/>
+                    </h:selectOneRadio>
+                    <h:message id="mensajeTipo" for="tipo" styleClass="rh-msg-campo"/>
+
+                    <div class="rh-fila-fechas">
+                        <div class="rh-campo-bloque">
+                            <label class="rh-campo">Desde
+                                <h:inputText id="desde" value="#{solicitudesBean.fechaInicio}" p:type="date"
+                                             styleClass="#{component.valid ? '' : 'rh-input-error'}"
+                                             required="#{not solicitudesBean.incapacidad}"
+                                             requiredMessage="Debe indicar la fecha de inicio.">
+                                    <f:validator validatorId="fechaValidator" disabled="#{solicitudesBean.incapacidad}"/>
+                                    <f:ajax event="change" render="desde resumen mensajeDesde"/>
+                                </h:inputText>
+                            </label>
+                            <h:message id="mensajeDesde" for="desde" styleClass="rh-msg-campo"/>
+                        </div>
+                        <div class="rh-campo-bloque">
+                            <label class="rh-campo">Hasta
+                                <h:inputText id="hasta" value="#{solicitudesBean.fechaFin}" p:type="date"
+                                             styleClass="#{component.valid ? '' : 'rh-input-error'}"
+                                             required="#{not solicitudesBean.incapacidad}"
+                                             requiredMessage="Debe indicar la fecha final.">
+                                    <f:validator validatorId="fechaValidator" disabled="#{solicitudesBean.incapacidad}"/>
+                                    <f:validator validatorId="rangoFechasValidator" disabled="#{solicitudesBean.incapacidad}"/>
+                                    <f:attribute name="desde" value="desde"/>
+                                    <f:ajax event="change" render="hasta resumen mensajeHasta"/>
+                                </h:inputText>
+                            </label>
+                            <h:message id="mensajeHasta" for="hasta" styleClass="rh-msg-campo"/>
+                        </div>
+                    </div>
+
+                    <h:panelGroup id="resumen" layout="block" styleClass="#{solicitudesBean.resumenClase}">
+                        <h:outputText value="#{solicitudesBean.resumen}" escape="false"/>
+                    </h:panelGroup>
+
+                    <label class="rh-campo">Motivo
+                        <h:inputTextarea id="motivo" value="#{solicitudesBean.motivo}" rows="3" p:maxlength="500"
+                                         styleClass="#{component.valid ? '' : 'rh-input-error'}"
+                                         required="#{not solicitudesBean.incapacidad}"
+                                         requiredMessage="Debe indicar el motivo de la solicitud."
+                                         p:placeholder="Detalla el motivo de la solicitud">
+                            <f:validator validatorId="motivoValidator" disabled="#{solicitudesBean.incapacidad}"/>
+                            <f:attribute name="min" value="5"/>
+                            <f:attribute name="max" value="500"/>
+                            <f:attribute name="etiqueta" value="motivo"/>
+                        </h:inputTextarea>
+                    </label>
+                    <h:message id="mensajeMotivo" for="motivo" styleClass="rh-msg-campo"/>
+
+                    <h:commandButton id="enviar" value="Enviar solicitud" action="#{solicitudesBean.enviar}" styleClass="rh-btn-enviar"/>
+                </h:form>
+            </section>
+
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

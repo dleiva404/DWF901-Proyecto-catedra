@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Sistema de RRHH</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin"/>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="#{facesContext.externalContext.requestContextPath}/css/plantilla.css"/>
+    <h:outputScript library="javax.faces" name="jsf.js" target="head"/>
+</h:head>
+
+<h:body styleClass="rh-body">
+    <ui:param name="ctx" value="#{facesContext.externalContext.requestContextPath}"/>
+    <ui:param name="rolUpper" value="#{fn:toUpperCase(sessionScope.rol.nombre)}"/>
+
+    <div id="rh-ajax-barra" class="rh-ajax-barra" data-ctx="#{ctx}" aria-hidden="true"><span></span></div>
+    <div id="rh-ajax-aviso" class="rh-ajax-aviso" role="alert"></div>
+
+    <div class="rh-layout">
+
+        <aside class="rh-side">
+            <div class="rh-logo">
+                <img src="#{ctx}/img/logo.png" alt="Invercalma"/>
+            </div>
+
+            <nav class="rh-nav">
+                <div class="rh-nav-titulo">SISTEMA DE RRHH</div>
+
+                <h:panelGroup layout="block" rendered="#{fn:contains(rolUpper, 'JEFATURA') or fn:contains(rolUpper, 'RRHH') or fn:contains(rolUpper, 'ADMIN')}">
+                    <a href="#{ctx}/jefatura.xhtml" class="rh-item #{activo eq 'jefatura' ? 'rh-activo' : ''}">
+                        <span class="rh-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span>
+                        Solicitudes de empleados
+                    </a>
+                </h:panelGroup>
+
+                <a href="#{ctx}/solicitudes" class="rh-item #{activo eq 'solicitudes' ? 'rh-activo' : ''}">
+                    <span class="rh-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
+                    Mis solicitudes
+                </a>
+
+                <a href="#{ctx}/ConstanciaServlet" class="rh-item #{activo eq 'constancias' ? 'rh-activo' : ''}">
+                    <span class="rh-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
+                    Constancias
+                </a>
+
+                <h:panelGroup layout="block" rendered="#{fn:contains(rolUpper, 'RRHH') or fn:contains(rolUpper, 'ADMIN')}">
+                    <a href="#{ctx}/admin-constancias.xhtml" class="rh-item #{activo eq 'adminConstancias' ? 'rh-activo' : ''}">
+                        <span class="rh-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 14l2 2 4-4"/></svg></span>
+                        Gestión de constancias
+                    </a>
+                </h:panelGroup>
+
+                <a href="#{ctx}/historial.xhtml" class="rh-item #{activo eq 'historial' ? 'rh-activo' : ''}">
+                    <span class="rh-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                    Historial
+                </a>
+            </nav>
+
+            <div class="rh-user">
+                <div class="rh-avatar">#{fn:toUpperCase(fn:substring(sessionScope.empleado.nombre, 0, 1))}#{fn:toUpperCase(fn:substring(sessionScope.empleado.apellido, 0, 1))}</div>
+                <div class="rh-user-datos">
+                    <div class="rh-user-nombre">#{sessionScope.empleado.nombre} #{sessionScope.empleado.apellido}</div>
+                    <div class="rh-user-rol">#{rolUpper eq 'ADMIN' ? 'Administrador' : (rolUpper eq 'RRHH' ? 'Recursos Humanos' : (rolUpper eq 'JEFATURA' ? 'Jefatura' : 'Empleado'))}</div>
+                </div>
+                <a href="#{ctx}/logout" class="rh-salir" aria-label="Cerrar sesión" title="Cerrar sesión">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d5dbe8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                </a>
+            </div>
+        </aside>
+
+        <main class="rh-main">
+            <div class="rh-contenido">
+                <ui:insert name="contenido">Contenido de la página</ui:insert>
+            </div>
+        </main>
+
+    </div>
+
+    <h:outputScript library="js" name="ajax-indicador.js" target="body"/>
+</h:body>
+</html>

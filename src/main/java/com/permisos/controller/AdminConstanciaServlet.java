@@ -32,78 +32,10 @@ public class AdminConstanciaServlet extends HttpServlet {
         empleadoDAO = new EmpleadoDAO();
     }
 
-    @Override
+        @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        HttpSession session = request.getSession(false);
-
-        if (session == null || session.getAttribute("empleado") == null) {
-            response.sendRedirect(request.getContextPath() + "/vistas/login.jsp");
-            return;
-        }
-
-        Rol rol = (Rol) session.getAttribute("rol");
-
-        if (rol == null
-                || rol.getNombre() == null
-                || !"RRHH".equalsIgnoreCase(rol.getNombre().trim())) {
-
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/vistas/error.jsp?mensaje=Acceso%20denegado"
-            );
-            return;
-        }
-
-        List<Constancia> listaConstancias =
-                constanciaDAO.obtenerTodas();
-
-        Map<Integer, String> mapNombresEmpleados =
-                new HashMap<>();
-
-        for (Constancia c : listaConstancias) {
-
-            if (!mapNombresEmpleados.containsKey(c.getIdEmpleado())) {
-
-                try {
-                    Empleado emp =
-                            empleadoDAO.buscarPorId(c.getIdEmpleado());
-
-                    if (emp != null) {
-                        mapNombresEmpleados.put(
-                                c.getIdEmpleado(),
-                                emp.getNombre() + " " + emp.getApellido()
-                        );
-                    } else {
-                        mapNombresEmpleados.put(
-                                c.getIdEmpleado(),
-                                "Colaborador ID: " + c.getIdEmpleado()
-                        );
-                    }
-
-                } catch (Exception e) {
-                    mapNombresEmpleados.put(
-                            c.getIdEmpleado(),
-                            "Colaborador ID: " + c.getIdEmpleado()
-                    );
-                }
-            }
-        }
-
-        request.setAttribute(
-                "listaConstancias",
-                listaConstancias
-        );
-
-        request.setAttribute(
-                "mapNombresEmpleados",
-                mapNombresEmpleados
-        );
-
-        request.getRequestDispatcher(
-                "/vistas/admin_constancias.jsp"
-        ).forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/admin-constancias.xhtml");
     }
 
     @Override

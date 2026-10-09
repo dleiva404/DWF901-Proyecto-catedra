@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+
+<ui:composition template="/WEB-INF/templates/template.xhtml">
+    <ui:param name="activo" value="historial"/>
+
+    <ui:define name="contenido">
+
+        <div>
+            <h1 class="rh-titulo">Historial de solicitudes</h1>
+        </div>
+
+        <h:messages globalOnly="true" layout="list" errorClass="rh-msg rh-msg-error" infoClass="rh-msg rh-msg-ok"/>
+
+        <section class="rh-panel-tabla rh-panel-hist">
+            <h:form id="formHistorial">
+
+                <div class="rh-filtros">
+                    <label class="rh-buscar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b6475" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                        <h:inputText id="busqueda" value="#{historialBean.busqueda}" p:placeholder="Buscar por motivo" p:aria-label="Buscar por motivo" p:autocomplete="off">
+                            <f:ajax event="keyup" delay="300" render="tabla"/>
+                        </h:inputText>
+                    </label>
+
+                    <label class="rh-select">Tipo
+                        <h:selectOneMenu id="tipo" value="#{historialBean.tipoFiltro}">
+                            <f:selectItems value="#{historialBean.tipos}"/>
+                            <f:ajax render="tabla"/>
+                        </h:selectOneMenu>
+                    </label>
+
+                    <h:selectOneRadio id="estado" value="#{historialBean.estadoFiltro}" styleClass="rh-chips-filtro">
+                        <f:selectItem itemValue="todas" itemLabel="Todas"/>
+                        <f:selectItem itemValue="pendiente" itemLabel="Pendientes"/>
+                        <f:selectItem itemValue="aprobada" itemLabel="Aprobadas"/>
+                        <f:selectItem itemValue="rechazada" itemLabel="Rechazadas"/>
+                        <f:ajax render="tabla"/>
+                    </h:selectOneRadio>
+                </div>
+
+                <h:panelGroup id="tabla" layout="block">
+                    <div class="rh-tabla-scroll">
+                        <table class="rh-tabla rh-tabla-hist">
+                            <thead>
+                                <tr>
+                                    <th>TIPO</th>
+                                    <th>INICIO</th>
+                                    <th>FIN</th>
+                                    <th>DÍAS</th>
+                                    <th>MOTIVO</th>
+                                    <th>ESTADO</th>
+                                    <th>MOTIVO DE RECHAZO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ui:repeat value="#{historialBean.filas}" var="s">
+                                    <tr>
+                                        <td class="rh-td-tipo">#{s.tipo}</td>
+                                        <td class="rh-nowrap">#{s.inicio}</td>
+                                        <td class="rh-nowrap">#{s.fin}</td>
+                                        <td>#{s.dias}</td>
+                                        <td>#{s.motivo}</td>
+                                        <td><span class="rh-chip rh-chip-#{s.claseEstado}"><span class="rh-punto"></span>#{s.estado}</span></td>
+                                        <td class="#{s.conMotivoRechazo ? 'rh-td-nota-rojo' : 'rh-td-nota'}">#{s.motivoRechazo}</td>
+                                    </tr>
+                                </ui:repeat>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h:panelGroup layout="block" styleClass="rh-vacio rh-vacio-tabla" rendered="#{not historialBean.hayFilas}">
+                        No hay solicitudes que coincidan con tu búsqueda.
+                    </h:panelGroup>
+
+                    <div class="rh-pie-tabla">
+                        <span>#{historialBean.conteo}</span>
+                        <h:panelGroup layout="block" styleClass="rh-paginacion" rendered="#{historialBean.hayPaginacion}">
+                            <h:commandButton value="Anterior" action="#{historialBean.anterior}" disabled="#{not historialBean.hayAnterior}" styleClass="rh-btn-pag">
+                                <f:ajax render="tabla"/>
+                            </h:commandButton>
+                            <span class="rh-pag-texto">#{historialBean.textoPagina}</span>
+                            <h:commandButton value="Siguiente" action="#{historialBean.siguiente}" disabled="#{not historialBean.haySiguiente}" styleClass="rh-btn-pag">
+                                <f:ajax render="tabla"/>
+                            </h:commandButton>
+                        </h:panelGroup>
+                    </div>
+                </h:panelGroup>
+
+            </h:form>
+        </section>
+    </ui:define>
+</ui:composition>
+</html>
