@@ -9,6 +9,7 @@ import com.permisos.dao.ConstanciaDAO;
 import com.permisos.dao.EmpleadoDAO;
 import com.permisos.model.Constancia;
 import com.permisos.model.Empleado;
+import com.permisos.model.Rol;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -62,6 +63,17 @@ public class GenerarConstanciaPDFServlet extends HttpServlet {
 
             if (constancia == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Constancia no encontrada.");
+                return;
+            }
+
+            Empleado sesionEmpleado = (Empleado) session.getAttribute("empleado");
+            Rol rolSesion = (Rol) session.getAttribute("rol");
+            String nombreRolSesion = (rolSesion != null && rolSesion.getNombre() != null)
+                    ? rolSesion.getNombre().toUpperCase() : "";
+            boolean esRrhh = nombreRolSesion.contains("RRHH") || nombreRolSesion.contains("ADMIN");
+
+            if (!esRrhh && constancia.getIdEmpleado() != sesionEmpleado.getIdEmpleado()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "No tiene permiso para ver esta constancia.");
                 return;
             }
 

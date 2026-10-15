@@ -9,6 +9,7 @@ import com.permisos.model.Usuario;
 import com.permisos.model.VacacionesEmpleado;
 import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.SolicitudService;
+import com.permisos.service.ReglasVacaciones;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +134,10 @@ public class SolicitudServlet extends HttpServlet {
                 } else if (inicio.isBefore(LocalDate.now())) {
                     errores.append("No se pueden solicitar fechas pasadas. ");
                 } else {
-                    diasSolicitados = (int) (ChronoUnit.DAYS.between(inicio, fin) + 1);
+                    diasSolicitados = ReglasVacaciones.contarDiasLaborables(inicio, fin);
+                    if (diasSolicitados == 0) {
+                        errores.append("El rango seleccionado solo incluye domingos. Elija al menos un día de lunes a sábado. ");
+                    }
                 }
             } catch (DateTimeParseException e) {
                 errores.append("Formato de fecha inválido. ");

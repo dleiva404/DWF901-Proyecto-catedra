@@ -1,7 +1,9 @@
 package com.permisos.service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 
 
 public final class ReglasVacaciones {
@@ -12,7 +14,18 @@ public final class ReglasVacaciones {
         
     }
 
-    
+    public static int contarDiasLaborables(LocalDate inicio, LocalDate fin) {
+        if (inicio == null || fin == null || fin.isBefore(inicio)) {
+            return 0;
+        }
+        long total = ChronoUnit.DAYS.between(inicio, fin) + 1;
+        LocalDate primerDomingo = inicio.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        long domingos = primerDomingo.isAfter(fin)
+                ? 0
+                : ChronoUnit.DAYS.between(primerDomingo, fin) / 7 + 1;
+        return (int) (total - domingos);
+    }
+
     public static int calcularDias(LocalDate inicio, LocalDate fin) throws ReglaNegocioException {
         if (inicio == null || fin == null) {
             throw new ReglaNegocioException("Debe indicar fecha de inicio y fin.");
@@ -20,7 +33,12 @@ public final class ReglasVacaciones {
         if (fin.isBefore(inicio)) {
             throw new ReglaNegocioException("La fecha fin no puede ser anterior al inicio.");
         }
-        return (int) (ChronoUnit.DAYS.between(inicio, fin) + 1);
+        int dias = contarDiasLaborables(inicio, fin);
+        if (dias == 0) {
+            throw new ReglaNegocioException(
+                    "El rango seleccionado solo incluye domingos. Elija al menos un día de lunes a sábado.");
+        }
+        return dias;
     }
 
     /**

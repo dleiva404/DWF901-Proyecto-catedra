@@ -9,6 +9,7 @@ import com.permisos.model.Usuario;
 import com.permisos.model.VacacionesEmpleado;
 import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.SolicitudService;
+import com.permisos.service.ReglasVacaciones;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -22,7 +23,6 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -124,6 +124,7 @@ public class SolicitudesBean implements Serializable {
 
                 if (actividad.size() < MAX_ACTIVIDAD) {
                     actividad.add(new ActividadItem(
+                            s.getIdSolicitud(),
                             capitalizar(tipo != null ? tipo : "Solicitud"),
                             estado,
                             rango(s.getFechaInicio(), s.getFechaFin()),
@@ -169,7 +170,10 @@ public class SolicitudesBean implements Serializable {
         } else if (inicio.isBefore(LocalDate.now())) {
             errores.add("No se pueden solicitar fechas pasadas.");
         } else {
-            dias = (int) (ChronoUnit.DAYS.between(inicio, fin) + 1);
+            dias = ReglasVacaciones.contarDiasLaborables(inicio, fin);
+            if (dias == 0) {
+                errores.add("El rango seleccionado solo incluye domingos. Elija al menos un día de lunes a sábado.");
+            }
         }
 
         if (errores.isEmpty() && TIPO_VACACIONES.equals(nombreTipo)) {
@@ -209,6 +213,25 @@ public class SolicitudesBean implements Serializable {
         return "solicitudes?faces-redirect=true";
     }
 
+    public void cancelar(int idSolicitud) {
+        if (usuario == null) {
+            return;
+        }
+        try {
+            boolean cancelada = new SolicitudDAO().cancelar(
+                    idSolicitud, usuario.getIdEmpleado(), usuario.getIdUsuario());
+            if (cancelada) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Solicitud cancelada.", null));
+            } else {
+                error("No se pudo cancelar: la solicitud ya no está pendiente.");
+            }
+            cargar();
+        } catch (SQLException e) {
+            error("No se pudo cancelar la solicitud.");
+        }
+    }
+
     public boolean isHayHero() {
         return saldo != null;
     }
@@ -228,18 +251,6 @@ public class SolicitudesBean implements Serializable {
     public String getHeroTitulo() {
         int d = getDiasDisponibles();
         return "Te quedan " + d + (d == 1 ? " día" : " días");
-    }
-
-    public String getHeroDetalle() {
-        if (saldo == null) {
-            return "";
-        }
-        String texto = "Has usado " + saldo.getDiasUtilizados() + " de tus " + saldo.getDiasAsignados() + " días.";
-        if (diasPendientesVacaciones > 0) {
-            texto += " Tienes " + diasPendientesVacaciones + (diasPendientesVacaciones == 1 ? " día" : " días")
-                    + " en solicitudes pendientes que aún no se descuentan.";
-        }
-        return texto;
     }
 
     public String getDashArray() {
@@ -262,8 +273,11 @@ public class SolicitudesBean implements Serializable {
         if (fin.isBefore(inicio)) {
             return "La fecha fin no puede ser anterior al inicio.";
         }
-        int dias = (int) (ChronoUnit.DAYS.between(inicio, fin) + 1);
-        String textoDias = "<strong>" + dias + (dias == 1 ? " día" : " días") + "</strong>";
+        int dias = ReglasVacaciones.contarDiasLaborables(inicio, fin);
+        if (dias == 0) {
+            return "El rango seleccionado solo incluye domingos. Elija al menos un día de lunes a sábado.";
+        }
+        String textoDias = "<strong>" + dias + (dias == 1 ? " día" : " días") + "</strong> (lunes a sábado)";
 
         if (TIPO_VACACIONES.equals(nombreTipo) && saldo != null) {
             int libres = saldo.getDiasDisponibles() - diasPendientesVacaciones;
@@ -279,6 +293,7 @@ public class SolicitudesBean implements Serializable {
     public String getResumenClase() {
         String r = getResumen();
         return r.contains("pero solo tienes") || r.startsWith("La fecha fin")
+                || r.startsWith("El rango seleccionado")
                 ? "rh-resumen rh-resumen-alerta" : "rh-resumen";
     }
 
@@ -426,18 +441,28 @@ public class SolicitudesBean implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
+        private final int idSolicitud;
         private final String tipo;
         private final String estado;
         private final String rango;
         private final int dias;
         private final String motivoRechazo;
 
-        ActividadItem(String tipo, String estado, String rango, int dias, String motivoRechazo) {
+        ActividadItem(int idSolicitud, String tipo, String estado, String rango, int dias, String motivoRechazo) {
+            this.idSolicitud = idSolicitud;
             this.tipo = tipo;
             this.estado = estado;
             this.rango = rango;
             this.dias = dias;
             this.motivoRechazo = motivoRechazo;
+        }
+
+        public int getIdSolicitud() {
+            return idSolicitud;
+        }
+
+        public boolean isPendiente() {
+            return "PENDIENTE".equals(estado);
         }
 
         public String getTipo() {

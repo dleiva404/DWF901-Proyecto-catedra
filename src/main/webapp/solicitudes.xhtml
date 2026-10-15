@@ -15,9 +15,11 @@
             <h1 class="rh-titulo">Mis solicitudes</h1>
         </div>
 
-        <h:messages globalOnly="true" layout="list" errorClass="rh-msg rh-msg-error" infoClass="rh-msg rh-msg-ok"/>
+        <h:panelGroup id="mensajes" layout="block">
+            <h:messages globalOnly="true" layout="list" errorClass="rh-msg rh-msg-error" infoClass="rh-msg rh-msg-ok"/>
+        </h:panelGroup>
 
-        <div class="rh-bloque">
+        <h:panelGroup id="bloque" layout="block" styleClass="rh-bloque">
 
             <h:panelGroup layout="block" styleClass="rh-hero" rendered="#{solicitudesBean.hayHero}">
                 <div class="rh-hero-texto">
@@ -48,7 +50,7 @@
                     <div class="rh-tile-pie">#{solicitudesBean.ultimaAprobada}</div>
                 </div>
             </div>
-        </div>
+        </h:panelGroup>
 
         <div class="rh-dos-col">
 
@@ -59,23 +61,32 @@
                     Aún no has enviado solicitudes.
                 </h:panelGroup>
 
-                <div class="rh-grid-act">
-                    <ui:repeat value="#{solicitudesBean.actividad}" var="a">
-                        <article class="rh-card-act">
-                            <div class="rh-card-fila">
-                                <span class="rh-card-tipo">#{a.tipo}</span>
-                                <span class="rh-chip rh-chip-#{a.claseEstado}"><span class="rh-punto"></span>#{a.estado}</span>
-                            </div>
-                            <div class="rh-card-fecha">#{a.rango} · #{a.diasTexto}</div>
-                            <h:panelGroup layout="block" styleClass="rh-tl rh-tl-#{a.claseEstado}" rendered="#{a.enProceso}">
-                                <span class="rh-dot"></span>Enviada<span class="rh-tl-linea"></span><span class="rh-dot rh-dot-fin"></span>#{a.etiquetaFinal}
-                            </h:panelGroup>
-                            <h:panelGroup layout="block" styleClass="rh-card-rechazo" rendered="#{a.rechazadaConMotivo}">
-                                Motivo: #{a.motivoRechazo}
-                            </h:panelGroup>
-                        </article>
-                    </ui:repeat>
-                </div>
+                <h:form id="formActividad">
+                    <div class="rh-grid-act">
+                        <ui:repeat value="#{solicitudesBean.actividad}" var="a">
+                            <article class="rh-card-act">
+                                <div class="rh-card-fila">
+                                    <span class="rh-card-tipo">#{a.tipo}</span>
+                                    <span class="rh-chip rh-chip-#{a.claseEstado}"><span class="rh-punto"></span>#{a.estado}</span>
+                                </div>
+                                <div class="rh-card-fecha">#{a.rango} · #{a.diasTexto}</div>
+                                <h:panelGroup layout="block" styleClass="rh-tl rh-tl-#{a.claseEstado}" rendered="#{a.enProceso}">
+                                    <span class="rh-dot"></span>Enviada<span class="rh-tl-linea"></span><span class="rh-dot rh-dot-fin"></span>#{a.etiquetaFinal}
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="rh-card-rechazo" rendered="#{a.rechazadaConMotivo}">
+                                    Motivo: #{a.motivoRechazo}
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="rh-card-acciones" rendered="#{a.pendiente}">
+                                    <h:commandButton value="Cancelar solicitud" styleClass="rh-btn-cancelar-sol"
+                                                     action="#{solicitudesBean.cancelar(a.idSolicitud)}"
+                                                     onclick="if (!confirm('¿Cancelar esta solicitud?')) return false;">
+                                        <f:ajax execute="@this" render=":bloque :mensajes :formActividad :formSolicitud:resumen"/>
+                                    </h:commandButton>
+                                </h:panelGroup>
+                            </article>
+                        </ui:repeat>
+                    </div>
+                </h:form>
             </section>
 
             <section class="rh-col-form" id="nueva-solicitud">

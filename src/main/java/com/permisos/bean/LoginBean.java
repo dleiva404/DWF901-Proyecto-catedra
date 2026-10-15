@@ -11,6 +11,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -48,6 +49,9 @@ public class LoginBean {
             usuarioDAO.registrarUltimoAcceso(usuario.getIdUsuario());
 
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            HttpServletRequest req = (HttpServletRequest) ec.getRequest();
+            req.getSession(true);
+            req.changeSessionId();
             Map<String, Object> sesion = ec.getSessionMap();
             sesion.put("usuario", usuario);
             sesion.put("rol", rol);

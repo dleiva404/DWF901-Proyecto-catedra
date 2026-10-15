@@ -1,12 +1,12 @@
 package com.permisos.bean;
 
 import com.permisos.dao.IncapacidadDAO;
-import com.permisos.dao.SolicitudDAO;
 import com.permisos.dao.TipoSolicitudDAO;
 import com.permisos.model.Incapacidad;
 import com.permisos.model.Solicitud;
 import com.permisos.model.TipoSolicitud;
 import com.permisos.model.Usuario;
+import com.permisos.service.ReglasVacaciones;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -19,7 +19,6 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +80,10 @@ public class IncapacidadBean implements Serializable {
                 if (fin.isBefore(inicio)) {
                     errores.add("La fecha fin no puede ser anterior al inicio.");
                 } else {
-                    dias = (int) (ChronoUnit.DAYS.between(inicio, fin) + 1);
+                    dias = ReglasVacaciones.contarDiasLaborables(inicio, fin);
+                    if (dias == 0) {
+                        errores.add("El rango seleccionado solo incluye domingos. Elija al menos un día de lunes a sábado.");
+                    }
                 }
             } catch (DateTimeParseException e) {
                 errores.add("Formato de fecha inválido.");
@@ -114,16 +116,13 @@ public class IncapacidadBean implements Serializable {
             solicitud.setDiasSolicitados(dias);
             solicitud.setMotivo("Incapacidad medica - documento " + documento);
 
-            int idSolicitud = new SolicitudDAO().insertar(solicitud);
-
             Incapacidad incapacidad = new Incapacidad();
-            incapacidad.setIdSolicitud(idSolicitud);
             incapacidad.setNumeroDocumento(documento);
             incapacidad.setFechaInicio(inicio);
             incapacidad.setFechaFin(fin);
             incapacidad.setObservaciones(observaciones != null ? observaciones.trim() : null);
 
-            new IncapacidadDAO().insertar(incapacidad);
+            new IncapacidadDAO().registrar(solicitud, incapacidad);
 
         } catch (SQLException e) {
             error(fc, "Ocurrió un error al registrar la incapacidad.");

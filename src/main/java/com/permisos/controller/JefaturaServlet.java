@@ -64,6 +64,14 @@ public class JefaturaServlet extends HttpServlet {
             return;
         }
 
+        Rol rolSesion = (Rol) session.getAttribute("rol");
+        String nombreRolSesion = (rolSesion != null && rolSesion.getNombre() != null)
+                ? rolSesion.getNombre().toUpperCase() : "";
+        if (!nombreRolSesion.contains("JEFATURA")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "No tiene permiso para esta operación.");
+            return;
+        }
+
         String accion = limpiar(request.getParameter("accion"));
 
         if ("aprobar".equalsIgnoreCase(accion)) {
@@ -285,7 +293,7 @@ public class JefaturaServlet extends HttpServlet {
             int idEmpleadoJefe = empleado.getIdEmpleado();
             int idUsuarioJefatura = usuario.getIdUsuario();
 
-            solicitudDAO.rechazar(idSolicitud, idEmpleadoJefe, motivoRechazo, idUsuarioJefatura);
+            solicitudService.rechazar(idSolicitud, idEmpleadoJefe, motivoRechazo, idUsuarioJefatura);
 
             response.sendRedirect(
                     request.getContextPath() + "/jefatura?resultado=rechazada"
@@ -293,6 +301,9 @@ public class JefaturaServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             request.setAttribute("error", "El identificador de la solicitud no es válido.");
+            listarPendientes(request, response);
+        } catch (ReglaNegocioException e) {
+            request.setAttribute("error", e.getMessage());
             listarPendientes(request, response);
         } catch (SQLException e) {
             request.setAttribute("error", "No fue posible rechazar la solicitud.");

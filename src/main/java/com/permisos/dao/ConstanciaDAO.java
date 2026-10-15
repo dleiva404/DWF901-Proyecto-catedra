@@ -10,9 +10,12 @@ import javax.persistence.EntityManager;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConstanciaDAO {
 
+    private static final Logger LOG = Logger.getLogger(ConstanciaDAO.class.getName());
     /*
      * Mantiene la firma que utilizan los Servlets actuales.
      * Internamente utiliza JPA/Hibernate.
@@ -67,6 +70,9 @@ public class ConstanciaDAO {
                     constancia.setSalarioReferencia(
                             salarios.get(0).getSalario()
                     );
+                    } else {
+                    em.getTransaction().rollback();
+                    return false;
                 }
             }
 
@@ -82,9 +88,7 @@ public class ConstanciaDAO {
                 em.getTransaction().rollback();
             }
 
-            System.err.println(
-                    "Error al insertar constancia: " + ex.getMessage()
-            );
+            LOG.log(Level.SEVERE, "Error al insertar constancia", ex);
 
             return false;
 
@@ -235,76 +239,6 @@ public class ConstanciaDAO {
                             Constancia.ESTADO_APROBADA
                     )
                     .getResultList();
-
-        } finally {
-            em.close();
-        }
-    }
-
-    /*
-     * Mantiene el método utilizado actualmente por
-     * AdminConstanciaServlet.
-     */
-    public boolean actualizarEstado(
-            int idConstancia,
-            String nuevoEstado) {
-
-        EntityManager em = JPAUtil.getEntityManager();
-
-        try {
-            em.getTransaction().begin();
-
-            Constancia constancia =
-                    em.find(Constancia.class, idConstancia);
-
-            if (constancia == null) {
-                em.getTransaction().rollback();
-                return false;
-            }
-
-            /*
-             * Unificamos los estados utilizados por el código anterior
-             * con los estados definidos en la entidad.
-             */
-            if ("APROBADO".equalsIgnoreCase(nuevoEstado)
-                    || "APROBADA".equalsIgnoreCase(nuevoEstado)) {
-
-                constancia.setEstado(
-                        Constancia.ESTADO_APROBADA
-                );
-
-            } else if ("RECHAZADO".equalsIgnoreCase(nuevoEstado)
-                    || "RECHAZADA".equalsIgnoreCase(nuevoEstado)) {
-
-                constancia.setEstado(
-                        Constancia.ESTADO_RECHAZADA
-                );
-
-            } else {
-
-                constancia.setEstado(nuevoEstado);
-            }
-
-            constancia.setFechaRespuesta(
-                    LocalDateTime.now()
-            );
-
-            em.getTransaction().commit();
-
-            return true;
-
-        } catch (RuntimeException ex) {
-
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-
-            System.err.println(
-                    "Error al actualizar el estado: " +
-                            ex.getMessage()
-            );
-
-            return false;
 
         } finally {
             em.close();
