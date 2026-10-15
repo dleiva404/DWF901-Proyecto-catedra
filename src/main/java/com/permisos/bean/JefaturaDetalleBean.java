@@ -77,6 +77,23 @@ public class JefaturaDetalleBean implements Serializable {
             return;
         }
 
+        if (!soloLectura) {
+            boolean esDeSuEquipo;
+            try {
+                esDeSuEquipo = new SolicitudService().esJefeDelEmpleado(
+                        empleado.getIdEmpleado(), solicitud.getIdEmpleado());
+            } catch (SQLException e) {
+                esDeSuEquipo = false;
+            }
+            if (!esDeSuEquipo) {
+                fc.getExternalContext().getFlash().setKeepMessages(true);
+                fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                        "No tiene permiso para ver esta solicitud.", null));
+                redirigir(fc, "/jefatura.xhtml");
+                return;
+            }
+        }
+
         calcularSaldo();
     }
 
@@ -135,8 +152,11 @@ public class JefaturaDetalleBean implements Serializable {
             return null;
         }
         try {
-            new SolicitudDAO().rechazar(solicitud.getIdSolicitud(), empleado.getIdEmpleado(),
+            new SolicitudService().rechazar(solicitud.getIdSolicitud(), empleado.getIdEmpleado(),
                     motivo, usuario.getIdUsuario());
+        } catch (ReglaNegocioException e) {
+            error(fc, e.getMessage());
+            return null;
         } catch (SQLException e) {
             error(fc, "No fue posible rechazar la solicitud.");
             return null;

@@ -61,16 +61,15 @@ public class LoginServlet extends HttpServlet {
         // Validación de campos obligatorios en el servidor
         if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
             request.setAttribute("error", "Debe ingresar usuario y contraseña.");
-            request.getRequestDispatcher("/login").forward(request, response);
+            request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
             return;
         }
 
         try {
             Usuario usuario = usuarioDAO.autenticar(username.trim(), password);
-
             if (usuario == null) {
                 request.setAttribute("error", "Usuario o contraseña incorrectos.");
-                request.getRequestDispatcher("/login").forward(request, response);
+                request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
                 return;
             }
 
@@ -80,6 +79,7 @@ public class LoginServlet extends HttpServlet {
             usuarioDAO.registrarUltimoAcceso(usuario.getIdUsuario());
 
             HttpSession session = request.getSession(true);
+            request.changeSessionId();
             session.setAttribute("usuario", usuario);
             session.setAttribute("rol", rol);
             session.setAttribute("empleado", empleado);
@@ -97,7 +97,7 @@ public class LoginServlet extends HttpServlet {
 
         } catch (SQLException e) {
             request.setAttribute("error", "Error de conexión con la base de datos.");
-            request.getRequestDispatcher("/login").forward(request, response);
+            request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
         }
     }
 }

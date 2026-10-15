@@ -6,6 +6,7 @@ import com.permisos.model.Solicitud;
 import com.permisos.util.JPAUtil;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -365,12 +366,13 @@ public class SolicitudDAO {
         }
     }
 
-    /**
-     * Cancela una solicitud solamente si está PENDIENTE.
-     * El cambio y el historial se guardan en la misma transacción.
+        /**
+     * Cancela una solicitud solamente si es del empleado indicado y sigue PENDIENTE.
+     * @return true si se canceló; false si no existe, no es del empleado o ya no está pendiente
      */
     public boolean cancelar(
             int idSolicitud,
+            int idEmpleado,
             int idUsuario) throws SQLException {
 
         EntityManager em = JPAUtil.getEntityManager();
@@ -379,11 +381,11 @@ public class SolicitudDAO {
             em.getTransaction().begin();
 
             Solicitud solicitud =
-                    em.find(Solicitud.class, idSolicitud);
+                    em.find(Solicitud.class, idSolicitud, LockModeType.PESSIMISTIC_WRITE);
 
-            if (solicitud == null ||
-                    !Solicitud.ESTADO_PENDIENTE.equals(
-                            solicitud.getEstado())) {
+            if (solicitud == null
+                    || solicitud.getEmpleado().getIdEmpleado() != idEmpleado
+                    || !Solicitud.ESTADO_PENDIENTE.equals(solicitud.getEstado())) {
 
                 em.getTransaction().rollback();
                 return false;
@@ -396,6 +398,7 @@ public class SolicitudDAO {
             h.setSolicitud(solicitud);
             h.setEstadoAnterior(Solicitud.ESTADO_PENDIENTE);
             h.setEstadoNuevo(Solicitud.ESTADO_CANCELADA);
+            h.setComentario("Cancelada por el empleado");
             h.setIdUsuario(idUsuario);
             h.setFecha(LocalDateTime.now());
 

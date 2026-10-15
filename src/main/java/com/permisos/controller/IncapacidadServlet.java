@@ -7,6 +7,7 @@ import com.permisos.model.Solicitud;
 import com.permisos.model.TipoSolicitud;
 import com.permisos.model.Usuario;
 import com.permisos.dao.SolicitudDAO;
+import com.permisos.service.ReglasVacaciones;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,11 +19,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebServlet(name = "IncapacidadServlet", urlPatterns = {"/incapacidad"})
 public class IncapacidadServlet extends HttpServlet {
-
+private static final Logger LOG = Logger.getLogger(IncapacidadServlet.class.getName());
     private static final String NOMBRE_TIPO_INCAPACIDAD = "INCAPACIDAD";
 
     private final SolicitudDAO solicitudDAO = new SolicitudDAO();
@@ -77,7 +79,10 @@ public class IncapacidadServlet extends HttpServlet {
                 if (fin.isBefore(inicio)) {
                     errores.append("La fecha fin no puede ser anterior al inicio. ");
                 } else {
-                    diasSolicitados = (int) (ChronoUnit.DAYS.between(inicio, fin) + 1);
+                    diasSolicitados = ReglasVacaciones.contarDiasLaborables(inicio, fin);
+                    if (diasSolicitados == 0) {
+                        errores.append("El rango seleccionado solo incluye domingos. Elija al menos un día de lunes a sábado. ");
+                    }
                 }
             } catch (DateTimeParseException e) {
                 errores.append("Formato de fecha invalido. ");
@@ -108,21 +113,18 @@ public class IncapacidadServlet extends HttpServlet {
             solicitud.setDiasSolicitados(diasSolicitados);
             solicitud.setMotivo("Incapacidad medica - documento " + numeroDocumentoLimpio);
 
-            int idSolicitud = solicitudDAO.insertar(solicitud);
-
             Incapacidad incapacidad = new Incapacidad();
-            incapacidad.setIdSolicitud(idSolicitud);
             incapacidad.setNumeroDocumento(numeroDocumentoLimpio);
             incapacidad.setFechaInicio(inicio);
             incapacidad.setFechaFin(fin);
             incapacidad.setObservaciones(observaciones != null ? observaciones.trim() : null);
 
-            incapacidadDAO.insertar(incapacidad);
+            incapacidadDAO.registrar(solicitud, incapacidad);
 
             response.sendRedirect(request.getContextPath() + "/solicitudes");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Error al registrar incapacidad", e);
             request.setAttribute("error", "Ocurrio un error al registrar la incapacidad.");
             request.getRequestDispatcher("/vistas/incapacidad.jsp").forward(request, response);
         }

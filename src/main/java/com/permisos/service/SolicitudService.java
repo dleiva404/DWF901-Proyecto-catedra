@@ -130,9 +130,89 @@ public class SolicitudService {
         }
     }
 
+    public void rechazar(int idSolicitud, int idEmpleadoJefe, String motivoRechazo, int idUsuarioJefatura)
+            throws ReglaNegocioException, SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            Solicitud solicitud = em.find(Solicitud.class, idSolicitud, LockModeType.PESSIMISTIC_WRITE);
+
+            if (solicitud == null) {
+                throw new ReglaNegocioException("La solicitud indicada no existe.");
+            }
+            if (!Solicitud.ESTADO_PENDIENTE.equals(solicitud.getEstado())) {
+                throw new ReglaNegocioException("Solo se pueden rechazar solicitudes pendientes.");
+            }
+
+            validarQueEsJefeDelEmpleado(em, idEmpleadoJefe, solicitud);
+
+            LocalDateTime ahora = LocalDateTime.now();
+
+            solicitud.setEstado(Solicitud.ESTADO_RECHAZADA);
+            solicitud.setFechaRespuesta(ahora);
+            solicitud.setIdJefaturaRespuesta(idEmpleadoJefe);
+            solicitud.setMotivoRechazo(motivoRechazo);
+
+            HistorialSolicitud h = new HistorialSolicitud();
+            h.setSolicitud(solicitud);
+            h.setEstadoAnterior(Solicitud.ESTADO_PENDIENTE);
+            h.setEstadoNuevo(Solicitud.ESTADO_RECHAZADA);
+            h.setComentario(motivoRechazo);
+            h.setIdUsuario(idUsuarioJefatura);
+            h.setFecha(ahora);
+
+            em.persist(h);
+
+            em.getTransaction().commit();
+
+        } catch (ReglaNegocioException ex) {
+            revertir(em);
+            throw ex;
+
+        } catch (RuntimeException ex) {
+            revertir(em);
+            throw new SQLException("No se pudo rechazar la solicitud.", ex);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean esJefeDelEmpleado(int idEmpleadoJefe, int idEmpleado) throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            Long coincidencias = em.createQuery(
+                            "SELECT COUNT(j) FROM Jefatura j, Empleado e "
+                                    + "WHERE e.idEmpleado = :idEmpleado "
+                                    + "AND j.empleado.idEmpleado = :idJefe "
+                                    + "AND j.departamento.idDepartamento = e.departamento.idDepartamento "
+                                    + "AND j.activo = true",
+                            Long.class)
+                    .setParameter("idEmpleado", idEmpleado)
+                    .setParameter("idJefe", idEmpleadoJefe)
+                    .getSingleResult();
+
+            return coincidencias != null && coincidencias > 0;
+
+        } catch (RuntimeException ex) {
+            throw new SQLException("No se pudo verificar la jefatura del empleado.", ex);
+
+        } finally {
+            em.close();
+        }
+    }
    
     private void validarQueEsJefeDelEmpleado(EntityManager em, int idEmpleadoJefe, Solicitud solicitud)
             throws ReglaNegocioException {
+
+        if (solicitud.getEmpleado().getIdEmpleado() == idEmpleadoJefe) {
+            throw new ReglaNegocioException("No puede aprobar/rechazar tus solicitudes.");
+        }
 
         int idDepartamento = solicitud.getEmpleado().getDepartamento().getIdDepartamento();
 

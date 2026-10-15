@@ -239,3 +239,7 @@ table.rh-pills, table.rh-cards-tipo { width: 100%; }
 
 .rh-ajax-aviso { position: fixed; top: 16px; left: 50%; z-index: 9999; transform: translate(-50%, -140%); padding: 12px 18px; border-radius: 10px; background: #fdecea; color: #a31d12; font-size: 14px; font-weight: 500; box-shadow: 0 6px 20px rgba(27, 34, 51, 0.18); opacity: 0; pointer-events: none; transition: transform .2s, opacity .2s; }
 .rh-ajax-aviso.rh-visible { transform: translate(-50%, 0); opacity: 1; }
+
+.rh-card-acciones { margin-top: 10px; }
+.rh-btn-cancelar-sol { border: 1px solid #f26b63; background: #fff; color: #a31d12; border-radius: 8px; padding: 7px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.rh-btn-cancelar-sol:hover { background: #fdecea; }

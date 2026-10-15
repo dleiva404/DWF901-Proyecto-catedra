@@ -6,6 +6,8 @@ import com.permisos.util.JPAUtil;
 import javax.persistence.EntityManager;
 import java.sql.SQLException;
 import java.util.List;
+import com.permisos.model.Solicitud;
+import java.time.LocalDateTime;
 
 public class IncapacidadDAO {
 
@@ -17,6 +19,43 @@ public class IncapacidadDAO {
         try {
             em.getTransaction().begin();
 
+            em.persist(incapacidad);
+
+            em.getTransaction().commit();
+
+            return incapacidad.getIdIncapacidad();
+
+        } catch (RuntimeException ex) {
+
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            throw new SQLException(
+                    "No se pudo registrar la incapacidad.",
+                    ex
+            );
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public int registrar(Solicitud solicitud, Incapacidad incapacidad)
+            throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            if (solicitud.getFechaSolicitud() == null) {
+                solicitud.setFechaSolicitud(LocalDateTime.now());
+            }
+            solicitud.setEstado(Solicitud.ESTADO_PENDIENTE);
+            em.persist(solicitud);
+
+            incapacidad.setSolicitud(solicitud);
             em.persist(incapacidad);
 
             em.getTransaction().commit();

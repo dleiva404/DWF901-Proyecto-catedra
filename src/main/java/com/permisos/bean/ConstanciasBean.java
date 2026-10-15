@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import com.permisos.dao.SalarioEmpleadoDAO;
+import java.sql.SQLException;
 
 /**
  * Bean de la vista "Constancias" del empleado (constancias.xhtml).
@@ -112,6 +114,21 @@ public class ConstanciasBean implements Serializable {
                 fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, e, null));
             }
             return null;
+        }
+
+        if (tipo.toUpperCase(Locale.ROOT).contains("SALAR")) {
+            try {
+                if (new SalarioEmpleadoDAO().buscarActivoPorEmpleado(empleado.getIdEmpleado()) == null) {
+                    fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Su salario aún no está registrado en el sistema. "
+                                    + "Comuníquese con Recursos Humanos para solicitar esta constancia.", null));
+                    return null;
+                }
+            } catch (SQLException e) {
+                fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                        "No fue posible verificar su salario. Intente de nuevo.", null));
+                return null;
+            }
         }
 
         try {

@@ -20,15 +20,17 @@ public class ReglasVacacionesTest {
         assertEquals(1, ReglasVacaciones.calcularDias(d, d));
     }
 
-    @Test
+     @Test
     public void extremosIncluidos() throws Exception {
-        assertEquals(3, ReglasVacaciones.calcularDias(
+        // sábado 10 a lunes 12 de octubre de 2026: el domingo 11 no cuenta
+        assertEquals(2, ReglasVacaciones.calcularDias(
                 LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 12)));
     }
 
     @Test
     public void cruzaFinDeMes() throws Exception {
-        assertEquals(4, ReglasVacaciones.calcularDias(
+        // viernes 30 de enero a lunes 2 de febrero de 2026: el domingo 1 no cuenta
+        assertEquals(3, ReglasVacaciones.calcularDias(
                 LocalDate.of(2026, 1, 30), LocalDate.of(2026, 2, 2)));
     }
 
@@ -52,6 +54,48 @@ public class ReglasVacacionesTest {
     @Test(expected = ReglaNegocioException.class)
     public void fechasNulasSonInvalidas() throws Exception {
         ReglasVacaciones.calcularDias(null, LocalDate.of(2026, 10, 10));
+    }
+
+        @Test
+    public void elDomingoNoCuenta() throws Exception {
+        // lunes 19 a domingo 25 de octubre de 2026
+        assertEquals(6, ReglasVacaciones.calcularDias(
+                LocalDate.of(2026, 10, 19), LocalDate.of(2026, 10, 25)));
+    }
+
+    @Test
+    public void dosSemanasCuentanDoceDias() throws Exception {
+        // lunes 19 de octubre a domingo 1 de noviembre de 2026
+        assertEquals(12, ReglasVacaciones.calcularDias(
+                LocalDate.of(2026, 10, 19), LocalDate.of(2026, 11, 1)));
+    }
+
+    @Test
+    public void sabadoCuentaComoDiaLaborable() throws Exception {
+        // sábado 17 de octubre de 2026
+        assertEquals(1, ReglasVacaciones.calcularDias(
+                LocalDate.of(2026, 10, 17), LocalDate.of(2026, 10, 17)));
+    }
+
+    @Test
+    public void unSoloDomingoEsInvalido() {
+        try {
+            // domingo 18 de octubre de 2026
+            ReglasVacaciones.calcularDias(LocalDate.of(2026, 10, 18), LocalDate.of(2026, 10, 18));
+            fail("Debió lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            assertEquals("El rango seleccionado solo incluye domingos. Elija al menos un día de lunes a sábado.",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void contarDiasLaborablesDevuelveCeroSiElRangoNoSirve() {
+        assertEquals(0, ReglasVacaciones.contarDiasLaborables(null, LocalDate.of(2026, 10, 19)));
+        assertEquals(0, ReglasVacaciones.contarDiasLaborables(
+                LocalDate.of(2026, 10, 20), LocalDate.of(2026, 10, 19)));
+        assertEquals(0, ReglasVacaciones.contarDiasLaborables(
+                LocalDate.of(2026, 10, 18), LocalDate.of(2026, 10, 18)));
     }
 
     // ---------- validarSaldoParaSolicitar ----------
