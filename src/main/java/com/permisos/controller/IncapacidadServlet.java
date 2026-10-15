@@ -38,7 +38,7 @@ public class IncapacidadServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        request.getRequestDispatcher("/vistas/incapacidad.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/incapacidad.xhtml");
     }
 
     @Override

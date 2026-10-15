@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+
+<ui:composition template="/WEB-INF/templates/template.xhtml">
+    <ui:param name="activo" value="jefatura"/>
+
+    <ui:define name="contenido">
+
+        <div>
+            <h:link outcome="jefatura" styleClass="rh-volver">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b3470a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+                Volver a solicitudes
+            </h:link>
+            <h1 class="rh-titulo">Detalle de la solicitud</h1>
+        </div>
+
+        <h:messages globalOnly="true" layout="list" errorClass="rh-msg rh-msg-error" infoClass="rh-msg rh-msg-ok"/>
+
+        <h:panelGroup layout="block" styleClass="rh-detalle-cols" rendered="#{jefaturaDetalleBean.cargada}">
+
+            <section class="rh-col-form">
+                <div class="rh-panel-cab rh-cab-sin-pad">
+                    <h2 class="rh-h2 rh-h2-0">#{jefaturaDetalleBean.tipo}</h2>
+                    <span class="rh-chip rh-chip-#{jefaturaDetalleBean.claseEstado}"><span class="rh-punto"></span>#{jefaturaDetalleBean.estado}</span>
+                </div>
+
+                <dl class="rh-datos">
+                    <div><dt>Empleado</dt><dd>#{jefaturaDetalleBean.empleado}</dd></div>
+                    <div><dt>Empresa</dt><dd>#{jefaturaDetalleBean.empresa}</dd></div>
+                    <div><dt>Fechas</dt><dd>#{jefaturaDetalleBean.fechas}</dd></div>
+                    <div><dt>Días solicitados</dt><dd>#{jefaturaDetalleBean.dias}</dd></div>
+                    <div class="rh-dato-ancho"><dt>Motivo</dt><dd>#{jefaturaDetalleBean.motivo}</dd></div>
+                </dl>
+
+                <h:panelGroup layout="block" styleClass="rh-nota-azul" rendered="#{jefaturaDetalleBean.haySaldo}">
+                    #{jefaturaDetalleBean.saldoTexto}
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="rh-card-rechazo rh-rechazo-detalle" rendered="#{jefaturaDetalleBean.rechazada}">
+                    Motivo del rechazo: #{jefaturaDetalleBean.motivoRechazoGuardado}
+                </h:panelGroup>
+            </section>
+
+            <h:panelGroup layout="block" styleClass="rh-col-form" rendered="#{jefaturaDetalleBean.puedeDecidir}">
+                <h2 class="rh-h2">Tu decisión</h2>
+
+                <h:form id="formAprobar" styleClass="rh-form">
+                    <h:commandButton id="aprobar" value="Aprobar solicitud" action="#{jefaturaDetalleBean.aprobar}" styleClass="rh-btn-enviar"/>
+                </h:form>
+
+                <div class="rh-separador"><span>o</span></div>
+
+                <h:form id="formRechazar" styleClass="rh-form">
+                    <label class="rh-campo">Motivo del rechazo
+                        <h:inputTextarea id="motivoRechazo" value="#{jefaturaDetalleBean.motivoRechazo}" rows="4"
+                                         styleClass="#{component.valid ? '' : 'rh-input-error'}"
+                                         required="true" requiredMessage="Debe indicar el motivo del rechazo."
+                                         p:maxlength="250" p:placeholder="Explica el motivo del rechazo (mínimo 5 caracteres)">
+                            <f:validator validatorId="motivoValidator"/>
+                            <f:attribute name="etiqueta" value="motivo del rechazo"/>
+                        </h:inputTextarea>
+                    </label>
+                    <h:message for="motivoRechazo" styleClass="rh-msg-campo"/>
+                    <h:commandButton id="rechazar" value="Rechazar solicitud" action="#{jefaturaDetalleBean.rechazar}" styleClass="rh-btn-rechazar"/>
+                </h:form>
+            </h:panelGroup>
+
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
+</html>

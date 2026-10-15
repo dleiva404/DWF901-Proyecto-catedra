@@ -25,37 +25,19 @@ public class JefaturaServlet extends HttpServlet {
     private final SolicitudDAO solicitudDAO = new SolicitudDAO();
     private final SolicitudService solicitudService = new SolicitudService();
 
-    @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
-            throws ServletException, IOException {
+          @Override
+      protected void doGet(HttpServletRequest request, HttpServletResponse response)
+              throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
+          String accion = limpiar(request.getParameter("accion"));
+          String id = limpiar(request.getParameter("id"));
 
-        Usuario usuario = obtenerUsuarioSesion(session);
-        Empleado empleado = obtenerEmpleadoSesion(session);
-
-        if (usuario == null || empleado == null) {
-            request.setAttribute(
-                    "error",
-                    "Debe iniciar sesión para acceder a este módulo."
-            );
-
-            request.getRequestDispatcher(
-                    "/WEB-INF/vistas/jefatura/pendientes.jsp"
-            ).forward(request, response);
-
-            return;
-        }
-
-        String accion = limpiar(request.getParameter("accion"));
-
-        if ("ver".equalsIgnoreCase(accion)) {
-            mostrarDetalle(request, response);
-        } else {
-            listarPendientes(request, response);
-        }
-    }
+          if ("ver".equalsIgnoreCase(accion) && !id.isEmpty()) {
+              response.sendRedirect(request.getContextPath() + "/jefatura-detalle.xhtml?id=" + id);
+          } else {
+              response.sendRedirect(request.getContextPath() + "/jefatura.xhtml");
+          }
+      }
 
     @Override
     protected void doPost(HttpServletRequest request,

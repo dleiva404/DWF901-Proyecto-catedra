@@ -50,8 +50,8 @@ public class LoginServlet extends HttpServlet {
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if ("GET".equalsIgnoreCase(request.getMethod())) {
-            request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
+                if ("GET".equalsIgnoreCase(request.getMethod())) {
+            response.sendRedirect(request.getContextPath() + "/login.xhtml");
             return;
         }
 
@@ -61,7 +61,7 @@ public class LoginServlet extends HttpServlet {
         // Validación de campos obligatorios en el servidor
         if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
             request.setAttribute("error", "Debe ingresar usuario y contraseña.");
-            request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/login").forward(request, response);
             return;
         }
 
@@ -70,7 +70,7 @@ public class LoginServlet extends HttpServlet {
 
             if (usuario == null) {
                 request.setAttribute("error", "Usuario o contraseña incorrectos.");
-                request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/login").forward(request, response);
                 return;
             }
 
@@ -97,7 +97,7 @@ public class LoginServlet extends HttpServlet {
 
         } catch (SQLException e) {
             request.setAttribute("error", "Error de conexión con la base de datos.");
-            request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/login").forward(request, response);
         }
     }
 }

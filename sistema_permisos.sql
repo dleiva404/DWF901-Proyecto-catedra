@@ -218,6 +218,8 @@ INSERT INTO usuarios (username, password, id_empleado, id_rol) VALUES
 
 INSERT INTO vacaciones_empleado (id_empleado, anio, dias_asignados, dias_utilizados, dias_disponibles) VALUES
     (1, YEAR(CURDATE()), 15, 0, 15),
+    (2, YEAR(CURDATE()), 15, 0, 15),
+    (3, YEAR(CURDATE()), 15, 0, 15),
     (4, YEAR(CURDATE()), 15, 0, 15),
     (5, YEAR(CURDATE()), 15, 0, 15),
     (6, YEAR(CURDATE()), 15, 0, 15),

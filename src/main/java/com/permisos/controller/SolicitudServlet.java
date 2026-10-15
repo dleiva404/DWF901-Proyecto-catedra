@@ -70,7 +70,7 @@ public class SolicitudServlet extends HttpServlet {
             return;
         }
 
-        mostrarFormularioEHistorial(request, response, usuario);
+          response.sendRedirect(request.getContextPath() + "/solicitudes.xhtml");
     }
 
     private Usuario obtenerUsuarioDeSesion(HttpServletRequest request) {

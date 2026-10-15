@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Verificación de constancia - Sistema de Solicitud de Permisos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&amp;family=Public+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="#{request.contextPath}/css/login.css"/>
+</h:head>
+
+<h:body styleClass="login-page">
+    <div class="login-pantalla">
+        <div class="aviso-tarjeta aviso-ancha">
+            <div class="aviso-logo">
+                <img src="#{request.contextPath}/img/logo.png" alt="Invercalma"/>
+            </div>
+
+            <div class="verif-icono #{verificarBean.claseResultado}">
+                <h:panelGroup rendered="#{verificarBean.valida}">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{not verificarBean.valida}">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </h:panelGroup>
+            </div>
+
+            <h1>#{verificarBean.titulo}</h1>
+            <p>#{verificarBean.mensaje}</p>
+
+            <h:panelGroup layout="block" styleClass="verif-datos" rendered="#{verificarBean.valida}">
+                <div class="verif-ancho"><span>Empleado</span><strong>#{verificarBean.empleado}</strong></div>
+                <div><span>Cargo</span><strong>#{verificarBean.cargo}</strong></div>
+                <div><span>Tipo de constancia</span><strong>#{verificarBean.tipo}</strong></div>
+                <div><span>Empresa emisora</span><strong>#{verificarBean.empresa}</strong></div>
+                <div><span>Institución destino</span><strong>#{verificarBean.institucion}</strong></div>
+                <div><span>Fecha de solicitud</span><strong>#{verificarBean.fechaSolicitud}</strong></div>
+                <div><span>Fecha de aprobación</span><strong>#{verificarBean.fechaAprobacion}</strong></div>
+                <h:panelGroup layout="block" styleClass="verif-ancho" rendered="#{verificarBean.hayAprobador}">
+                    <span>Aprobada por</span><strong>#{verificarBean.aprobadaPor}</strong>
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="verif-ancho" rendered="#{verificarBean.hayObservaciones}">
+                    <span>Observaciones de Recursos Humanos</span><strong>#{verificarBean.observaciones}</strong>
+                </h:panelGroup>
+                <div class="verif-ancho"><span>Código de verificación</span><strong class="verif-codigo">#{verificarBean.codigo}</strong></div>
+            </h:panelGroup>
+        </div>
+    </div>
+</h:body>
+</html>

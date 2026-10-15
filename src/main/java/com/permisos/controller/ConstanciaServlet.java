@@ -28,22 +28,15 @@ public class ConstanciaServlet extends HttpServlet {
         constanciaDAO = new ConstanciaDAO();
     }
 
-    @Override
+        @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("empleado") == null) {
-            response.sendRedirect(request.getContextPath() + "/vistas/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        Empleado empleado = (Empleado) session.getAttribute("empleado");
-
-
-        // Cargamos el historial de constancias del empleado
-        List<Constancia> historial = constanciaDAO.obtenerPorEmpleado(empleado.getIdEmpleado());
-        request.setAttribute("historialConstancias", historial);
-
-        request.getRequestDispatcher("/vistas/constancias_empleado.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/constancias.xhtml");
     }
 
     @Override
@@ -51,7 +44,7 @@ public class ConstanciaServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("empleado") == null) {
-            response.sendRedirect(request.getContextPath() + "/vistas/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 

@@ -25,33 +25,14 @@ public class HistorialServlet extends HttpServlet {
         solicitudDAO = new SolicitudDAO();
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("empleado") == null) {
-            response.sendRedirect(request.getContextPath() + "/vistas/login.jsp");
-            return;
-        }
+          @Override
+      protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+          HttpSession session = request.getSession(false);
+          if (session == null || session.getAttribute("empleado") == null) {
+              response.sendRedirect(request.getContextPath() + "/login");
+              return;
+          }
 
-        Empleado empleado = (Empleado) session.getAttribute("empleado");
-
-        String tipoFiltro = request.getParameter("tipoFiltro");
-        if (tipoFiltro == null || tipoFiltro.isEmpty()) {
-            tipoFiltro = "todos";
-        }
-
-        try {
-            List<Solicitud> listaHistorial = solicitudDAO.obtenerHistorialPorTipo(empleado.getIdEmpleado(), tipoFiltro);
-
-            request.setAttribute("listaHistorial", listaHistorial);
-            request.setAttribute("tipoFiltroActual", tipoFiltro);
-
-            request.getRequestDispatcher("/vistas/historial.jsp").forward(request, response);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Error al cargar el historial de solicitudes.");
-            request.getRequestDispatcher("/vistas/error.jsp").forward(request, response);
-        }
-    }
+          response.sendRedirect(request.getContextPath() + "/historial.xhtml");
+      }
 }
