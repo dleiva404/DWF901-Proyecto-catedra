@@ -89,6 +89,14 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
+
+                <!-- API de Expression Language: la necesitan los tests de JSF (Tomcat ya la trae al desplegar) -->
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>3.0.0</version>
+            <scope>provided</scope>
+        </dependency>
         
     </dependencies>
 
