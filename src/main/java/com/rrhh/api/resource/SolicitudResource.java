@@ -7,6 +7,7 @@ import com.permisos.model.Solicitud;
 import com.permisos.model.Usuario;
 import com.rrhh.api.dto.SolicitudDTO;
 import com.rrhh.api.mapper.SolicitudMapper;
+import com.rrhh.api.dto.RechazoSolicitudDTO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -19,6 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
+import javax.ws.rs.Consumes;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -290,6 +293,171 @@ public class SolicitudResource {
         }
 
         // 8. HTTP 204: operación exitosa, sin cuerpo de respuesta.
+        return Response.noContent().build();
+    }
+
+
+    @POST
+    @Path("/{id}/aprobar")
+    public Response aprobarSolicitud(@PathParam("id") int id)
+            throws SQLException {
+
+        if (id <= 0) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("El identificador debe ser mayor que cero.")
+                    .build();
+        }
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("Debe iniciar sesión.")
+                    .build();
+        }
+
+        Object objetoUsuario = session.getAttribute("usuario");
+
+        if (!(objetoUsuario instanceof Usuario)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("La sesión no contiene un usuario válido.")
+                    .build();
+        }
+
+        Usuario usuario = (Usuario) objetoUsuario;
+
+        Object objetoRol = session.getAttribute("rol");
+        Rol rol = objetoRol instanceof Rol
+                ? (Rol) objetoRol
+                : usuario.getRol();
+
+        if (rol == null || rol.getNombre() == null
+                || !"JEFATURA".equalsIgnoreCase(rol.getNombre().trim())) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("Solo Jefatura puede aprobar solicitudes.")
+                    .build();
+        }
+
+        // Verificar que la solicitud esté pendiente
+        // y corresponda al ámbito de esta jefatura.
+        List<Solicitud> pendientes =
+                solicitudDAO.listarPendientesPorJefatura(
+                        usuario.getIdEmpleado()
+                );
+
+        boolean autorizada = false;
+
+        for (Solicitud solicitud : pendientes) {
+            if (solicitud.getIdSolicitud() == id) {
+                autorizada = true;
+                break;
+            }
+        }
+
+        if (!autorizada) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("No se encontró una solicitud pendiente autorizada.")
+                    .build();
+        }
+
+        solicitudDAO.aprobar(
+                id,
+                usuario.getIdEmpleado(),
+                usuario.getIdUsuario()
+        );
+
+        return Response.noContent().build();
+    }
+
+
+    @POST
+    @Path("/{id}/rechazar")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response rechazarSolicitud(
+            @PathParam("id") int id,
+            RechazoSolicitudDTO datos) throws SQLException {
+
+        if (id <= 0) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("El identificador debe ser mayor que cero.")
+                    .build();
+        }
+
+        if (datos == null
+                || datos.getMotivoRechazo() == null
+                || datos.getMotivoRechazo().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Debe indicar el motivo del rechazo.")
+                    .build();
+        }
+
+        String motivo = datos.getMotivoRechazo().trim();
+
+        if (motivo.length() > 500) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("El motivo no debe superar 500 caracteres.")
+                    .build();
+        }
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("Debe iniciar sesión.")
+                    .build();
+        }
+
+        Object objetoUsuario = session.getAttribute("usuario");
+
+        if (!(objetoUsuario instanceof Usuario)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("La sesión no contiene un usuario válido.")
+                    .build();
+        }
+
+        Usuario usuario = (Usuario) objetoUsuario;
+
+        Object objetoRol = session.getAttribute("rol");
+        Rol rol = objetoRol instanceof Rol
+                ? (Rol) objetoRol
+                : usuario.getRol();
+
+        if (rol == null || rol.getNombre() == null
+                || !"JEFATURA".equalsIgnoreCase(rol.getNombre().trim())) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("Solo Jefatura puede rechazar solicitudes.")
+                    .build();
+        }
+
+        // Verificar que la solicitud esté pendiente
+        // y corresponda al ámbito de esta jefatura.
+        List<Solicitud> pendientes =
+                solicitudDAO.listarPendientesPorJefatura(
+                        usuario.getIdEmpleado()
+                );
+
+        boolean autorizada = false;
+
+        for (Solicitud solicitud : pendientes) {
+            if (solicitud.getIdSolicitud() == id) {
+                autorizada = true;
+                break;
+            }
+        }
+
+        if (!autorizada) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("No se encontró una solicitud pendiente autorizada.")
+                    .build();
+        }
+
+        solicitudDAO.rechazar(
+                id,
+                usuario.getIdEmpleado(),
+                motivo,
+                usuario.getIdUsuario()
+        );
+
         return Response.noContent().build();
     }
 
