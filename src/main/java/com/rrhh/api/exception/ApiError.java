@@ -11,13 +11,22 @@ public class ApiError {
     private String ruta;
     private String fechaHora;
 
+
     public ApiError(int codigo, String mensaje, String ruta) {
         this.codigo = codigo;
         this.mensaje = mensaje;
-        this.ruta = ruta;
+        this.ruta = normalizarRuta(ruta);
         this.fechaHora = LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
         );
+    }
+
+    private static String normalizarRuta(String ruta) {
+        if (ruta == null || ruta.isEmpty()) {
+            return "/api";
+        }
+        return ruta.startsWith("/api/") ? ruta
+                : "/api/" + (ruta.startsWith("/") ? ruta.substring(1) : ruta);
     }
 
     public int getCodigo() {

@@ -98,28 +98,35 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Jersey 2.x (JAX-RS) para Servlet y Tomcat 9 -->
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>2.41</version>
+        </dependency>
+
+        <!-- Jersey: inyección de dependencias (obligatoria desde Jersey 2.26) -->
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.41</version>
+        </dependency>
+
+        <!-- Jersey: soporte JSON mediante Jackson -->
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.41</version>
+        </dependency>
+
+        <!-- Soporte Jackson para LocalDate y LocalDateTime -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+
     </dependencies>
-
-    <!-- Jersey 2.x: integración con aplicaciones Servlet y Tomcat 9 -->
-    <dependency>
-        <groupId>org.glassfish.jersey.containers</groupId>
-        <artifactId>jersey-container-servlet-core</artifactId>
-        <version>2.41</version>
-    </dependency>
-
-    <!-- Jersey: soporte JSON mediante Jackson -->
-    <dependency>
-        <groupId>org.glassfish.jersey.media</groupId>
-        <artifactId>jersey-media-json-jackson</artifactId>
-        <version>2.41</version>
-    </dependency>
-
-    <!-- Soporte Jackson para LocalDate y LocalDateTime -->
-    <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.15.3</version>
-    </dependency>
 
     <build>
         <finalName>SistemaRRHH</finalName>
