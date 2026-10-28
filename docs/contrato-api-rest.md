@@ -1,10 +1,10 @@
 # Contrato de API REST — SistemaRRHH
 
-**Versión:** 1.1  
+**Versión:** 1.2  
 **Base URL:** `/SistemaRRHH/api` (en este documento las rutas se escriben sin el prefijo, por ejemplo `/ping`)  
-**Formato:** JSON (`application/json`), salvo el PDF de constancia  
+**Formato:** JSON (`application/json`, codificación UTF-8), salvo el PDF de constancia  
 **Fechas:** `yyyy-MM-dd` · **Fecha y hora:** `yyyy-MM-dd'T'HH:mm:ss`  
-**Autenticación:** token `Bearer` (ver sección 2). Mientras la Parte 2 no lo implemente, la API reconoce la sesión HTTP de la aplicación web.
+**Autenticación:** token `Bearer` (ver sección 2).
 
 ## 1. Convenciones generales
 
@@ -26,7 +26,18 @@ Authorization: Bearer <token>
 
 > **Supuesto pendiente de decisión del grupo:** el token es opaco (cadena aleatoria guardada en el servidor). Si el grupo elige JWT, solo cambia el contenido de `token` y su duración; las rutas y los cuerpos de este contrato no cambian.
 
-Un cliente en otro origen (Parte 5) necesita CORS: el servidor debe permitir su origen, los métodos `GET, POST, DELETE, OPTIONS` y las cabeceras `Authorization` y `Content-Type`.
+El token dura 30 minutos (`expiraEnSegundos: 1800`; el valor se configura en el servidor) y termina antes si el cliente llama a `POST /auth/logout`. Solo `GET /ping` y `POST /auth/login` se pueden llamar sin token.
+
+Respuestas `401` de autenticación, siempre con la cabecera `WWW-Authenticate: Bearer`:
+
+| Situación | `mensaje` |
+|---|---|
+| Falta la cabecera `Authorization` | `Autenticación requerida` |
+| Token alterado, vencido o cerrado con logout | `Token inválido o vencido` |
+
+Un usuario autenticado cuyo rol no puede usar el endpoint recibe `403` con el mensaje `No tiene permisos para esta operación`.
+
+Un cliente en otro origen (Parte 5) necesita CORS: el servidor debe permitir su origen, los métodos `GET, POST, DELETE, OPTIONS` y las cabeceras `Authorization` y `Content-Type`. Los orígenes permitidos se configuran en el servidor (`cors.origenes`); si el origen de la petición no está en la lista, la respuesta no incluye las cabeceras `Access-Control-*` y el navegador bloquea la llamada. Las consultas previas `OPTIONS` no exigen token.
 
 ## 3. Códigos HTTP
 
@@ -35,11 +46,13 @@ Un cliente en otro origen (Parte 5) necesita CORS: el servidor debe permitir su 
 | 200 | Operación realizada correctamente |
 | 201 | Recurso creado (incluye cabecera `Location`) |
 | 204 | Operación correcta sin contenido de respuesta |
-| 400 | Solicitud mal formada, campo inválido o identificador inválido |
+| 400 | Solicitud mal formada (incluido un cuerpo JSON inválido), campo inválido o identificador inválido |
 | 401 | Usuario no autenticado o token vencido |
 | 403 | Usuario autenticado sin permiso para esa operación |
 | 404 | Recurso inexistente o no accesible para el usuario |
+| 405 | Método HTTP no permitido para esa ruta |
 | 409 | Regla de negocio o estado del recurso lo impide |
+| 415 | El cuerpo de la solicitud no es `application/json` |
 | 500 | Error interno inesperado |
 
 ## 4. Endpoints
@@ -47,7 +60,7 @@ Un cliente en otro origen (Parte 5) necesita CORS: el servidor debe permitir su 
 | # | Método | Ruta | Rol | Respuesta correcta | Errores posibles |
 |---|---|---|---|---|---|
 | 1 | GET | `/ping` | Público | 200 estado del servicio | — |
-| 2 | POST | `/auth/login` | Público | 200 token y datos del usuario | 400, 401 |
+| 2 | POST | `/auth/login` | Público | 200 token y datos del usuario | 400, 401, 403 |
 | 3 | POST | `/auth/logout` | Autenticado | 204 | 401 |
 | 4 | GET | `/tipos-solicitud` | Autenticado | 200 catálogo de tipos | 401 |
 | 5 | GET | `/vacaciones/saldo` | Autenticado | 200 saldo del año | 400, 401, 404 |
@@ -76,7 +89,7 @@ Qué ve cada rol en las listas (endpoints 8, 15 y 18):
 - **Jefatura:** las solicitudes de los empleados de su departamento. Con `?propias=true` ve solo las suyas.
 - **RRHH:** todas, solo lectura. Con `?propias=true` ve solo las suyas.
 
-Filtros opcionales de `GET /solicitudes`: `estado` (`PENDIENTE`, `APROBADA`, `RECHAZADA`, `CANCELADA`), `tipoSolicitudId` y `propias`. Un valor inválido responde `400`.
+Filtros opcionales de `GET /solicitudes`: `estado` (`PENDIENTE`, `APROBADA`, `RECHAZADA`, `CANCELADA`), `tipoSolicitudId`, `propias`, `desde` y `hasta` (`yyyy-MM-dd`, se comparan con `fechaInicio`), `empleadoId` y `departamentoId`. Los filtros solo reducen lo que el rol ya puede ver: una jefatura no obtiene solicitudes de otro departamento aunque lo pida. Un valor inválido responde `400`.
 
 ## 5. Detalle de cada operación
 
@@ -118,7 +131,7 @@ Respuesta `200`:
 }
 ```
 
-Errores: `400` si falta `username` o `password`; `401` si las credenciales son incorrectas o el usuario está inactivo (mismo mensaje en ambos casos).
+Errores: `400` si falta `username` o `password` (la respuesta lista los campos faltantes en `campos`, ver sección 6); `401` si las credenciales son incorrectas o el usuario está inactivo (mismo mensaje en ambos casos: `Usuario o contraseña incorrectos.`); `403` si el usuario no tiene un rol asignado.
 
 ### 5.3. Logout — `POST /auth/logout`
 
@@ -416,6 +429,23 @@ Todas las respuestas de error usan el mismo JSON:
 
 `codigo` es el estado HTTP, `mensaje` explica el problema en español, `ruta` identifica la petición (siempre empieza con `/api`) y `fechaHora` indica cuándo ocurrió. Los errores `500` nunca incluyen detalles técnicos.
 
+Los errores de validación (`400`) incluyen además `campos`, con un texto por cada campo inválido:
+
+```json
+{
+  "codigo": 400,
+  "mensaje": "Hay campos inválidos.",
+  "ruta": "/api/auth/login",
+  "fechaHora": "2026-10-28T15:10:13",
+  "campos": [
+    "username: es obligatorio",
+    "password: es obligatorio"
+  ]
+}
+```
+
+`campos` solo aparece en los errores de validación; en los demás no existe. Un cuerpo JSON mal formado también responde `400` con este formato y sin `campos`.
+
 ## 7. Reglas de autorización
 
 - **Empleado:** consulta y gestiona solo sus solicitudes, incapacidades y constancias; puede cancelar sus solicitudes pendientes.
@@ -427,6 +457,7 @@ Todas las respuestas de error usan el mismo JSON:
 ## 8. Pendientes de validación
 
 - Decisión del grupo: token opaco o JWT (sección 2).
+- Hecho en la Parte 2: login, logout, `401` sin token o con token vencido, `403` por rol, `400` con `campos`, JSON mal formado, CORS y registro de operaciones, probados manualmente.
 - Confirmar que cada endpoint responde según este contrato cuando lo implementen las partes 3 y 4.
 - Probar permisos con cuentas de los tres roles.
 - Verificar que las fechas se serialicen con el formato documentado.
