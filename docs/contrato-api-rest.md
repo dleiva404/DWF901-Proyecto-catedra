@@ -24,7 +24,7 @@ El cliente inicia sesión con `POST /auth/login`, recibe un `token` y lo envía 
 Authorization: Bearer <token>
 ```
 
-> **Supuesto pendiente de decisión del grupo:** el token es opaco (cadena aleatoria guardada en el servidor). Si el grupo elige JWT, solo cambia el contenido de `token` y su duración; las rutas y los cuerpos de este contrato no cambian.
+> > **Decisión:** el token es opaco: una cadena aleatoria sin contenido que el servidor guarda en memoria. El cliente lo guarda y lo envía tal cual, sin leer su contenido. Si el servidor se reinicia, los tokens dejan de ser válidos y hay que iniciar sesión de nuevo. Si más adelante se adopta JWT, solo cambia el contenido de `token` y su duración; las rutas y los cuerpos de este contrato no cambian.
 
 El token dura 30 minutos (`expiraEnSegundos: 1800`; el valor se configura en el servidor) y termina antes si el cliente llama a `POST /auth/logout`. Solo `GET /ping` y `POST /auth/login` se pueden llamar sin token.
 
@@ -456,7 +456,7 @@ Los errores de validación (`400`) incluyen además `campos`, con un texto por c
 
 ## 8. Pendientes de validación
 
-- Decisión del grupo: token opaco o JWT (sección 2).
+- Decidido en la Parte 2: el token es opaco (sección 2).
 - Hecho en la Parte 2: login, logout, `401` sin token o con token vencido, `403` por rol, `400` con `campos`, JSON mal formado, CORS y registro de operaciones, probados manualmente.
 - Confirmar que cada endpoint responde según este contrato cuando lo implementen las partes 3 y 4.
 - Probar permisos con cuentas de los tres roles.
