@@ -90,14 +90,42 @@
             <scope>test</scope>
         </dependency>
 
-                <!-- API de Expression Language: la necesitan los tests de JSF (Tomcat ya la trae al desplegar) -->
+        <!-- API de Expression Language: la necesitan los tests de JSF (Tomcat ya la trae al desplegar) -->
         <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
             <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
-        
+
+        <!-- Jersey 2.x (JAX-RS) para Servlet y Tomcat 9 -->
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>2.41</version>
+        </dependency>
+
+        <!-- Jersey: inyección de dependencias (obligatoria desde Jersey 2.26) -->
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.41</version>
+        </dependency>
+
+        <!-- Jersey: soporte JSON mediante Jackson -->
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.41</version>
+        </dependency>
+
+        <!-- Soporte Jackson para LocalDate y LocalDateTime -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>
