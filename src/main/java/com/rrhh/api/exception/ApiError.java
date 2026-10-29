@@ -1,24 +1,32 @@
 
 package com.rrhh.api.exception;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiError {
 
     private int codigo;
     private String mensaje;
     private String ruta;
     private String fechaHora;
-
+    private List<String> campos;
 
     public ApiError(int codigo, String mensaje, String ruta) {
+        this(codigo, mensaje, ruta, null);
+    }
+
+    public ApiError(int codigo, String mensaje, String ruta, List<String> campos) {
         this.codigo = codigo;
         this.mensaje = mensaje;
         this.ruta = normalizarRuta(ruta);
         this.fechaHora = LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
         );
+        this.campos = campos;
     }
 
     private static String normalizarRuta(String ruta) {
@@ -60,4 +68,11 @@ public class ApiError {
     public void setFechaHora(String fechaHora) {
         this.fechaHora = fechaHora;
     }
+
+    public List<String> getCampos() {
+        return campos;
+    }
+
+    public void setCampos(List<String> campos) { this.campos = campos;}
 }
+

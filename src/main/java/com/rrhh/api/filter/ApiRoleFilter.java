@@ -1,11 +1,11 @@
 
 package com.rrhh.api.filter;
 
-import com.permisos.model.Rol;
-import com.permisos.model.Usuario;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import com.rrhh.api.exception.ApiError;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
@@ -17,10 +17,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 @Provider
+@Priority(Priorities.AUTHORIZATION)
 public class ApiRoleFilter implements ContainerRequestFilter {
-
-    @Context
-    private HttpServletRequest request;
 
     @Context
     private ResourceInfo resourceInfo;
@@ -28,6 +26,10 @@ public class ApiRoleFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext context)
             throws IOException {
+
+        if ("OPTIONS".equalsIgnoreCase(context.getMethod())) {
+            return;
+        }
 
         RequiresRole requiresRole = null;
 
@@ -43,34 +45,20 @@ public class ApiRoleFilter implements ContainerRequestFilter {
                     resourceClass.getAnnotation(RequiresRole.class);
         }
 
-        // Los endpoints sin anotación son públicos.
         if (requiresRole == null) {
             return;
         }
 
-        Object usuarioSesion = request.getSession(false) == null
-                ? null
-                : request.getSession(false).getAttribute("usuario");
+        SecurityContext seguridad = context.getSecurityContext();
 
-        Object rolSesion = request.getSession(false) == null
-                ? null
-                : request.getSession(false).getAttribute("rol");
-
-        if (!(usuarioSesion instanceof Usuario)
-                || !(rolSesion instanceof Rol)) {
-
+        if (seguridad == null || seguridad.getUserPrincipal() == null) {
             abortar(context, 401, "Autenticación requerida");
             return;
         }
 
-        Rol rol = (Rol) rolSesion;
-        String nombreRol = rol.getNombre();
-
-        if (nombreRol != null) {
-            for (String rolPermitido : requiresRole.value()) {
-                if (nombreRol.equalsIgnoreCase(rolPermitido)) {
-                    return;
-                }
+        for (String rolPermitido : requiresRole.value()) {
+            if (seguridad.isUserInRole(rolPermitido)) {
+                return;
             }
         }
 

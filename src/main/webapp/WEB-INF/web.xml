@@ -37,6 +37,13 @@
             <param-value>com.rrhh.api</param-value>
         </init-param>
 
+        <init-param>
+            <param-name>
+                jersey.config.server.wadl.disableWadl
+            </param-name>
+            <param-value>true</param-value>
+        </init-param>
+
         <load-on-startup>2</load-on-startup>
     </servlet>
 
