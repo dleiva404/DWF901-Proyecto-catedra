@@ -8,6 +8,7 @@ import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.security.SesionApi;
 import org.junit.Test;
 
+import javax.ws.rs.BadRequestException;
 import java.time.Instant;
 import java.util.List;
 
@@ -20,9 +21,7 @@ import static org.junit.Assert.fail;
  * Todos fallan ANTES de tocar la base de datos, así que no la necesitan.
  *
  * Qué NO cubren (necesitan servidor y base de datos): las respuestas
- * correctas 200/201/204 y los errores 404/409, que dependen de datos reales;
- * y los de identificador <= 0, que construyen una BadRequestException y
- * requieren Jersey en tiempo de ejecución.
+ * correctas 200/201/204 y los errores 404/409, que dependen de datos reales.
  */
 public class RecursosEmpleadoTest {
 
@@ -161,6 +160,65 @@ public class RecursosEmpleadoTest {
             } catch (ValidacionApiException e) {
                 assertEquals(malo, "[anio: debe ser un número de cuatro dígitos]", camposDe(e).toString());
             }
+        }
+    }
+
+    // ------------------------------- identificadores inválidos: 400, no 404
+
+    private static final String ID_NO_NUMERICO = "El identificador debe ser un número entero mayor que cero";
+    private static final String ID_NO_POSITIVO = "El identificador debe ser mayor que cero";
+
+    @Test
+    public void unIdNoNumericoOEnormeResponde400EnGetYEnDelete() throws Exception {
+        // Con un int en la firma, Jersey respondía 404 antes de entrar al método.
+        for (String malo : new String[]{"abc", "99999999999", "1.5", "", "  "}) {
+            try {
+                solicitudes().obtener(malo);
+                fail("GET debió responder 400 para: '" + malo + "'");
+            } catch (BadRequestException e) {
+                assertEquals(malo, ID_NO_NUMERICO, e.getMessage());
+            }
+            try {
+                solicitudes().cancelar(malo);
+                fail("DELETE debió responder 400 para: '" + malo + "'");
+            } catch (BadRequestException e) {
+                assertEquals(malo, ID_NO_NUMERICO, e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void unIdCeroONegativoResponde400EnGetYEnDelete() throws Exception {
+        for (String malo : new String[]{"0", "-5"}) {
+            try {
+                solicitudes().obtener(malo);
+                fail("GET debió responder 400 para: " + malo);
+            } catch (BadRequestException e) {
+                assertEquals(malo, ID_NO_POSITIVO, e.getMessage());
+            }
+            try {
+                solicitudes().cancelar(malo);
+                fail("DELETE debió responder 400 para: " + malo);
+            } catch (BadRequestException e) {
+                assertEquals(malo, ID_NO_POSITIVO, e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void leerIdAceptaUnEnteroPositivoAunConEspacios() {
+        assertEquals(7, SolicitudResource.leerId("7"));
+        assertEquals(12, SolicitudResource.leerId(" 12 "));
+        assertEquals(Integer.MAX_VALUE, SolicitudResource.leerId("2147483647"));
+    }
+
+    @Test
+    public void leerIdRechazaUnNumeroUnoMasAllaDelMaximoEntero() {
+        try {
+            SolicitudResource.leerId("2147483648");
+            fail("Debió rechazar un número que no cabe en un int");
+        } catch (BadRequestException e) {
+            assertEquals(ID_NO_NUMERICO, e.getMessage());
         }
     }
 

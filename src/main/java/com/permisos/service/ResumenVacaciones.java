@@ -2,7 +2,7 @@ package com.permisos.service;
 
 /**
  * Saldo de vacaciones de un empleado en un año, listo para devolverse en
- * GET /api/empleados/me/vacaciones.
+ * GET /vacaciones/saldo.
  *
  * Significado de cada campo (conviene que el contrato de la API los repita):
  *  - diasAsignados:   días que le corresponden ese año.
@@ -10,9 +10,9 @@ package com.permisos.service;
  *  - diasPendientes:  días comprometidos en solicitudes PENDIENTES de respuesta.
  *  - diasDisponibles: asignados - tomados. Es el mismo número que muestra la
  *                     pantalla web en el anillo de saldo (no descuenta los pendientes).
- *  - diasSolicitables: lo que todavía se puede pedir ahora mismo =
- *                     disponibles - pendientes (nunca menor que 0). Es el límite
- *                     real que aplica la validación al crear una solicitud.
+ *
+ * Lo que todavía se puede pedir ahora mismo es diasDisponibles - diasPendientes:
+ * el cliente lo deduce de estos dos campos. No se devuelve como campo aparte.
  *
  * Es Java puro (sin JPA) para poder probarlo sin base de datos.
  */
@@ -23,16 +23,14 @@ public final class ResumenVacaciones {
     private final int diasTomados;
     private final int diasPendientes;
     private final int diasDisponibles;
-    private final int diasSolicitables;
 
     private ResumenVacaciones(int anio, int diasAsignados, int diasTomados,
-                              int diasPendientes, int diasDisponibles, int diasSolicitables) {
+                              int diasPendientes, int diasDisponibles) {
         this.anio = anio;
         this.diasAsignados = diasAsignados;
         this.diasTomados = diasTomados;
         this.diasPendientes = diasPendientes;
         this.diasDisponibles = diasDisponibles;
-        this.diasSolicitables = diasSolicitables;
     }
 
     /**
@@ -47,8 +45,7 @@ public final class ResumenVacaciones {
         if (asignados < 0 || tomados < 0 || disponibles < 0 || pendientes < 0) {
             throw new IllegalArgumentException("Los días de vacaciones no pueden ser negativos.");
         }
-        int solicitables = Math.max(0, disponibles - pendientes);
-        return new ResumenVacaciones(anio, asignados, tomados, pendientes, disponibles, solicitables);
+        return new ResumenVacaciones(anio, asignados, tomados, pendientes, disponibles);
     }
 
     public int getAnio() {
@@ -71,7 +68,4 @@ public final class ResumenVacaciones {
         return diasDisponibles;
     }
 
-    public int getDiasSolicitables() {
-        return diasSolicitables;
-    }
 }

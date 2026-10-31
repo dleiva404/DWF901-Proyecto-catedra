@@ -126,9 +126,9 @@ public class SolicitudResource {
 
     @GET
     @Path("/{id}")
-    public Response obtener(@PathParam("id") int id) throws SQLException {
+    public Response obtener(@PathParam("id") String idTexto) throws SQLException {
 
-        validarId(id);
+        int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
 
         try {
@@ -144,9 +144,9 @@ public class SolicitudResource {
 
     @DELETE
     @Path("/{id}")
-    public Response cancelar(@PathParam("id") int id) throws SQLException {
+    public Response cancelar(@PathParam("id") String idTexto) throws SQLException {
 
-        validarId(id);
+        int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
 
         try {
@@ -169,9 +169,22 @@ public class SolicitudResource {
         return yo;
     }
 
-    private static void validarId(int id) {
+    /**
+     * Convierte el identificador de la URL. Se recibe como TEXTO a propósito: si el
+     * parámetro fuera un int, Jersey fallaría al convertir "abc" o un número enorme
+     * y respondería 404 antes de entrar al método, pero el contrato manda 400 para
+     * cualquier identificador inválido.
+     */
+    static int leerId(String texto) {
+        int id;
+        try {
+            id = Integer.parseInt(texto == null ? "" : texto.trim());
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("El identificador debe ser un número entero mayor que cero");
+        }
         if (id <= 0) {
             throw new BadRequestException("El identificador debe ser mayor que cero");
         }
+        return id;
     }
 }

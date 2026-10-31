@@ -15,25 +15,25 @@ public class ResumenVacacionesTest {
         assertEquals(0, r.getDiasTomados());
         assertEquals(0, r.getDiasPendientes());
         assertEquals(15, r.getDiasDisponibles());
-        assertEquals(15, r.getDiasSolicitables());
     }
 
     @Test
-    public void losPendientesBajanLoSolicitablePeroNoLoDisponible() {
+    public void losPendientesNoBajanLoDisponible() {
         // 5 tomados, 10 disponibles, 4 pendientes de respuesta
         ResumenVacaciones r = ResumenVacaciones.calcular(2026, 15, 5, 10, 4);
 
         assertEquals(10, r.getDiasDisponibles());   // igual que el anillo de la pantalla web
         assertEquals(4, r.getDiasPendientes());
-        assertEquals(6, r.getDiasSolicitables());   // 10 - 4
+        assertEquals(5, r.getDiasTomados());
     }
 
     @Test
-    public void losSolicitablesNuncaSonNegativos() {
-        // dato raro: más pendientes que disponibles
+    public void masPendientesQueDisponiblesNoRompeElCalculo() {
+        // dato raro, pero posible: no debe lanzar excepción ni alterar los valores
         ResumenVacaciones r = ResumenVacaciones.calcular(2026, 15, 10, 5, 8);
 
-        assertEquals(0, r.getDiasSolicitables());
+        assertEquals(5, r.getDiasDisponibles());
+        assertEquals(8, r.getDiasPendientes());
     }
 
     @Test
@@ -41,7 +41,7 @@ public class ResumenVacacionesTest {
         ResumenVacaciones r = ResumenVacaciones.calcular(2026, 15, 15, 0, 0);
 
         assertEquals(0, r.getDiasDisponibles());
-        assertEquals(0, r.getDiasSolicitables());
+        assertEquals(15, r.getDiasTomados());
     }
 
     @Test(expected = IllegalArgumentException.class)

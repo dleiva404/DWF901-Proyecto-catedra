@@ -89,7 +89,9 @@ public class SolicitudEmpleadoServiceIT {
         ResumenVacaciones conPendiente = servicio.saldoVacaciones(JUAN, anio);
         assertEquals(antes.getDiasPendientes() + 3, conPendiente.getDiasPendientes());
         assertEquals(antes.getDiasDisponibles(), conPendiente.getDiasDisponibles());
-        assertEquals(antes.getDiasSolicitables() - 3, conPendiente.getDiasSolicitables());
+        // lo que todavía se puede pedir (disponibles - pendientes) baja en 3
+        assertEquals(antes.getDiasDisponibles() - antes.getDiasPendientes() - 3,
+                conPendiente.getDiasDisponibles() - conPendiente.getDiasPendientes());
 
         // 3. Listado propio con filtro por estado: aparece
         List<Solicitud> pendientes = servicio.listarMias(
@@ -110,7 +112,8 @@ public class SolicitudEmpleadoServiceIT {
         }
 
         // 5. Pedir más de lo solicitable se rechaza (cuenta los pendientes)
-        LocalDate finDemasiadoLargo = lunes.plusDays(conPendiente.getDiasSolicitables() + 7);
+        int solicitable = conPendiente.getDiasDisponibles() - conPendiente.getDiasPendientes();
+        LocalDate finDemasiadoLargo = lunes.plusDays(solicitable + 7);
         try {
             servicio.crear(JUAN, idTipo("VACACIONES"), "Prueba de integración", lunes, finDemasiadoLargo);
             fail("Debió rechazar por saldo insuficiente");
