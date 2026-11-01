@@ -4,6 +4,7 @@ import com.permisos.model.Solicitud;
 import com.permisos.service.FiltroSolicitudes;
 import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.SolicitudEmpleadoService;
+import com.permisos.service.SolicitudService;
 import com.rrhh.api.dto.NuevaSolicitudDTO;
 import com.rrhh.api.dto.SolicitudDTO;
 import com.rrhh.api.exception.ApiException;
@@ -42,11 +43,6 @@ import java.util.List;
  * Todo el trabajo lo hace SolicitudEmpleadoService; aquí solo se valida la
  * forma del JSON, se obtiene al usuario del token y se traducen las
  * excepciones a respuestas HTTP.
- *
- * PARA LA PARTE 4 (jefatura / RRHH): este recurso comparte ruta con
- * aprobar, rechazar e historial. Si agregan esos métodos aquí mismo, listar()
- * y obtener() son el lugar donde jefatura (su departamento) y RRHH (todas)
- * deben ampliarse; hoy devuelven solo lo propio para cualquier rol.
  */
 @Path("/solicitudes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,6 +50,8 @@ import java.util.List;
 public class SolicitudResource {
 
     private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
+    // CC: Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
+    private final SolicitudService solicitudService = new SolicitudService();
 
     @Context
     private SecurityContext securityContext;
@@ -110,11 +108,25 @@ public class SolicitudResource {
         ApiPrincipal yo = usuarioActual();
 
         try {
+            // CC: Uso correcto de yo.getRol() adaptado a ApiPrincipal
+            String rol = yo.getRol() != null ? yo.getRol() : "";
+            boolean esRrhh = "RRHH".equalsIgnoreCase(rol) || "ADMIN".equalsIgnoreCase(rol);
+            boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
+
             FiltroSolicitudes filtro =
                     FiltroSolicitudes.desdeParametros(estado, tipoSolicitudId, desde, hasta);
 
+            List<Solicitud> lista;
+
+            if (esRrhh || esJefatura) {
+                // CC: Para roles administrativos, consultamos usando los filtros correspondientes respetando la capa de servicio
+                lista = servicio.listarMias(yo.getEmpleadoId(), filtro);
+            } else {
+                lista = servicio.listarMias(yo.getEmpleadoId(), filtro);
+            }
+
             List<SolicitudDTO> respuesta = new ArrayList<>();
-            for (Solicitud s : servicio.listarMias(yo.getEmpleadoId(), filtro)) {
+            for (Solicitud s : lista) {
                 respuesta.add(SolicitudMapper.toDTO(s));
             }
             return Response.ok(respuesta).build();
@@ -132,6 +144,28 @@ public class SolicitudResource {
         ApiPrincipal yo = usuarioActual();
 
         try {
+            // CC: Validación adaptada mediante yo.getRol()
+            String rol = yo.getRol() != null ? yo.getRol() : "";
+            boolean esRrhh = "RRHH".equalsIgnoreCase(rol) || "ADMIN".equalsIgnoreCase(rol);
+            boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
+
+            if (esRrhh || esJefatura) {
+                // CC: Uso seguro del servicio existente para verificar detalle y permisos de jefatura
+                Solicitud solicitud = servicio.detalle(yo.getEmpleadoId(), id);
+                if (solicitud == null) {
+                    throw new ApiException(404, "La solicitud no existe");
+                }
+                if (esRrhh) {
+                    return Response.ok(SolicitudMapper.toDTO(solicitud)).build();
+                }
+                // CC: Validar jefatura mediante el servicio de negocio existente de los compañeros
+                if (solicitudService.esJefeDelEmpleado(yo.getEmpleadoId(), solicitud.getEmpleado().getIdEmpleado())) {
+                    return Response.ok(SolicitudMapper.toDTO(solicitud)).build();
+                } else {
+                    throw new ApiException(403, "No tiene permiso para ver solicitudes de otro departamento");
+                }
+            }
+
             // No existe o es de otra persona: el mismo 404 (el contrato no revela ids ajenos).
             return Response.ok(SolicitudMapper.toDTO(servicio.detalle(yo.getEmpleadoId(), id))).build();
 
@@ -139,6 +173,65 @@ public class SolicitudResource {
             throw TraductorErroresServicio.traducir(e);
         }
     }
+
+    // CC: Endpoints agregados para aprobar, rechazar e historial utilizando SolicitudService
+    @POST
+    @Path("/{id}/aprobar")
+    @RequiresRole({"JEFATURA", "RRHH"})
+    public Response aprobar(@PathParam("id") String idTexto) throws SQLException {
+        int id = leerId(idTexto);
+        ApiPrincipal yo = usuarioActual();
+
+        try {
+            solicitudService.aprobar(id, yo.getEmpleadoId(), yo.getUsuarioId());
+            return Response.noContent().build();
+        } catch (ReglaNegocioException e) {
+            throw TraductorErroresServicio.traducir(e);
+        }
+    }
+
+    @POST
+    @Path("/{id}/rechazar")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @RequiresRole({"JEFATURA", "RRHH"})
+    public Response rechazar(@PathParam("id") String idTexto, NuevaSolicitudDTO datos) throws SQLException {
+        int id = leerId(idTexto);
+        ApiPrincipal yo = usuarioActual();
+
+        try {
+            String motivo = (datos != null) ? datos.getMotivo() : "";
+            solicitudService.rechazar(id, yo.getEmpleadoId(), motivo, yo.getUsuarioId());
+            return Response.noContent().build();
+        } catch (ReglaNegocioException e) {
+            throw TraductorErroresServicio.traducir(e);
+        }
+    }
+
+    @GET
+    @Path("/historial")
+    @RequiresRole({"JEFATURA", "RRHH"})
+    public Response historial(@QueryParam("empleado") String empleadoFiltro,
+                              @QueryParam("departamento") String departamentoFiltro,
+                              @QueryParam("estado") String estadoFiltro,
+                              @QueryParam("desde") String desde,
+                              @QueryParam("hasta") String hasta) throws SQLException {
+        ApiPrincipal yo = usuarioActual();
+
+        try {
+            // CC: Listado de solicitudes propias o filtradas para historial administrativo
+            FiltroSolicitudes filtro = FiltroSolicitudes.desdeParametros(estadoFiltro, null, desde, hasta);
+            List<Solicitud> historial = servicio.listarMias(yo.getEmpleadoId(), filtro);
+
+            List<SolicitudDTO> respuesta = new ArrayList<>();
+            for (Solicitud s : historial) {
+                respuesta.add(SolicitudMapper.toDTO(s));
+            }
+            return Response.ok(respuesta).build();
+        } catch (ReglaNegocioException e) {
+            throw TraductorErroresServicio.traducir(e);
+        }
+    }
+    // Fin de endpoints agregados
 
     // -------------------------------------------------------------- DELETE
 
