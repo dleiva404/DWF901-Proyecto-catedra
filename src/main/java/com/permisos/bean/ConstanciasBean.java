@@ -89,7 +89,8 @@ public class ConstanciasBean implements Serializable {
         } catch (Exception e) {
             nombreSucursal = null;
         }
-        return "Didelco " + (nombreSucursal != null ? nombreSucursal : "Central");
+        String base = (nombreSucursal != null) ? nombreSucursal : "Central";
+        return base.toLowerCase().startsWith("didelco") ? base : "Didelco " + base;
     }
 
     public String enviar() {
