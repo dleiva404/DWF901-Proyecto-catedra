@@ -38,7 +38,9 @@ import java.util.List;
 
 /**
  * Solicitudes del EMPLEADO autenticado sobre SUS PROPIAS solicitudes
+ *
  * (endpoints 8 a 11 del contrato): crear, listar, consultar y cancelar.
+ *
  *
  * Todo el trabajo lo hace SolicitudEmpleadoService; aquí solo se valida la
  * forma del JSON, se obtiene al usuario del token y se traducen las
@@ -50,7 +52,7 @@ import java.util.List;
 public class SolicitudResource {
 
     private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
-    // CC: Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
+    // Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
     private final SolicitudService solicitudService = new SolicitudService();
 
     @Context
@@ -108,7 +110,7 @@ public class SolicitudResource {
         ApiPrincipal yo = usuarioActual();
 
         try {
-            // CC: Uso correcto de yo.getRol() adaptado a ApiPrincipal
+            // Uso correcto de yo.getRol() adaptado a ApiPrincipal
             String rol = yo.getRol() != null ? yo.getRol() : "";
             boolean esRrhh = "RRHH".equalsIgnoreCase(rol) || "ADMIN".equalsIgnoreCase(rol);
             boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
@@ -119,7 +121,7 @@ public class SolicitudResource {
             List<Solicitud> lista;
 
             if (esRrhh || esJefatura) {
-                // CC: Para roles administrativos, consultamos usando los filtros correspondientes respetando la capa de servicio
+                // Para roles administrativos, consultamos usando los filtros correspondientes respetando la capa de servicio
                 lista = servicio.listarMias(yo.getEmpleadoId(), filtro);
             } else {
                 lista = servicio.listarMias(yo.getEmpleadoId(), filtro);
@@ -144,7 +146,7 @@ public class SolicitudResource {
         ApiPrincipal yo = usuarioActual();
 
         try {
-            // CC: Validación adaptada mediante yo.getRol()
+            // Validación adaptada mediante yo.getRol()
             String rol = yo.getRol() != null ? yo.getRol() : "";
             boolean esRrhh = "RRHH".equalsIgnoreCase(rol) || "ADMIN".equalsIgnoreCase(rol);
             boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
@@ -174,10 +176,10 @@ public class SolicitudResource {
         }
     }
 
-    // CC: Endpoints agregados para aprobar, rechazar e historial utilizando SolicitudService
+    // Endpoints agregados para aprobar, rechazar e historial utilizando SolicitudService
     @POST
     @Path("/{id}/aprobar")
-    @RequiresRole({"JEFATURA", "RRHH"})
+    @RequiresRole({"JEFATURA"})
     public Response aprobar(@PathParam("id") String idTexto) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
@@ -193,13 +195,16 @@ public class SolicitudResource {
     @POST
     @Path("/{id}/rechazar")
     @Consumes(MediaType.APPLICATION_JSON)
-    @RequiresRole({"JEFATURA", "RRHH"})
+    @RequiresRole({"JEFATURA"})
     public Response rechazar(@PathParam("id") String idTexto, NuevaSolicitudDTO datos) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
 
         try {
-            String motivo = (datos != null) ? datos.getMotivo() : "";
+            String motivo = (datos != null && datos.getMotivo() != null) ? datos.getMotivo() : "";
+            if (motivo.trim().isEmpty()) {
+                throw new ApiException(400, "El motivo de rechazo es obligatorio");
+            }
             solicitudService.rechazar(id, yo.getEmpleadoId(), motivo, yo.getUsuarioId());
             return Response.noContent().build();
         } catch (ReglaNegocioException e) {
@@ -208,17 +213,19 @@ public class SolicitudResource {
     }
 
     @GET
-    @Path("/historial")
+    @Path("/{id}/historial")
     @RequiresRole({"JEFATURA", "RRHH"})
-    public Response historial(@QueryParam("empleado") String empleadoFiltro,
+    public Response historial(@PathParam("id") String idTexto,
+                              @QueryParam("empleado") String empleadoFiltro,
                               @QueryParam("departamento") String departamentoFiltro,
                               @QueryParam("estado") String estadoFiltro,
                               @QueryParam("desde") String desde,
                               @QueryParam("hasta") String hasta) throws SQLException {
+        int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
 
         try {
-            // CC: Listado de solicitudes propias o filtradas para historial administrativo
+            // Listado de solicitudes propias o filtradas para historial administrativo
             FiltroSolicitudes filtro = FiltroSolicitudes.desdeParametros(estadoFiltro, null, desde, hasta);
             List<Solicitud> historial = servicio.listarMias(yo.getEmpleadoId(), filtro);
 
@@ -264,9 +271,11 @@ public class SolicitudResource {
 
     /**
      * Convierte el identificador de la URL. Se recibe como TEXTO a propósito: si el
+     *
      * parámetro fuera un int, Jersey fallaría al convertir "abc" o un número enorme
+     *
      * y respondería 404 antes de entrar al método, pero el contrato manda 400 para
-     * cualquier identificador inválido.
+     *      cualquier identificador inválido.
      */
     static int leerId(String texto) {
         int id;
