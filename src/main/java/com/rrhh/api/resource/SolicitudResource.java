@@ -54,7 +54,7 @@ import java.util.List;
 public class SolicitudResource {
 
     private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
-    //  Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
+    // Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
     private final SolicitudService solicitudService = new SolicitudService();
 
     @Context
