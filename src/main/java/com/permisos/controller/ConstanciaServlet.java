@@ -67,7 +67,8 @@ public class ConstanciaServlet extends HttpServlet {
                 SucursalArea sucursal = sucursalDAO.buscarPorId(empleado.getIdSucursalArea());
 
                 String nombreSucursal = (sucursal != null) ? sucursal.getNombre() : null;
-                empresaEmisoraFinal = "Didelco " + (nombreSucursal != null ? nombreSucursal : "Central");
+                String base = (nombreSucursal != null) ? nombreSucursal : "Central";
+                empresaEmisoraFinal = base.toLowerCase().startsWith("didelco") ? base : "Didelco " + base;
             }
 
             // Creamos el objeto Constancia con los datos recolectados

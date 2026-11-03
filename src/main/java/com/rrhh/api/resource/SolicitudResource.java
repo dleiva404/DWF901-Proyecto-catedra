@@ -1,16 +1,20 @@
 package com.rrhh.api.resource;
 
+import com.permisos.model.HistorialSolicitud;
 import com.permisos.model.Solicitud;
 import com.permisos.service.FiltroSolicitudes;
 import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.SolicitudEmpleadoService;
 import com.permisos.service.SolicitudService;
+import com.rrhh.api.dto.HistorialSolicitudDTO;
 import com.rrhh.api.dto.NuevaSolicitudDTO;
+import com.rrhh.api.dto.RechazoSolicitudDTO;
 import com.rrhh.api.dto.SolicitudDTO;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
 import com.rrhh.api.filter.RequiresRole;
+import com.rrhh.api.mapper.HistorialSolicitudMapper;
 import com.rrhh.api.mapper.SolicitudMapper;
 import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.validation.ValidadorApi;
@@ -38,9 +42,7 @@ import java.util.List;
 
 /**
  * Solicitudes del EMPLEADO autenticado sobre SUS PROPIAS solicitudes
- *
  * (endpoints 8 a 11 del contrato): crear, listar, consultar y cancelar.
- *
  *
  * Todo el trabajo lo hace SolicitudEmpleadoService; aquí solo se valida la
  * forma del JSON, se obtiene al usuario del token y se traducen las
@@ -104,6 +106,7 @@ public class SolicitudResource {
     @GET
     public Response listar(@QueryParam("estado") String estado,
                            @QueryParam("tipoSolicitudId") String tipoSolicitudId,
+                           @QueryParam("propias") String propias,
                            @QueryParam("desde") String desde,
                            @QueryParam("hasta") String hasta) throws SQLException {
 
@@ -120,11 +123,12 @@ public class SolicitudResource {
 
             List<Solicitud> lista;
 
-            if (esRrhh || esJefatura) {
-                // Para roles administrativos, consultamos usando los filtros correspondientes respetando la capa de servicio
+            if (leerPropias(propias) || !(esRrhh || esJefatura)) {
                 lista = servicio.listarMias(yo.getEmpleadoId(), filtro);
+            } else if (esRrhh) {
+                lista = solicitudService.listarTodas(filtro);
             } else {
-                lista = servicio.listarMias(yo.getEmpleadoId(), filtro);
+                lista = solicitudService.listarPorDepartamento(yo.getEmpleadoId(), filtro);
             }
 
             List<SolicitudDTO> respuesta = new ArrayList<>();
@@ -152,20 +156,18 @@ public class SolicitudResource {
             boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
 
             if (esRrhh || esJefatura) {
-                // CC: Uso seguro del servicio existente para verificar detalle y permisos de jefatura
-                Solicitud solicitud = servicio.detalle(yo.getEmpleadoId(), id);
-                if (solicitud == null) {
-                    throw new ApiException(404, "La solicitud no existe");
-                }
+                Solicitud solicitud = solicitudService.obtenerPorId(id);
                 if (esRrhh) {
                     return Response.ok(SolicitudMapper.toDTO(solicitud)).build();
                 }
-                // CC: Validar jefatura mediante el servicio de negocio existente de los compañeros
-                if (solicitudService.esJefeDelEmpleado(yo.getEmpleadoId(), solicitud.getEmpleado().getIdEmpleado())) {
+                // jefatura: la suya o la de alguien de su departamento
+                int idDuenio = solicitud.getEmpleado().getIdEmpleado();
+                if (idDuenio == yo.getEmpleadoId()
+                        || solicitudService.esJefeDelEmpleado(yo.getEmpleadoId(), idDuenio)) {
                     return Response.ok(SolicitudMapper.toDTO(solicitud)).build();
-                } else {
-                    throw new ApiException(403, "No tiene permiso para ver solicitudes de otro departamento");
                 }
+                // de otro departamento: mismo 404, no se revela que existe
+                throw new ApiException(404, "La solicitud indicada no existe.");
             }
 
             // No existe o es de otra persona: el mismo 404 (el contrato no revela ids ajenos).
@@ -196,14 +198,14 @@ public class SolicitudResource {
     @Path("/{id}/rechazar")
     @Consumes(MediaType.APPLICATION_JSON)
     @RequiresRole({"JEFATURA"})
-    public Response rechazar(@PathParam("id") String idTexto, NuevaSolicitudDTO datos) throws SQLException {
+    public Response rechazar(@PathParam("id") String idTexto, RechazoSolicitudDTO datos) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
 
         try {
-            String motivo = (datos != null && datos.getMotivo() != null) ? datos.getMotivo() : "";
+            String motivo = (datos != null && datos.getMotivoRechazo() != null) ? datos.getMotivoRechazo() : "";
             if (motivo.trim().isEmpty()) {
-                throw new ApiException(400, "El motivo de rechazo es obligatorio");
+                throw new ValidacionApiException(Collections.singletonList("motivoRechazo: es obligatorio"));
             }
             solicitudService.rechazar(id, yo.getEmpleadoId(), motivo, yo.getUsuarioId());
             return Response.noContent().build();
@@ -214,24 +216,17 @@ public class SolicitudResource {
 
     @GET
     @Path("/{id}/historial")
-    @RequiresRole({"JEFATURA", "RRHH"})
-    public Response historial(@PathParam("id") String idTexto,
-                              @QueryParam("empleado") String empleadoFiltro,
-                              @QueryParam("departamento") String departamentoFiltro,
-                              @QueryParam("estado") String estadoFiltro,
-                              @QueryParam("desde") String desde,
-                              @QueryParam("hasta") String hasta) throws SQLException {
+    public Response historial(@PathParam("id") String idTexto) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
 
         try {
-            // Listado de solicitudes propias o filtradas para historial administrativo
-            FiltroSolicitudes filtro = FiltroSolicitudes.desdeParametros(estadoFiltro, null, desde, hasta);
-            List<Solicitud> historial = servicio.listarMias(yo.getEmpleadoId(), filtro);
+            List<HistorialSolicitud> cambios =
+                    solicitudService.obtenerHistorial(id, yo.getEmpleadoId(), yo.getRol());
 
-            List<SolicitudDTO> respuesta = new ArrayList<>();
-            for (Solicitud s : historial) {
-                respuesta.add(SolicitudMapper.toDTO(s));
+            List<HistorialSolicitudDTO> respuesta = new ArrayList<>();
+            for (HistorialSolicitud h : cambios) {
+                respuesta.add(HistorialSolicitudMapper.toDTO(h));
             }
             return Response.ok(respuesta).build();
         } catch (ReglaNegocioException e) {
@@ -271,11 +266,9 @@ public class SolicitudResource {
 
     /**
      * Convierte el identificador de la URL. Se recibe como TEXTO a propósito: si el
-     *
      * parámetro fuera un int, Jersey fallaría al convertir "abc" o un número enorme
-     *
      * y respondería 404 antes de entrar al método, pero el contrato manda 400 para
-     *      cualquier identificador inválido.
+     * cualquier identificador inválido.
      */
     static int leerId(String texto) {
         int id;
@@ -288,5 +281,16 @@ public class SolicitudResource {
             throw new BadRequestException("El identificador debe ser mayor que cero");
         }
         return id;
+    }
+
+    // propias=true devuelve solo lo del usuario, otro valor que no sea true/false es 400
+    static boolean leerPropias(String texto) {
+        if (texto == null || texto.trim().isEmpty() || "false".equalsIgnoreCase(texto.trim())) {
+            return false;
+        }
+        if ("true".equalsIgnoreCase(texto.trim())) {
+            return true;
+        }
+        throw new BadRequestException("El parámetro propias debe ser true o false");
     }
 }

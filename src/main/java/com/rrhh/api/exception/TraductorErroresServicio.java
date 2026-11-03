@@ -1,5 +1,6 @@
 package com.rrhh.api.exception;
 
+import com.permisos.service.AccesoDenegadoException;
 import com.permisos.service.ConflictoException;
 import com.permisos.service.RecursoNoEncontradoException;
 import com.permisos.service.ReglaNegocioException;
@@ -38,6 +39,9 @@ public final class TraductorErroresServicio {
         }
         if (e instanceof RecursoNoEncontradoException) {
             return new ApiException(404, e.getMessage());
+        }
+        if (e instanceof AccesoDenegadoException) {
+            return new ApiException(403, e.getMessage());
         }
         // ConflictoException y cualquier otra regla de negocio incumplida
         return new ApiException(409, e.getMessage());
