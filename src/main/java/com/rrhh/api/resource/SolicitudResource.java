@@ -1,15 +1,20 @@
 package com.rrhh.api.resource;
 
+import com.permisos.model.HistorialSolicitud;
 import com.permisos.model.Solicitud;
 import com.permisos.service.FiltroSolicitudes;
 import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.SolicitudEmpleadoService;
+import com.permisos.service.SolicitudService;
+import com.rrhh.api.dto.HistorialSolicitudDTO;
 import com.rrhh.api.dto.NuevaSolicitudDTO;
+import com.rrhh.api.dto.RechazoSolicitudDTO;
 import com.rrhh.api.dto.SolicitudDTO;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
 import com.rrhh.api.filter.RequiresRole;
+import com.rrhh.api.mapper.HistorialSolicitudMapper;
 import com.rrhh.api.mapper.SolicitudMapper;
 import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.validation.ValidadorApi;
@@ -42,11 +47,6 @@ import java.util.List;
  * Todo el trabajo lo hace SolicitudEmpleadoService; aquí solo se valida la
  * forma del JSON, se obtiene al usuario del token y se traducen las
  * excepciones a respuestas HTTP.
- *
- * PARA LA PARTE 4 (jefatura / RRHH): este recurso comparte ruta con
- * aprobar, rechazar e historial. Si agregan esos métodos aquí mismo, listar()
- * y obtener() son el lugar donde jefatura (su departamento) y RRHH (todas)
- * deben ampliarse; hoy devuelven solo lo propio para cualquier rol.
  */
 @Path("/solicitudes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,6 +54,8 @@ import java.util.List;
 public class SolicitudResource {
 
     private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
+    // Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
+    private final SolicitudService solicitudService = new SolicitudService();
 
     @Context
     private SecurityContext securityContext;
@@ -104,17 +106,33 @@ public class SolicitudResource {
     @GET
     public Response listar(@QueryParam("estado") String estado,
                            @QueryParam("tipoSolicitudId") String tipoSolicitudId,
+                           @QueryParam("propias") String propias,
                            @QueryParam("desde") String desde,
                            @QueryParam("hasta") String hasta) throws SQLException {
 
         ApiPrincipal yo = usuarioActual();
 
         try {
+            // Uso correcto de yo.getRol() adaptado a ApiPrincipal
+            String rol = yo.getRol() != null ? yo.getRol() : "";
+            boolean esRrhh = "RRHH".equalsIgnoreCase(rol) || "ADMIN".equalsIgnoreCase(rol);
+            boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
+
             FiltroSolicitudes filtro =
                     FiltroSolicitudes.desdeParametros(estado, tipoSolicitudId, desde, hasta);
 
+            List<Solicitud> lista;
+
+            if (leerPropias(propias) || !(esRrhh || esJefatura)) {
+                lista = servicio.listarMias(yo.getEmpleadoId(), filtro);
+            } else if (esRrhh) {
+                lista = solicitudService.listarTodas(filtro);
+            } else {
+                lista = solicitudService.listarPorDepartamento(yo.getEmpleadoId(), filtro);
+            }
+
             List<SolicitudDTO> respuesta = new ArrayList<>();
-            for (Solicitud s : servicio.listarMias(yo.getEmpleadoId(), filtro)) {
+            for (Solicitud s : lista) {
                 respuesta.add(SolicitudMapper.toDTO(s));
             }
             return Response.ok(respuesta).build();
@@ -132,6 +150,26 @@ public class SolicitudResource {
         ApiPrincipal yo = usuarioActual();
 
         try {
+            // Validación adaptada mediante yo.getRol()
+            String rol = yo.getRol() != null ? yo.getRol() : "";
+            boolean esRrhh = "RRHH".equalsIgnoreCase(rol) || "ADMIN".equalsIgnoreCase(rol);
+            boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
+
+            if (esRrhh || esJefatura) {
+                Solicitud solicitud = solicitudService.obtenerPorId(id);
+                if (esRrhh) {
+                    return Response.ok(SolicitudMapper.toDTO(solicitud)).build();
+                }
+                // jefatura: la suya o la de alguien de su departamento
+                int idDuenio = solicitud.getEmpleado().getIdEmpleado();
+                if (idDuenio == yo.getEmpleadoId()
+                        || solicitudService.esJefeDelEmpleado(yo.getEmpleadoId(), idDuenio)) {
+                    return Response.ok(SolicitudMapper.toDTO(solicitud)).build();
+                }
+                // de otro departamento: mismo 404, no se revela que existe
+                throw new ApiException(404, "La solicitud indicada no existe.");
+            }
+
             // No existe o es de otra persona: el mismo 404 (el contrato no revela ids ajenos).
             return Response.ok(SolicitudMapper.toDTO(servicio.detalle(yo.getEmpleadoId(), id))).build();
 
@@ -139,6 +177,63 @@ public class SolicitudResource {
             throw TraductorErroresServicio.traducir(e);
         }
     }
+
+    // Endpoints agregados para aprobar, rechazar e historial utilizando SolicitudService
+    @POST
+    @Path("/{id}/aprobar")
+    @RequiresRole({"JEFATURA"})
+    public Response aprobar(@PathParam("id") String idTexto) throws SQLException {
+        int id = leerId(idTexto);
+        ApiPrincipal yo = usuarioActual();
+
+        try {
+            solicitudService.aprobar(id, yo.getEmpleadoId(), yo.getUsuarioId());
+            return Response.noContent().build();
+        } catch (ReglaNegocioException e) {
+            throw TraductorErroresServicio.traducir(e);
+        }
+    }
+
+    @POST
+    @Path("/{id}/rechazar")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @RequiresRole({"JEFATURA"})
+    public Response rechazar(@PathParam("id") String idTexto, RechazoSolicitudDTO datos) throws SQLException {
+        int id = leerId(idTexto);
+        ApiPrincipal yo = usuarioActual();
+
+        try {
+            String motivo = (datos != null && datos.getMotivoRechazo() != null) ? datos.getMotivoRechazo() : "";
+            if (motivo.trim().isEmpty()) {
+                throw new ValidacionApiException(Collections.singletonList("motivoRechazo: es obligatorio"));
+            }
+            solicitudService.rechazar(id, yo.getEmpleadoId(), motivo, yo.getUsuarioId());
+            return Response.noContent().build();
+        } catch (ReglaNegocioException e) {
+            throw TraductorErroresServicio.traducir(e);
+        }
+    }
+
+    @GET
+    @Path("/{id}/historial")
+    public Response historial(@PathParam("id") String idTexto) throws SQLException {
+        int id = leerId(idTexto);
+        ApiPrincipal yo = usuarioActual();
+
+        try {
+            List<HistorialSolicitud> cambios =
+                    solicitudService.obtenerHistorial(id, yo.getEmpleadoId(), yo.getRol());
+
+            List<HistorialSolicitudDTO> respuesta = new ArrayList<>();
+            for (HistorialSolicitud h : cambios) {
+                respuesta.add(HistorialSolicitudMapper.toDTO(h));
+            }
+            return Response.ok(respuesta).build();
+        } catch (ReglaNegocioException e) {
+            throw TraductorErroresServicio.traducir(e);
+        }
+    }
+    // Fin de endpoints agregados
 
     // -------------------------------------------------------------- DELETE
 
@@ -186,5 +281,16 @@ public class SolicitudResource {
             throw new BadRequestException("El identificador debe ser mayor que cero");
         }
         return id;
+    }
+
+    // propias=true devuelve solo lo del usuario, otro valor que no sea true/false es 400
+    static boolean leerPropias(String texto) {
+        if (texto == null || texto.trim().isEmpty() || "false".equalsIgnoreCase(texto.trim())) {
+            return false;
+        }
+        if ("true".equalsIgnoreCase(texto.trim())) {
+            return true;
+        }
+        throw new BadRequestException("El parámetro propias debe ser true o false");
     }
 }

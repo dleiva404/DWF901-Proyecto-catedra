@@ -1,8 +1,10 @@
 package com.rrhh.api.resource;
 
 import com.permisos.model.Incapacidad;
+import com.permisos.service.IncapacidadConsultaService;
 import com.permisos.service.IncapacidadEmpleadoService;
 import com.permisos.service.ReglaNegocioException;
+import com.rrhh.api.dto.IncapacidadDTO;
 import com.rrhh.api.dto.NuevaIncapacidadDTO;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
@@ -13,8 +15,10 @@ import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.validation.ValidadorApi;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -24,7 +28,9 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Registro de una incapacidad del usuario autenticado (endpoint 17 del
@@ -40,6 +46,7 @@ import java.util.Collections;
 public class IncapacidadResource {
 
     private final IncapacidadEmpleadoService servicio = new IncapacidadEmpleadoService();
+    private final IncapacidadConsultaService consulta = new IncapacidadConsultaService();
 
     @Context
     private SecurityContext securityContext;
@@ -82,6 +89,41 @@ public class IncapacidadResource {
         } catch (ReglaNegocioException e) {
             throw TraductorErroresServicio.traducir(e);
         }
+    }
+
+    @GET
+    public Response listar() throws SQLException {
+
+        ApiPrincipal yo = usuarioActual();
+
+        List<Incapacidad> lista = consulta.listar(yo.getEmpleadoId(), esRrhh(yo));
+
+        List<IncapacidadDTO> respuesta = new ArrayList<>();
+        for (Incapacidad i : lista) {
+            respuesta.add(IncapacidadMapper.toDTO(i));
+        }
+        return Response.ok(respuesta).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    public Response obtener(@PathParam("id") String idTexto) throws SQLException {
+
+        int id = SolicitudResource.leerId(idTexto);
+        ApiPrincipal yo = usuarioActual();
+
+        try {
+            Incapacidad encontrada = consulta.detalle(yo.getEmpleadoId(), esRrhh(yo), id);
+            return Response.ok(IncapacidadMapper.toDTO(encontrada)).build();
+
+        } catch (ReglaNegocioException e) {
+            throw TraductorErroresServicio.traducir(e);
+        }
+    }
+
+    // RRHH ve las incapacidades de todos
+    private boolean esRrhh(ApiPrincipal yo) {
+        return "RRHH".equalsIgnoreCase(yo.getRol());
     }
 
     protected ApiPrincipal usuarioActual() {

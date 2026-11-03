@@ -1,5 +1,6 @@
 package com.rrhh.api.exception;
 
+import com.permisos.service.AccesoDenegadoException;
 import com.permisos.service.ConflictoException;
 import com.permisos.service.RecursoNoEncontradoException;
 import com.permisos.service.ReglaNegocioException;
@@ -45,6 +46,15 @@ public class TraductorErroresServicioTest {
 
         assertEquals(409, api.getEstado());
         assertEquals("La solicitud ya fue aprobada.", api.getMessage());
+    }
+
+    @Test
+    public void unAccesoDenegadoSale403() {
+        ApiException api = TraductorErroresServicio.traducir(
+                new AccesoDenegadoException("No tiene permiso para aprobar solicitudes de este empleado."));
+
+        assertEquals(403, api.getEstado());
+        assertEquals("No tiene permiso para aprobar solicitudes de este empleado.", api.getMessage());
     }
 
     @Test

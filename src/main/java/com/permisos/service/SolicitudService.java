@@ -68,13 +68,14 @@ public class SolicitudService {
             Solicitud solicitud = em.find(Solicitud.class, idSolicitud, LockModeType.PESSIMISTIC_WRITE);
 
             if (solicitud == null) {
-                throw new ReglaNegocioException("La solicitud indicada no existe.");
-            }
-            if (!Solicitud.ESTADO_PENDIENTE.equals(solicitud.getEstado())) {
-                throw new ReglaNegocioException("Solo se pueden aprobar solicitudes pendientes.");
+                throw new RecursoNoEncontradoException("La solicitud indicada no existe.");
             }
 
             validarQueEsJefeDelEmpleado(em, idEmpleadoJefe, solicitud);
+
+            if (!Solicitud.ESTADO_PENDIENTE.equals(solicitud.getEstado())) {
+                throw new ReglaNegocioException("Solo se pueden aprobar solicitudes pendientes.");
+            }
 
             String comentario = null;
 
@@ -141,13 +142,14 @@ public class SolicitudService {
             Solicitud solicitud = em.find(Solicitud.class, idSolicitud, LockModeType.PESSIMISTIC_WRITE);
 
             if (solicitud == null) {
-                throw new ReglaNegocioException("La solicitud indicada no existe.");
-            }
-            if (!Solicitud.ESTADO_PENDIENTE.equals(solicitud.getEstado())) {
-                throw new ReglaNegocioException("Solo se pueden rechazar solicitudes pendientes.");
+                throw new RecursoNoEncontradoException("La solicitud indicada no existe.");
             }
 
             validarQueEsJefeDelEmpleado(em, idEmpleadoJefe, solicitud);
+
+            if (!Solicitud.ESTADO_PENDIENTE.equals(solicitud.getEstado())) {
+                throw new ReglaNegocioException("Solo se pueden rechazar solicitudes pendientes.");
+            }
 
             LocalDateTime ahora = LocalDateTime.now();
 
@@ -206,12 +208,135 @@ public class SolicitudService {
             em.close();
         }
     }
-   
+
+    public Solicitud obtenerPorId(int idSolicitud) throws RecursoNoEncontradoException, SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            java.util.List<Solicitud> encontradas = em.createQuery(
+                            "SELECT s FROM Solicitud s JOIN FETCH s.tipoSolicitud JOIN FETCH s.empleado "
+                                    + "WHERE s.idSolicitud = :idSolicitud",
+                            Solicitud.class)
+                    .setParameter("idSolicitud", idSolicitud)
+                    .getResultList();
+
+            if (encontradas.isEmpty()) {
+                throw new RecursoNoEncontradoException("La solicitud indicada no existe.");
+            }
+            return encontradas.get(0);
+
+        } catch (RuntimeException ex) {
+            throw new SQLException("No se pudo consultar la solicitud.", ex);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public java.util.List<Solicitud> listarTodas(FiltroSolicitudes filtro) throws SQLException {
+        return listarConFiltro(null, filtro);
+    }
+
+    public java.util.List<Solicitud> listarPorDepartamento(int idEmpleadoJefe, FiltroSolicitudes filtro)
+            throws SQLException {
+        return listarConFiltro(idEmpleadoJefe, filtro);
+    }
+
+    private java.util.List<Solicitud> listarConFiltro(Integer idJefe, FiltroSolicitudes filtro)
+            throws SQLException {
+
+        StringBuilder jpql = new StringBuilder(
+                "SELECT s FROM Solicitud s JOIN FETCH s.tipoSolicitud JOIN FETCH s.empleado WHERE 1 = 1");
+
+        if (idJefe != null) {
+            jpql.append(" AND s.empleado.departamento.idDepartamento IN "
+                    + "(SELECT j.departamento.idDepartamento FROM Jefatura j "
+                    + "WHERE j.empleado.idEmpleado = :idJefe AND j.activo = true)");
+        }
+        if (filtro.getEstado() != null) {
+            jpql.append(" AND s.estado = :estado");
+        }
+        if (filtro.getIdTipo() != null) {
+            jpql.append(" AND s.tipoSolicitud.idTipoSolicitud = :idTipo");
+        }
+        if (filtro.getDesde() != null) {
+            jpql.append(" AND s.fechaInicio >= :desde");
+        }
+        if (filtro.getHasta() != null) {
+            jpql.append(" AND s.fechaInicio <= :hasta");
+        }
+        jpql.append(" ORDER BY s.fechaSolicitud DESC, s.idSolicitud DESC");
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            javax.persistence.TypedQuery<Solicitud> consulta = em.createQuery(jpql.toString(), Solicitud.class);
+
+            if (idJefe != null) {
+                consulta.setParameter("idJefe", idJefe);
+            }
+            if (filtro.getEstado() != null) {
+                consulta.setParameter("estado", filtro.getEstado());
+            }
+            if (filtro.getIdTipo() != null) {
+                consulta.setParameter("idTipo", filtro.getIdTipo());
+            }
+            if (filtro.getDesde() != null) {
+                consulta.setParameter("desde", filtro.getDesde());
+            }
+            if (filtro.getHasta() != null) {
+                consulta.setParameter("hasta", filtro.getHasta());
+            }
+
+            return consulta.getResultList();
+
+        } catch (RuntimeException ex) {
+            throw new SQLException("No se pudieron consultar las solicitudes.", ex);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public java.util.List<HistorialSolicitud> obtenerHistorial(int idSolicitud, int idEmpleado, String rol)
+            throws RecursoNoEncontradoException, SQLException {
+
+        Solicitud solicitud = obtenerPorId(idSolicitud);
+        int idDuenio = solicitud.getEmpleado().getIdEmpleado();
+
+        boolean puedeVer = "RRHH".equalsIgnoreCase(rol)
+                || idDuenio == idEmpleado
+                || ("JEFATURA".equalsIgnoreCase(rol) && esJefeDelEmpleado(idEmpleado, idDuenio));
+
+        if (!puedeVer) {
+            throw new RecursoNoEncontradoException("La solicitud indicada no existe.");
+        }
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            return em.createQuery(
+                            "SELECT h FROM HistorialSolicitud h JOIN FETCH h.solicitud LEFT JOIN FETCH h.usuario "
+                                    + "WHERE h.solicitud.idSolicitud = :idSolicitud "
+                                    + "ORDER BY h.fecha ASC, h.idHistorial ASC",
+                            HistorialSolicitud.class)
+                    .setParameter("idSolicitud", idSolicitud)
+                    .getResultList();
+
+        } catch (RuntimeException ex) {
+            throw new SQLException("No se pudo consultar el historial.", ex);
+
+        } finally {
+            em.close();
+        }
+    }
+
     private void validarQueEsJefeDelEmpleado(EntityManager em, int idEmpleadoJefe, Solicitud solicitud)
             throws ReglaNegocioException {
 
         if (solicitud.getEmpleado().getIdEmpleado() == idEmpleadoJefe) {
-            throw new ReglaNegocioException("No puede aprobar/rechazar tus solicitudes.");
+            throw new AccesoDenegadoException("No puede aprobar/rechazar tus solicitudes.");
         }
 
         int idDepartamento = solicitud.getEmpleado().getDepartamento().getIdDepartamento();
@@ -227,7 +352,7 @@ public class SolicitudService {
                 .getSingleResult();
 
         if (coincidencias == null || coincidencias == 0) {
-            throw new ReglaNegocioException("No tiene permiso para aprobar solicitudes de este empleado.");
+            throw new AccesoDenegadoException("No tiene permiso para aprobar solicitudes de este empleado.");
         }
     }
 
