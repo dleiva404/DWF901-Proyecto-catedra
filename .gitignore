@@ -22,3 +22,5 @@ buildNumber.properties
 *.iml
 .smarttomcat/
 
+src/main/resources/db.properties
+
