@@ -9,6 +9,7 @@ public class SolicitudDTO {
 
     private Integer id;
     private Integer empleadoId;
+    private String empleadoNombre;
     private Integer tipoSolicitudId;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -30,6 +31,9 @@ public class SolicitudDTO {
 
     public Integer getEmpleadoId() { return empleadoId; }
     public void setEmpleadoId(Integer id) { this.empleadoId = id; }
+
+    public String getEmpleadoNombre() { return empleadoNombre; }
+    public void setEmpleadoNombre(String nombre) { this.empleadoNombre = nombre; }
 
     public Integer getTipoSolicitudId() { return tipoSolicitudId; }
     public void setTipoSolicitudId(Integer id) { this.tipoSolicitudId = id; }
