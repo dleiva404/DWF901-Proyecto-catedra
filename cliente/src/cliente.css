@@ -1,0 +1,351 @@
+@import url("https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap");
+
+/* Adaptaciones mínimas para React. La identidad visual proviene de login.css y plantilla.css del equipo. */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+html, body, #root {
+    min-height: 100%;
+    width: 100%;
+}
+body {
+    margin: 0;
+    display: block;
+}
+#root {
+    min-height: 100vh;
+}
+button, input, select, textarea {
+    font: inherit;
+}
+button {
+    cursor: pointer;
+}
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+.rh-nav .rh-item {
+    width: 100%;
+    border: 0;
+    text-align: left;
+    background: transparent;
+    cursor: pointer;
+}
+.rh-nav .rh-item:hover {
+    background: var(--navy-2);
+}
+.rh-nav .rh-item.rh-activo {
+    background: var(--navy-3);
+}
+.rh-salir {
+    color: #d5dbe8;
+    background: transparent;
+    cursor: pointer;
+}
+.rh-salir svg {
+    stroke: currentColor;
+}
+.rh-campo select, .cliente-filtro select, .cliente-rechazo textarea {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 9px 12px;
+    background: #fff;
+    color: var(--navy);
+}
+.rh-campo textarea {
+    min-height: 90px;
+}
+.rh-campo input:focus, .rh-campo textarea:focus, .rh-campo select:focus, .cliente-filtro select:focus {
+    outline: 2px solid var(--naranja);
+    outline-offset: 1px;
+}
+.cliente-aviso {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.cliente-aviso-error {
+    background: #fdecea;
+    color: #a31d12;
+}
+.cliente-aviso-ok {
+    background: #e4f5ea;
+    color: #14623a;
+}
+.cliente-cab-seccion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.cliente-cab-seccion .rh-h2 {
+    margin: 0;
+}
+.cliente-filtro {
+    color: var(--gris);
+    font-weight: 600;
+    font-size: 13px;
+}
+.cliente-filtro select {
+    width: auto;
+    margin-left: 8px;
+}
+.cliente-texto-secundario {
+    font-size: 13px;
+    color: var(--texto-2);
+    overflow-wrap: anywhere;
+}
+.cliente-enlace {
+    background: transparent;
+    border: 0;
+    padding: 6px 0;
+    color: #b3470a;
+    font-weight: 600;
+    text-align: left;
+}
+.cliente-nota-cancelacion {
+    color: var(--gris);
+    font-size: 12px;
+    line-height: 1.45;
+}
+.cliente-rechazo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 190px;
+}
+.cliente-rechazo label {
+    font-size: 12px;
+    font-weight: 600;
+}
+.cliente-rechazo textarea {
+    display: block;
+    margin-top: 6px;
+    min-height: 65px;
+}
+.cliente-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.cliente-acciones button, .cliente-rechazo button {
+    padding: 8px 14px;
+    height: auto;
+    min-height: 38px;
+    font-size: 13px;
+}
+.cliente-radio-grupo {
+    display: flex;
+    gap: 8px;
+}
+.cliente-radio {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border: 2px solid #dde3ea;
+    border-radius: 12px;
+    color: var(--texto-2);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.cliente-radio.activo {
+    border-color: var(--navy);
+    color: var(--navy);
+}
+.cliente-radio input {
+    accent-color: var(--naranja);
+}
+.rh-btn-pdf {
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.rh-form .rh-nota-azul {
+    line-height: 1.4;
+}
+@media (max-width: 800px) {
+    .rh-side {
+        height: auto;
+        position: static;
+    }
+    .rh-user {
+        margin-top: 0;
+    }
+    .rh-contenido {
+        gap: 16px;
+    }
+}
+@media (max-width: 560px) {
+    .cliente-radio-grupo {
+        flex-direction: column;
+    }
+}
+
+/* Confirmación de cancelación, con el estilo del sistema. */
+.cliente-modal {
+    width: min(460px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    padding: 0;
+    border: 0;
+    border-radius: 18px;
+    background: #fff;
+    color: var(--navy);
+    box-shadow: 0 24px 65px rgba(17, 25, 43, .25);
+    font-family: "Public Sans", system-ui, sans-serif;
+}
+.cliente-modal::backdrop {
+    background: rgba(17, 25, 43, .64);
+}
+.cliente-modal-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 30px;
+}
+.cliente-modal-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.cliente-modal-icono {
+    flex: 0 0 46px;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #fff0e6;
+    color: #b84a10;
+    font-size: 26px;
+    font-weight: 700;
+}
+.cliente-modal h2 {
+    margin: 0;
+    color: var(--navy);
+    font-family: var(--titulos);
+    font-size: 24px;
+    line-height: 1.2;
+}
+.cliente-modal p {
+    margin: 0;
+    color: var(--texto-2);
+    line-height: 1.5;
+}
+.cliente-modal .cliente-modal-nota {
+    color: var(--gris);
+    font-size: 13px;
+}
+.cliente-modal-acciones {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+.cliente-modal-acciones button {
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.cliente-modal-volver {
+    border: 1px solid var(--borde);
+    background: #fff;
+    color: var(--navy);
+}
+.cliente-modal-volver:hover {
+    background: var(--fondo);
+}
+.cliente-modal-confirmar {
+    border: 1px solid #a31d12;
+    background: #a31d12;
+    color: #fff;
+}
+.cliente-modal-confirmar:hover:not(:disabled) {
+    background: #86190f;
+}
+.cliente-modal-acciones button:focus-visible {
+    outline: 3px solid var(--naranja);
+    outline-offset: 2px;
+}
+@media (max-width: 480px) {
+    .cliente-modal-contenido {
+        padding: 22px;
+    }
+    .cliente-modal-acciones button {
+        flex: 1;
+    }
+}
+
+/* Bandeja de revisión de constancias de Recursos Humanos */
+.cliente-gestion-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 24px 22px;
+    align-items: end;
+}
+.cliente-gestion-filtros .rh-campo {
+    margin: 0;
+}
+.cliente-gestion-buscar {
+    flex: 1 1 260px;
+}
+.cliente-gestion-estado {
+    flex: 0 1 190px;
+}
+.cliente-gestion-filtros input,
+.cliente-gestion-filtros select {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 9px 12px;
+    background: #fff;
+    color: var(--navy);
+}
+.cliente-gestion-filtros input:focus-visible,
+.cliente-gestion-filtros select:focus-visible {
+    outline: 2px solid var(--naranja);
+    outline-offset: 1px;
+}
+.cliente-gestion-detalle .rh-col-form {
+    min-width: 0;
+}
+.cliente-gestion-decision,
+.cliente-gestion-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.cliente-gestion-decision .rh-btn-aprobar,
+.cliente-gestion-decision .rh-btn-rechazar {
+    width: 100%;
+}
+.cliente-gestion-decision .rh-separador {
+    margin: 2px 0;
+}
+.cliente-gestion-acciones .rh-btn-cancelar {
+    justify-content: center;
+}
+.cliente-gestion-detalle .rh-campo textarea {
+    width: 100%;
+    min-height: 96px;
+    box-sizing: border-box;
+}
+@media (max-width: 560px) {
+    .cliente-gestion-estado {
+        flex: 1 1 160px;
+    }
+}
