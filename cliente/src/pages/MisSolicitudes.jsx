@@ -106,7 +106,7 @@ export default function MisSolicitudes({ usuario, irAIncapacidad }) {
   return (
     <>
       <h1 className="rh-titulo">Mis solicitudes</h1>
-      <Aviso>{error.includes('fechaFin') && error.includes('domingos') ? 'La solicitud debe incluir al menos un día de lunes a sábado.' : error}</Aviso>
+      <Aviso>{error.includes('domingos') ? 'La solicitud debe incluir al menos un día de lunes a sábado.' : error}</Aviso>
       <Aviso tipo="ok">{aviso}</Aviso>
 
       <div className="rh-bloque">

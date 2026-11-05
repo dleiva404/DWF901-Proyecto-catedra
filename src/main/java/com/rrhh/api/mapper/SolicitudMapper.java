@@ -18,7 +18,9 @@ public class SolicitudMapper {
 
         dto.setId(solicitud.getIdSolicitud());
         dto.setEmpleadoId(solicitud.getIdEmpleado());
-        dto.setEmpleadoNombre(solicitud.getEmpleado().getNombre() + " " + solicitud.getEmpleado().getApellido());
+        if (solicitud.getEmpleado() != null) {
+            dto.setEmpleadoNombre(solicitud.getEmpleado().getNombre() + " " + solicitud.getEmpleado().getApellido());
+        }
         dto.setTipoSolicitudId(solicitud.getIdTipoSolicitud());
         dto.setFechaSolicitud(solicitud.getFechaSolicitud());
         dto.setFechaInicio(solicitud.getFechaInicio());
