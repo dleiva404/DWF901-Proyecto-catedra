@@ -348,7 +348,7 @@ public class SolicitudService {
             throws ReglaNegocioException {
 
         if (solicitud.getEmpleado().getIdEmpleado() == idEmpleadoJefe) {
-            throw new AccesoDenegadoException("No puede aprobar/rechazar tus solicitudes.");
+            throw new AccesoDenegadoException("No puede aprobar ni rechazar sus propias solicitudes.");
         }
 
         int idDepartamento = solicitud.getEmpleado().getDepartamento().getIdDepartamento();

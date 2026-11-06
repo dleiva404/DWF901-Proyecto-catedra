@@ -140,7 +140,7 @@ public class ConstanciasBean implements Serializable {
             nueva.setMotivo(motivo.trim());
             nueva.setSalarioReferencia(BigDecimal.ZERO);
             nueva.setEmpresaEmisora(empresaEmisora);
-            nueva.setTokenVerificacion(UUID.randomUUID().toString().substring(0, 15));
+            nueva.setTokenVerificacion(UUID.randomUUID().toString());
 
             if (!new ConstanciaDAO().insertar(nueva)) {
                 fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
