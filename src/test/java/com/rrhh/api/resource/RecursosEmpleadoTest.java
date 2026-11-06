@@ -122,7 +122,7 @@ public class RecursosEmpleadoTest {
     @Test
     public void listarConEstadoInvalidoResponde400() throws Exception {
         try {
-            solicitudes().listar("ARCHIVADA", null, null, null, null);
+            solicitudes().listar("ARCHIVADA", null, null, null, null, null, null);
             fail("Debió responder 400");
         } catch (ValidacionApiException e) {
             assertTrue(camposDe(e).get(0).startsWith("estado: debe ser uno de"));
@@ -132,7 +132,7 @@ public class RecursosEmpleadoTest {
     @Test
     public void listarConVariosFiltrosInvalidosLosReportaTodos() throws Exception {
         try {
-            solicitudes().listar("X", "abc", null, "mal", "2026-10-01");
+            solicitudes().listar("X", "abc", null, "mal", "2026-10-01", null, null);
             fail("Debió responder 400");
         } catch (ValidacionApiException e) {
             assertEquals(3, camposDe(e).size());
@@ -142,7 +142,7 @@ public class RecursosEmpleadoTest {
     @Test
     public void listarConDesdePosteriorAHastaResponde400() throws Exception {
         try {
-            solicitudes().listar(null, null, null, "2026-10-31", "2026-10-01");
+            solicitudes().listar(null, null, null, "2026-10-31", "2026-10-01", null, null);
             fail("Debió responder 400");
         } catch (ValidacionApiException e) {
             assertEquals("[desde: no puede ser posterior a hasta]", camposDe(e).toString());

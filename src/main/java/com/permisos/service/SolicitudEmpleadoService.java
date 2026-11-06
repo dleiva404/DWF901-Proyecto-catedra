@@ -138,6 +138,12 @@ public class SolicitudEmpleadoService {
         if (filtro.getIdTipo() != null) {
             jpql.append(" AND s.tipoSolicitud.idTipoSolicitud = :idTipo");
         }
+        if (filtro.getIdEmpleado() != null) {
+            jpql.append(" AND s.empleado.idEmpleado = :idEmpleadoFiltro");
+        }
+        if (filtro.getIdDepartamento() != null) {
+            jpql.append(" AND s.empleado.departamento.idDepartamento = :idDepartamentoFiltro");
+        }
         if (filtro.getDesde() != null) {
             jpql.append(" AND s.fechaInicio >= :desde");
         }
@@ -157,6 +163,12 @@ public class SolicitudEmpleadoService {
             }
             if (filtro.getIdTipo() != null) {
                 consulta.setParameter("idTipo", filtro.getIdTipo());
+            }
+            if (filtro.getIdEmpleado() != null) {
+                consulta.setParameter("idEmpleadoFiltro", filtro.getIdEmpleado());
+            }
+            if (filtro.getIdDepartamento() != null) {
+                consulta.setParameter("idDepartamentoFiltro", filtro.getIdDepartamento());
             }
             if (filtro.getDesde() != null) {
                 consulta.setParameter("desde", filtro.getDesde());

@@ -87,6 +87,42 @@ public class FiltroSolicitudesTest {
     }
 
     @Test
+    public void empleadoIdYDepartamentoIdValidosSeConvierten() throws Exception {
+        FiltroSolicitudes f = FiltroSolicitudes.desdeParametros(null, null, " 5 ", "2", null, null);
+
+        assertEquals(Integer.valueOf(5), f.getIdEmpleado());
+        assertEquals(Integer.valueOf(2), f.getIdDepartamento());
+    }
+
+    @Test
+    public void empleadoIdYDepartamentoIdEnBlancoOCuatroParametrosQuedanSinFiltro() throws Exception {
+        FiltroSolicitudes deBlancos = FiltroSolicitudes.desdeParametros(null, null, " ", "", null, null);
+        FiltroSolicitudes deCuatro = FiltroSolicitudes.desdeParametros(null, null, null, null);
+
+        assertNull(deBlancos.getIdEmpleado());
+        assertNull(deBlancos.getIdDepartamento());
+        assertNull(deCuatro.getIdEmpleado());
+        assertNull(deCuatro.getIdDepartamento());
+        assertNull(FiltroSolicitudes.vacio().getIdEmpleado());
+        assertNull(FiltroSolicitudes.vacio().getIdDepartamento());
+    }
+
+    @Test
+    public void empleadoIdYDepartamentoIdInvalidosSeReportanJuntos() {
+        for (String malo : new String[]{"abc", "0", "-3", "1.5", "99999999999"}) {
+            try {
+                FiltroSolicitudes.desdeParametros(null, null, malo, malo, null, null);
+                fail("Debió lanzar ValidacionException con " + malo);
+            } catch (ValidacionException e) {
+                assertEquals(malo,
+                        "[empleadoId: debe ser un entero mayor que cero, "
+                                + "departamentoId: debe ser un entero mayor que cero]",
+                        e.getErrores().toString());
+            }
+        }
+    }
+
+    @Test
     public void fechasIsoSeParsean() throws Exception {
         FiltroSolicitudes f = FiltroSolicitudes.desdeParametros(null, null, "2026-10-01", "2026-10-31");
 

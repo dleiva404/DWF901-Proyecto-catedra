@@ -108,7 +108,9 @@ public class SolicitudResource {
                            @QueryParam("tipoSolicitudId") String tipoSolicitudId,
                            @QueryParam("propias") String propias,
                            @QueryParam("desde") String desde,
-                           @QueryParam("hasta") String hasta) throws SQLException {
+                           @QueryParam("hasta") String hasta,
+                           @QueryParam("empleadoId") String empleadoId,
+                           @QueryParam("departamentoId") String departamentoId) throws SQLException {
 
         ApiPrincipal yo = usuarioActual();
 
@@ -119,7 +121,7 @@ public class SolicitudResource {
             boolean esJefatura = "JEFATURA".equalsIgnoreCase(rol);
 
             FiltroSolicitudes filtro =
-                    FiltroSolicitudes.desdeParametros(estado, tipoSolicitudId, desde, hasta);
+                    FiltroSolicitudes.desdeParametros(estado, tipoSolicitudId, empleadoId, departamentoId, desde, hasta);
 
             List<Solicitud> lista;
 
