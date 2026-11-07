@@ -43,13 +43,13 @@ El archivo `src/config.js` define `API_BASE_URL`, actualmente `http://localhost:
 - Estados de carga, validaciones básicas y mensajes de errores de la API.
 - Diseño basado en `src/main/webapp/login.xhtml`, `css/login.css`, `css/plantilla.css` y `WEB-INF/templates/template.xhtml` del proyecto original.
 
-## Dependencias del backend (contrato REST v1.2)
+## Dependencias del backend (contrato REST v1.3)
 
 Para que todas las pantallas funcionen, el equipo debe haber integrado `/auth/login`, `/auth/logout`, `/tipos-solicitud`, `/vacaciones/saldo`, `/solicitudes`, `/solicitudes/{id}/aprobar`, `/solicitudes/{id}/rechazar`, `/incapacidades`, `/constancias`, `/constancias/{id}/aprobar`, `/constancias/{id}/rechazar`, `/constancias/{id}/pdf` y `/empleados` (solo RRHH).
 
-**Pendiente:** el contrato v1.2 únicamente permite `DELETE /solicitudes/{id}` si la solicitud está `PENDIENTE`. No define aún una operación para *pedir cancelación* de una solicitud ya resuelta. El cliente lo indica sin simular una acción.
+**Pendiente:** el contrato v1.3 únicamente permite `DELETE /solicitudes/{id}` si la solicitud está `PENDIENTE`. No define aún una operación para *pedir cancelación* de una solicitud ya resuelta. El cliente lo indica sin simular una acción.
 
-**Pendiente de comprobar en integración:** que `GET /constancias?propias=true` esté implementado; como medida adicional, la pantalla filtra los resultados del usuario en el frontend, pero el servidor siempre debe imponer la autorización real.
+**Comprobado en integración:** `GET /constancias?propias=true` está implementado; como medida adicional, la pantalla filtra los resultados del usuario en el frontend, pero el servidor siempre impone la autorización real.
 
 Las reglas de negocio, seguridad del token, generación del PDF, endpoints y base de datos son parte del backend del equipo, no del frontend.
 
@@ -61,4 +61,4 @@ Las reglas de negocio, seguridad del token, generación del PDF, endpoints y bas
 
 ## Seguridad y control de versiones
 
-`npm audit` para revisar dependencias; no subir `node_modules`, configuraciones locales ni credenciales. No hacer push/PR de la rama `feature/cliente-consumidor` antes de la coordinación con David.
+`npm audit` para revisar dependencias; no subir `node_modules`, configuraciones locales ni credenciales.
