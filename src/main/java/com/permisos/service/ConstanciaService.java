@@ -84,7 +84,7 @@ public class ConstanciaService {
         nueva.setMotivo(motivo);
         nueva.setSalarioReferencia(BigDecimal.ZERO);
         nueva.setEmpresaEmisora(empresaEmisora(idEmpleado));
-        nueva.setTokenVerificacion(UUID.randomUUID().toString().substring(0, 15));
+        nueva.setTokenVerificacion(UUID.randomUUID().toString());
 
         if (!constanciaDAO.insertar(nueva)) {
             throw new ConflictoException("No se pudo registrar la constancia. "

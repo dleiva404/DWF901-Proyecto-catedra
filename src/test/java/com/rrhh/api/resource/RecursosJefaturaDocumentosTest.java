@@ -294,10 +294,21 @@ public class RecursosJefaturaDocumentosTest {
     @Test
     public void listarSolicitudesConPropiasInvalidoResponde400() throws Exception {
         try {
-            solicitudes().listar(null, null, "abc", null, null);
+            solicitudes().listar(null, null, "abc", null, null, null, null);
             fail("Debió responder 400");
         } catch (BadRequestException e) {
             assertEquals("El parámetro propias debe ser true o false", e.getMessage());
+        }
+    }
+
+    @Test
+    public void listarSolicitudesConEmpleadoIdODepartamentoIdInvalidoResponde400() throws Exception {
+        try {
+            solicitudes().listar(null, null, null, null, null, "abc", "0");
+            fail("Debió responder 400");
+        } catch (ValidacionApiException e) {
+            assertEquals("[empleadoId: debe ser un entero mayor que cero, "
+                    + "departamentoId: debe ser un entero mayor que cero]", e.getCampos().toString());
         }
     }
 

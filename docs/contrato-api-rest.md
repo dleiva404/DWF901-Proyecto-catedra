@@ -1,6 +1,6 @@
 # Contrato de API REST — SistemaRRHH
 
-**Versión:** 1.2  
+**Versión:** 1.3  
 **Base URL:** `/SistemaRRHH/api` (en este documento las rutas se escriben sin el prefijo, por ejemplo `/ping`)  
 **Formato:** JSON (`application/json`, codificación UTF-8), salvo el PDF de constancia  
 **Fechas:** `yyyy-MM-dd` · **Fecha y hora:** `yyyy-MM-dd'T'HH:mm:ss`  
@@ -159,9 +159,12 @@ Devuelve solo los tipos activos. Respuesta `200`:
   "anio": 2026,
   "diasAsignados": 15,
   "diasUtilizados": 3,
-  "diasDisponibles": 12
+  "diasDisponibles": 12,
+  "diasPendientes": 2
 }
 ```
+
+`diasDisponibles` es `diasAsignados - diasUtilizados` y no descuenta los pendientes. `diasPendientes` suma los días de las solicitudes de vacaciones en estado `PENDIENTE` de ese año; lo que todavía se puede solicitar es `diasDisponibles - diasPendientes`.
 
 Errores: `400` si `anio` no es un número de cuatro dígitos; `404` si el empleado no tiene saldo registrado para ese año.
 
@@ -194,6 +197,7 @@ Respuesta `200` (arreglo de solicitudes):
   {
     "id": 15,
     "empleadoId": 5,
+    "empleadoNombre": "David Leiva",
     "tipoSolicitudId": 1,
     "fechaSolicitud": "2026-10-27T18:30:00",
     "fechaInicio": "2026-11-09",
@@ -205,6 +209,8 @@ Respuesta `200` (arreglo de solicitudes):
   }
 ]
 ```
+
+`empleadoNombre` es el nombre y apellido del empleado que hizo la solicitud.
 
 ### 5.8. Consultar una solicitud — `GET /solicitudes/{id}`
 
@@ -229,6 +235,7 @@ Respuesta `201` (cabecera `Location: /SistemaRRHH/api/solicitudes/15`):
 {
   "id": 15,
   "empleadoId": 5,
+  "empleadoNombre": "David Leiva",
   "tipoSolicitudId": 1,
   "fechaSolicitud": "2026-10-27T18:30:00",
   "fechaInicio": "2026-11-09",
@@ -458,7 +465,13 @@ Los errores de validación (`400`) incluyen además `campos`, con un texto por c
 
 - Decidido en la Parte 2: el token es opaco (sección 2).
 - Hecho en la Parte 2: login, logout, `401` sin token o con token vencido, `403` por rol, `400` con `campos`, JSON mal formado, CORS y registro de operaciones, probados manualmente.
-- Confirmar que cada endpoint responde según este contrato cuando lo implementen las partes 3 y 4.
-- Probar permisos con cuentas de los tres roles.
+- Hecho en las Partes 3 y 4: los endpoints están implementados y probados con cuentas de los tres roles, en Tomcat y desde el cliente web.
+- Pendiente: colección de pruebas con casos positivos y negativos por endpoint.
 - Verificar que las fechas se serialicen con el formato documentado.
 - Verificar la compatibilidad con las pantallas JSF existentes.
+
+## 9. Cambios respecto a la v1.2
+
+- `GET /vacaciones/saldo`: se agrega `diasPendientes`.
+- Solicitudes (`GET /solicitudes`, `GET /solicitudes/{id}` y `POST /solicitudes`): se agrega `empleadoNombre`.
+- Los filtros `empleadoId` y `departamentoId` de `GET /solicitudes` ya están implementados.

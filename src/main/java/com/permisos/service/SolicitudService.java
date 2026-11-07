@@ -260,6 +260,12 @@ public class SolicitudService {
         if (filtro.getIdTipo() != null) {
             jpql.append(" AND s.tipoSolicitud.idTipoSolicitud = :idTipo");
         }
+        if (filtro.getIdEmpleado() != null) {
+            jpql.append(" AND s.empleado.idEmpleado = :idEmpleadoFiltro");
+        }
+        if (filtro.getIdDepartamento() != null) {
+            jpql.append(" AND s.empleado.departamento.idDepartamento = :idDepartamentoFiltro");
+        }
         if (filtro.getDesde() != null) {
             jpql.append(" AND s.fechaInicio >= :desde");
         }
@@ -281,6 +287,12 @@ public class SolicitudService {
             }
             if (filtro.getIdTipo() != null) {
                 consulta.setParameter("idTipo", filtro.getIdTipo());
+            }
+            if (filtro.getIdEmpleado() != null) {
+                consulta.setParameter("idEmpleadoFiltro", filtro.getIdEmpleado());
+            }
+            if (filtro.getIdDepartamento() != null) {
+                consulta.setParameter("idDepartamentoFiltro", filtro.getIdDepartamento());
             }
             if (filtro.getDesde() != null) {
                 consulta.setParameter("desde", filtro.getDesde());
@@ -336,7 +348,7 @@ public class SolicitudService {
             throws ReglaNegocioException {
 
         if (solicitud.getEmpleado().getIdEmpleado() == idEmpleadoJefe) {
-            throw new AccesoDenegadoException("No puede aprobar/rechazar tus solicitudes.");
+            throw new AccesoDenegadoException("No puede aprobar ni rechazar sus propias solicitudes.");
         }
 
         int idDepartamento = solicitud.getEmpleado().getDepartamento().getIdDepartamento();

@@ -10,14 +10,16 @@ import java.util.List;
 
 /**
  * Filtros del listado de solicitudes (GET /api/solicitudes), según el contrato:
- * estado, tipoSolicitudId, desde y hasta. Un valor nulo significa "sin filtro".
+ * estado, tipoSolicitudId, empleadoId, departamentoId, desde y hasta. Un valor nulo
+ * significa "sin filtro".
  *
  * Los parámetros llegan como texto (query string); aquí se convierten una sola
  * vez y de forma segura. Como dice el contrato, desde y hasta se comparan con la
  * FECHA DE INICIO de la solicitud, con ambos extremos incluidos.
  *
- * Los filtros "propias", "empleadoId" y "departamentoId" del contrato dependen
- * del rol (jefatura y RRHH): son de la parte 4 y no se manejan aquí.
+ * El filtro "propias" depende del rol y se resuelve en SolicitudResource.
+ * Los filtros empleadoId y departamentoId se combinan (AND) con el alcance del rol:
+ * una jefatura que pide un empleado de otro departamento recibe una lista vacía.
  *
  * Es Java puro (sin JPA ni JAX-RS) para poder probarlo sin infraestructura.
  */
@@ -31,19 +33,24 @@ public final class FiltroSolicitudes {
 
     private final String estado;
     private final Integer idTipo;
+    private final Integer idEmpleado;
+    private final Integer idDepartamento;
     private final LocalDate desde;
     private final LocalDate hasta;
 
-    private FiltroSolicitudes(String estado, Integer idTipo, LocalDate desde, LocalDate hasta) {
+    private FiltroSolicitudes(String estado, Integer idTipo, Integer idEmpleado,
+                              Integer idDepartamento, LocalDate desde, LocalDate hasta) {
         this.estado = estado;
         this.idTipo = idTipo;
+        this.idEmpleado = idEmpleado;
+        this.idDepartamento = idDepartamento;
         this.desde = desde;
         this.hasta = hasta;
     }
 
     /** Filtro sin restricciones: devuelve todo. */
     public static FiltroSolicitudes vacio() {
-        return new FiltroSolicitudes(null, null, null, null);
+        return new FiltroSolicitudes(null, null, null, null, null, null);
     }
 
     /**
@@ -53,6 +60,13 @@ public final class FiltroSolicitudes {
      * @throws ValidacionException con un texto "campo: problema" por cada valor inválido
      */
     public static FiltroSolicitudes desdeParametros(String estado, String tipoSolicitudId,
+                                                    String desde, String hasta)
+            throws ValidacionException {
+        return desdeParametros(estado, tipoSolicitudId, null, null, desde, hasta);
+    }
+
+    public static FiltroSolicitudes desdeParametros(String estado, String tipoSolicitudId,
+                                                    String empleadoId, String departamentoId,
                                                     String desde, String hasta)
             throws ValidacionException {
 
@@ -80,6 +94,9 @@ public final class FiltroSolicitudes {
             }
         }
 
+        Integer idEmpleado = parsearEntero(empleadoId, "empleadoId", errores);
+        Integer idDepartamento = parsearEntero(departamentoId, "departamentoId", errores);
+
         LocalDate desdeFecha = parsearFecha(desde, "desde", errores);
         LocalDate hastaFecha = parsearFecha(hasta, "hasta", errores);
 
@@ -91,7 +108,24 @@ public final class FiltroSolicitudes {
             throw new ValidacionException(errores);
         }
 
-        return new FiltroSolicitudes(estadoLimpio, tipo, desdeFecha, hastaFecha);
+        return new FiltroSolicitudes(estadoLimpio, tipo, idEmpleado, idDepartamento, desdeFecha, hastaFecha);
+    }
+
+    private static Integer parsearEntero(String valor, String campo, List<String> errores) {
+        if (esBlanco(valor)) {
+            return null;
+        }
+        Integer numero = null;
+        try {
+            numero = Integer.valueOf(valor.trim());
+        } catch (NumberFormatException e) {
+            numero = null;
+        }
+        if (numero == null || numero <= 0) {
+            errores.add(campo + ": debe ser un entero mayor que cero");
+            return null;
+        }
+        return numero;
     }
 
     private static LocalDate parsearFecha(String valor, String campo, List<String> errores) {
@@ -117,6 +151,14 @@ public final class FiltroSolicitudes {
 
     public Integer getIdTipo() {
         return idTipo;
+    }
+
+    public Integer getIdEmpleado() {
+        return idEmpleado;
+    }
+
+    public Integer getIdDepartamento() {
+        return idDepartamento;
     }
 
     public LocalDate getDesde() {

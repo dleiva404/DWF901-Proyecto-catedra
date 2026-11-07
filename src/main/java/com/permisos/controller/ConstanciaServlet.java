@@ -79,7 +79,7 @@ public class ConstanciaServlet extends HttpServlet {
             nuevaConstancia.setMotivo(motivo);
             nuevaConstancia.setSalarioReferencia(BigDecimal.ZERO);
             nuevaConstancia.setEmpresaEmisora(empresaEmisoraFinal);
-            nuevaConstancia.setTokenVerificacion(UUID.randomUUID().toString().substring(0, 15));
+            nuevaConstancia.setTokenVerificacion(UUID.randomUUID().toString());
 
             boolean exito = constanciaDAO.insertar(nuevaConstancia);
 
