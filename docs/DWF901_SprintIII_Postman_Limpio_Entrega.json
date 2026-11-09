@@ -1,0 +1,2400 @@
+{
+  "info": {
+    "_postman_id": "119d869e-315d-42ac-98af-a5167d31b54e",
+    "name": "DWF901 - Sistema RRHH - Sprint III REST",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección DWF901 – Sistema RRHH, Sprint III. Versión sanitizada para GitHub: se eliminaron tokens Bearer reales y contraseñas de las solicitudes; las credenciales de prueba se configuran localmente mediante variables sin valores publicados. Ejecutar P02 (EMPLEADO), P21 (JEFATURA) y P30 (RRHH) para obtener tokens con los scripts existentes. Se conservan las 76 solicitudes identificadas (P01–P78 excepto P28 y P29); se retiró la solicitud accidental «New Request» sin identificador. P04 usa la ruta GET /empleados, sustentada por P05/P06. P15 tenía la URL vacía en el archivo original y requiere cotejar su URL exacta antes de ejecutarla. Esta colección no demuestra por sí sola resultados HTTP; consultar el informe, la matriz y las capturas de evidencia."
+  },
+  "item": [
+    {
+      "name": "01 - Autenticación y acceso público",
+      "item": [
+        {
+          "name": "P01 - Verificar servicio REST (Ping)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ping",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ping"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P77 - Ping con formato XML no admitido",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/xml"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ping",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ping"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P02 - Login correcto REST",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Login correcto - HTTP 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const respuesta = pm.response.json();\r\n\r\n    if (respuesta.token && respuesta.usuario?.rol === \"EMPLEADO\") {\r\n        pm.collectionVariables.set(\"token\", respuesta.token);\r\n        pm.collectionVariables.set(\"tokenEmpleado\", respuesta.token);\r\n\r\n        console.log(\"Token de EMPLEADO guardado correctamente\");\r\n    }\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{usuarioEmpleado}}\",\n  \"password\": \"{{contrasenaEmpleado}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P03 - Login con contraseña incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{usuarioJefatura}}\",\n  \"password\": \"{{contrasenaIncorrecta}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P49 - Login con contraseña vacía",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{usuarioEmpleado}}\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Empleado",
+      "item": [
+        {
+          "name": "P07 — Consultar tipos de solicitud",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tipos-solicitud",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos-solicitud"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P66 - Tipos de solicitud sin token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tipos-solicitud",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos-solicitud"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P08 - Consultar saldo de vacaciones",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vacaciones/saldo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vacaciones",
+                "saldo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P09 - Saldo con año inválido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vacaciones/saldo?anio=26",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vacaciones",
+                "saldo"
+              ],
+              "query": [
+                {
+                  "key": "anio",
+                  "value": "26"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P10 — Saldo de año inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vacaciones/saldo?anio=1999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vacaciones",
+                "saldo"
+              ],
+              "query": [
+                {
+                  "key": "anio",
+                  "value": "1999"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P11 - Consultar mis solicitudes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?estado=PENDIENTE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "PENDIENTE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P63 - Filtro propias invalido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?propias=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "propias",
+                  "value": "abc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P12 - Filtro de estado inválido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?estado=ARCHIVADA",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "ARCHIVADA"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P13 - Consultar solicitud por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P14 - Consultar solicitud inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P15 - Solicitud con ID inválido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            },
+            "description": "URL reconstruida como /solicitudes/-1 para probar ID negativo. La URL estaba vacía en el export original: confirmar contra captura y ejecución real."
+          },
+          "response": [],
+          "description": "Pendiente de cotejo: la URL de P15 estaba vacía en la colección original. Completar con el valor exacto de la evidencia antes de ejecutar este caso; no se supone ni se inventa un identificador."
+        },
+        {
+          "name": "P16 - Solicitud con ID no numérico",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "abc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P17 - Solicitud con ID demasiado grande",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/99999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "99999999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P18 - Consultar solicitudes pendientes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?estado=PENDIENTE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "PENDIENTE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P19- Consultar historial de solicitud",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/5/historial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "5",
+                "historial"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P20 — Consultar solicitudes aprobadas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?estado=APROBADA",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "APROBADA"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P24 - Crear solicitud de vacaciones",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipoSolicitudId\": 1,\r\n  \"fechaInicio\": \"2026-12-14\",\r\n  \"fechaFin\": \"2026-12-16\",\r\n  \"motivo\": \"Prueba de cancelación por empleado - Sprint III\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P68 - Crear solicitud con JSON vacio",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P69 - Solicitud con motivo corto",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipoSolicitudId\": 1,\r\n  \"motivo\": \"abcd\",\r\n  \"fechaInicio\": \"2026-11-16\",\r\n  \"fechaFin\": \"2026-11-17\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P48 - Empleado cancela solicitud",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "10"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P70 - Cancelar solicitud con ID cero",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P71 - Cancelar solicitud inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P51 - Empleado intenta consultar solicitud ajena",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P52 - Historial de solicitud con ID cero",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/0/historial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "0",
+                "historial"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P56 - Historial de solicitud inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/999999/historial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "999999",
+                "historial"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenEmpleado}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "03 - Jefatura",
+      "item": [
+        {
+          "name": "P21 - Login de Jefatura",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Login Jefatura - HTTP 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const respuesta = pm.response.json();\r\n\r\n    if (respuesta.token && respuesta.usuario?.rol === \"JEFATURA\") {\r\n        pm.collectionVariables.set(\"tokenJefatura\", respuesta.token);\r\n        console.log(\"Token de JEFATURA guardado correctamente\");\r\n    }\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{usuarioJefatura}}\",\n  \"password\": \"{{contrasenaJefatura}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P22 - Consultar solicitudes de Jefatura",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P23 - Solicitudes pendientes de Jefatura",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes?estado=PENDIENTE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "PENDIENTE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P25 - Jefatura consulta solicitud pendiente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "7"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P26 - Empleado intenta aprobar solicitud",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/6/aprobar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "6",
+                "aprobar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P27 — Aprobación por Jefatura",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/7/aprobar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "7",
+                "aprobar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P72 - Aprobar solicitud con ID cero",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/0/aprobar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "0",
+                "aprobar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P47 - Jefatura rechaza solicitud",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"motivoRechazo\": \"Las fechas solicitadas requieren corrección.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/9/rechazar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "9",
+                "rechazar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P73 - Rechazar solicitud inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"motivoRechazo\": \"Prueba de solicitud inexistente\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/999999/rechazar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "999999",
+                "rechazar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P74 - Rechazar solicitud con motivo vacio",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenJefatura}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"motivoRechazo\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes/999999/rechazar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "solicitudes",
+                "999999",
+                "rechazar"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenJefatura}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "04 - Recursos Humanos (RRHH)",
+      "item": [
+        {
+          "name": "P05 - Acceso con token alterado",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "token-alterado-prueba-123",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P04 - Acceso a empleados sin token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "URL reconstruida para probar acceso a empleados sin token; estaba vacía en el export original. Revisar evidencia antes de ejecutar."
+          },
+          "response": [],
+          "description": "URL reconstruida a partir del nombre del caso y de las solicitudes P05/P06 sobre GET /empleados, ya presentes en el export. Se mantiene auth=noauth para validar el acceso sin token."
+        },
+        {
+          "name": "P06 — Acceso con rol incorrecto (403 Forbidden)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmpleado}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P30 - Login correcto RRHH",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login RRHH - HTTP 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const respuesta = pm.response.json();\r\n\r\n    if (respuesta.token && respuesta.usuario?.rol === \"RRHH\") {\r\n        pm.collectionVariables.set(\"tokenRRHH\", respuesta.token);\r\n        console.log(\"Token de RRHH guardado correctamente\");\r\n    }\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{usuarioRRHH}}\",\n  \"password\": \"{{contrasenaRRHH}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P31 - RRHH consulta empleados",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P32 - RRHH consulta empleado por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P33 - RRHH consulta empleado inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P34 - RRHH consulta constancias",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P78 - Constancias con filtro propias vacio",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias?propias=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias"
+              ],
+              "query": [
+                {
+                  "key": "propias",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P64 - Constancias con filtro propias invalido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias?propias=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias"
+              ],
+              "query": [
+                {
+                  "key": "propias",
+                  "value": "abc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P35 — RRHH consulta constancia por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P57 - Constancia inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P36 - RRHH descarga PDF de constancia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias/2/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "2",
+                "pdf"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P55 - PDF de constancia con ID cero",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias/0/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "0",
+                "pdf"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P37 - RRHH descarga constancia inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias/999999/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "999999",
+                "pdf"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P38 - RRHH consulta incapacidades",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P65 - Consultar incapacidades sin token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P39 - RRHH consulta incapacidad por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P54 - Incapacidad con ID cero",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P40 - RRHH consulta incapacidad inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P41 - Cerrar sesión RRHH",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P67 - Cerrar sesion sin token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P42 - Registrar incapacidad",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"numeroDocumento\": \"PRUEBA-REST-2026-042\",\r\n  \"fechaInicio\": \"2026-11-02\",\r\n  \"fechaFin\": \"2026-11-04\",\r\n  \"observaciones\": \"Prueba funcional de registro de incapacidad - Sprint III\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P75 - Registrar incapacidad con JSON vacio",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P76 - Incapacidad con documento vacio",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"numeroDocumento\": \"\",\r\n  \"fechaInicio\": \"2026-11-16\",\r\n  \"fechaFin\": \"2026-11-17\",\r\n  \"observaciones\": \"Prueba de limite inferior\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/incapacidades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incapacidades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P43 - Crear constancia laboral",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"Laboral\",\r\n  \"institucion\": \"Banco de prueba\",\r\n  \"motivo\": \"Prueba de rechazo de constancia - Sprint III\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P58 - Tipo de constancia invalido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"Invalido\",\r\n  \"institucion\": \"Banco de prueba\",\r\n  \"motivo\": \"Validar tipo de constancia\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P59 - Constancia con institución vacía",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"Laboral\",\r\n  \"institucion\": \"\",\r\n  \"motivo\": \"Prueba de limite inferior\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P44 - RRHH aprueba constancia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias/3/aprobar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "3",
+                "aprobar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P61 - Aprobar constancia inexistente",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias/999999/aprobar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "999999",
+                "aprobar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P62 - Aprobar constancia con ID cero",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias/0/aprobar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "0",
+                "aprobar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P45 - Rechazar constancia ya aprobada",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"motivoRechazo\": \"Prueba negativa de rechazo de constancia ya aprobada\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias/3/rechazar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "3",
+                "rechazar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P46 - RRHH rechaza constancia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"motivoRechazo\": \"La información presentada requiere corrección.\",\r\n  \"observaciones\": \"Prueba funcional de rechazo - Sprint III\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias/5/rechazar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "5",
+                "rechazar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P60 - Rechazo de constancia con motivo vacio",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRRHH}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"motivoRechazo\": \"\",\r\n  \"observaciones\": \"Prueba de limite inferior\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/constancias/5/rechazar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "5",
+                "rechazar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P50 - RRHH consulta empleado con ID cero",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "P53 - Constancia con ID cero",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/constancias/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "constancias",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenRRHH}}",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/SistemaRRHH/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "tokenEmpleado",
+      "value": ""
+    },
+    {
+      "key": "tokenJefatura",
+      "value": ""
+    },
+    {
+      "key": "tokenRRHH",
+      "value": ""
+    },
+    {
+      "key": "usuarioEmpleado",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuarioJefatura",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuarioRRHH",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contrasenaEmpleado",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contrasenaJefatura",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contrasenaRRHH",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contrasenaIncorrecta",
+      "value": "CONTRASENA_INCORRECTA_PRUEBA",
+      "type": "string"
+    }
+  ]
+}
