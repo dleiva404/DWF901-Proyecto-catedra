@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Catálogo de tipos de solicitud activos (endpoint 4 del contrato), para
@@ -24,7 +25,8 @@ import java.util.List;
 @RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class TipoSolicitudResource {
 
-    private final TipoSolicitudDAO tipoSolicitudDAO = new TipoSolicitudDAO();
+    @Autowired
+    private TipoSolicitudDAO tipoSolicitudDAO;
 
     @GET
     public Response listar() throws SQLException {

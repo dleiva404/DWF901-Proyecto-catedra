@@ -126,6 +126,26 @@
             <version>2.15.3</version>
         </dependency>
 
+        <!-- Spring: contenedor de inyección de dependencias -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.3.39</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>5.3.39</version>
+        </dependency>
+
+        <!-- Puente entre Jersey y Spring (@Autowired en los recursos REST) -->
+        <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-spring5</artifactId>
+            <version>2.41</version>
+        </dependency>
+
     </dependencies>
 
     <build>
