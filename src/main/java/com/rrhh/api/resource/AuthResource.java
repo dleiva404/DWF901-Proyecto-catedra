@@ -24,14 +24,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.sql.SQLException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
-    private final RolDAO rolDAO = new RolDAO();
-    private final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
+    @Autowired
+    private UsuarioDAO usuarioDAO;
+    @Autowired
+    private RolDAO rolDAO;
+    @Autowired
+    private EmpleadoDAO empleadoDAO;
 
     @Context
     private SecurityContext securityContext;

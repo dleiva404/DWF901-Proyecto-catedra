@@ -8,6 +8,8 @@ import com.permisos.model.TipoSolicitud;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Registro de una incapacidad por parte del empleado.
@@ -21,12 +23,24 @@ import java.time.LocalDate;
  * Mapeo a HTTP (lo hace la capa REST): ValidacionException -> 400,
  * SQLException -> 500.
  */
+@Service
 public class IncapacidadEmpleadoService {
 
     private static final String TIPO_INCAPACIDAD = "INCAPACIDAD";
 
-    private final TipoSolicitudDAO tipoSolicitudDAO = new TipoSolicitudDAO();
-    private final IncapacidadDAO incapacidadDAO = new IncapacidadDAO();
+    private final TipoSolicitudDAO tipoSolicitudDAO;
+    private final IncapacidadDAO incapacidadDAO;
+
+    @Autowired
+    public IncapacidadEmpleadoService(TipoSolicitudDAO tipoSolicitudDAO, IncapacidadDAO incapacidadDAO) {
+        this.tipoSolicitudDAO = tipoSolicitudDAO;
+        this.incapacidadDAO = incapacidadDAO;
+    }
+
+    /** Para pruebas que no levantan Spring. */
+    public IncapacidadEmpleadoService() {
+        this(new TipoSolicitudDAO(), new IncapacidadDAO());
+    }
 
     /**
      * Valida y registra la incapacidad. Devuelve la incapacidad ya guardada,

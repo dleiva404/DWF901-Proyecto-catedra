@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Constancias del usuario autenticado (endpoints 18, 19 y 20 del contrato).
@@ -47,7 +48,8 @@ import java.util.List;
 @RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class ConstanciaResource {
 
-    private final ConstanciaService servicio = new ConstanciaService();
+    @Autowired
+    private ConstanciaService servicio;
 
     @Context
     private SecurityContext securityContext;

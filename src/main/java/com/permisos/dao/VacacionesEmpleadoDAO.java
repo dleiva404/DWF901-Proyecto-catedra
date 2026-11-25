@@ -5,7 +5,9 @@ import com.permisos.util.JPAUtil;
 
 import javax.persistence.EntityManager;
 import java.sql.SQLException;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class VacacionesEmpleadoDAO {
 
     public VacacionesEmpleado buscarPorEmpleadoYAnio(

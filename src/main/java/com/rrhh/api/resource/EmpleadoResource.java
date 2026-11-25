@@ -18,13 +18,15 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/empleados")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiresRole({"RRHH"})
 public class EmpleadoResource {
 
-    private final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
+    @Autowired
+    private EmpleadoDAO empleadoDAO;
 
     @GET
     public Response listarEmpleados() throws SQLException {

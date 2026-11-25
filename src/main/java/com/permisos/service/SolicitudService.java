@@ -11,8 +11,10 @@ import javax.persistence.LockModeType;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.springframework.stereotype.Service;
 
 
+@Service
 public class SolicitudService {
 
   /**

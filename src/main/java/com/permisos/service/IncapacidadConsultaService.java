@@ -7,8 +7,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.sql.SQLException;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
 // consultas de incapacidades: empleado y jefatura ven las suyas, RRHH ve todas
+@Service
 public class IncapacidadConsultaService {
 
     public List<Incapacidad> listar(int idEmpleado, boolean verTodas) throws SQLException {

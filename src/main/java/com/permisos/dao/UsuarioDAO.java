@@ -7,7 +7,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import java.sql.SQLException;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class UsuarioDAO {
 
     private static final Logger LOG =

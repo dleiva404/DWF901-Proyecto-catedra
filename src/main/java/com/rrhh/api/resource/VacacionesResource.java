@@ -20,6 +20,7 @@ import javax.ws.rs.core.SecurityContext;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Saldo de vacaciones del usuario autenticado (endpoint 5 del contrato).
@@ -30,7 +31,8 @@ import java.util.Collections;
 @RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class VacacionesResource {
 
-    private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
+    @Autowired
+    private SolicitudEmpleadoService servicio;
 
     @Context
     private SecurityContext securityContext;

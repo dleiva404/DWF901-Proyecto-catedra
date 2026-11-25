@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Registro de una incapacidad del usuario autenticado (endpoint 17 del
@@ -45,8 +46,10 @@ import java.util.List;
 @RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class IncapacidadResource {
 
-    private final IncapacidadEmpleadoService servicio = new IncapacidadEmpleadoService();
-    private final IncapacidadConsultaService consulta = new IncapacidadConsultaService();
+    @Autowired
+    private IncapacidadEmpleadoService servicio;
+    @Autowired
+    private IncapacidadConsultaService consulta;
 
     @Context
     private SecurityContext securityContext;

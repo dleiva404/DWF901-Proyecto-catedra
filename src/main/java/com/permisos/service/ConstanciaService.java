@@ -10,11 +10,24 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 // constancias: empleado y jefatura ven las suyas, RRHH ve todas
+@Service
 public class ConstanciaService {
 
-    private final ConstanciaDAO constanciaDAO = new ConstanciaDAO();
+    private final ConstanciaDAO constanciaDAO;
+
+    @Autowired
+    public ConstanciaService(ConstanciaDAO constanciaDAO) {
+        this.constanciaDAO = constanciaDAO;
+    }
+
+    /** Para pruebas que no levantan Spring. */
+    public ConstanciaService() {
+        this(new ConstanciaDAO());
+    }
 
     public List<Constancia> listar(int idEmpleado, boolean verTodas) throws SQLException {
 

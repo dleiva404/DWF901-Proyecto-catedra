@@ -39,6 +39,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Solicitudes del EMPLEADO autenticado sobre SUS PROPIAS solicitudes
@@ -53,9 +54,11 @@ import java.util.List;
 @RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class SolicitudResource {
 
-    private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
+    @Autowired
+    private SolicitudEmpleadoService servicio;
     // Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
-    private final SolicitudService solicitudService = new SolicitudService();
+    @Autowired
+    private SolicitudService solicitudService;
 
     @Context
     private SecurityContext securityContext;
