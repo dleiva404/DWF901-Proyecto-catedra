@@ -6,6 +6,8 @@ import com.rrhh.api.security.ApiSecurityContext;
 import com.rrhh.api.security.SesionApi;
 import com.rrhh.api.security.TokenService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -28,6 +30,9 @@ public class AuthFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Override
     public void filter(ContainerRequestContext context) throws IOException {
 
@@ -47,7 +52,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
 
         String token = extraerToken(cabecera);
-        SesionApi sesion = TokenService.getInstance().validar(token);
+        SesionApi sesion = tokenService.validar(token);
 
         if (sesion == null) {
             rechazar(context, "Token inválido o vencido");

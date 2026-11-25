@@ -6,27 +6,23 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Service;
 
+@Service
 public final class TokenService {
-
-    private static final TokenService INSTANCIA = new TokenService();
 
     private final ConcurrentHashMap<String, SesionApi> sesiones =
             new ConcurrentHashMap<>();
     private final long duracionSegundos;
     private final Clock reloj;
 
-    private TokenService() {
+    public TokenService() {
         this(ApiConfig.tokenMinutos() * 60L, Clock.systemUTC());
     }
 
     TokenService(long duracionSegundos, Clock reloj) {
         this.duracionSegundos = duracionSegundos;
         this.reloj = reloj;
-    }
-
-    public static TokenService getInstance() {
-        return INSTANCIA;
     }
 
     public SesionApi crear(int usuarioId, int empleadoId, String username,

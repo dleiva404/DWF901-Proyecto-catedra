@@ -36,6 +36,8 @@ public class AuthResource {
     private RolDAO rolDAO;
     @Autowired
     private EmpleadoDAO empleadoDAO;
+    @Autowired
+    private TokenService tokenService;
 
     @Context
     private SecurityContext securityContext;
@@ -72,7 +74,7 @@ public class AuthResource {
 
         usuarioDAO.registrarUltimoAcceso(usuario.getIdUsuario());
 
-        SesionApi sesion = TokenService.getInstance().crear(
+        SesionApi sesion = tokenService.crear(
                 usuario.getIdUsuario(),
                 usuario.getIdEmpleado(),
                 usuario.getUsername(),
@@ -81,7 +83,7 @@ public class AuthResource {
 
         LoginResponseDTO respuesta = new LoginResponseDTO(
                 sesion.getToken(),
-                TokenService.getInstance().getDuracionSegundos(),
+                tokenService.getDuracionSegundos(),
                 new LoginResponseDTO.UsuarioSesionDTO(
                         sesion.getUsuarioId(),
                         sesion.getUsername(),
@@ -98,7 +100,7 @@ public class AuthResource {
         ApiPrincipal yo = ApiPrincipal.desde(securityContext);
 
         if (yo != null) {
-            TokenService.getInstance().invalidar(yo.getToken());
+            tokenService.invalidar(yo.getToken());
         }
 
         return Response.noContent().build();
