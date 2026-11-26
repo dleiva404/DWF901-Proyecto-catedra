@@ -9,7 +9,6 @@ import com.rrhh.api.dto.NuevaIncapacidadDTO;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.IncapacidadMapper;
 import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.validation.ValidadorApi;
@@ -43,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Path("/incapacidades")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class IncapacidadResource {
 
     @Autowired

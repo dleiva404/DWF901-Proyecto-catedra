@@ -9,7 +9,6 @@ import com.permisos.model.Usuario;
 import com.rrhh.api.dto.LoginRequestDTO;
 import com.rrhh.api.dto.LoginResponseDTO;
 import com.rrhh.api.exception.ApiException;
-import com.rrhh.api.filter.Publico;
 import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.security.SesionApi;
 import com.rrhh.api.security.TokenService;
@@ -44,7 +43,6 @@ public class AuthResource {
 
     @POST
     @Path("/login")
-    @Publico
     @Consumes(MediaType.APPLICATION_JSON)
     public Response login(LoginRequestDTO datos) throws SQLException {
 

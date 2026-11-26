@@ -3,7 +3,6 @@ package com.rrhh.api.resource;
 import com.rrhh.repository.TipoSolicitudRepository;
 import com.permisos.model.TipoSolicitud;
 import com.rrhh.api.dto.TipoSolicitudDTO;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.TipoSolicitudMapper;
 
 import javax.ws.rs.GET;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Path("/tipos-solicitud")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class TipoSolicitudResource {
 
     @Autowired

@@ -4,6 +4,7 @@ import com.permisos.util.JPAUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -15,6 +16,7 @@ import javax.persistence.EntityManagerFactory;
 @ComponentScan(basePackages = {"com.permisos.dao", "com.permisos.service", "com.rrhh.api.security"})
 @EnableJpaRepositories(basePackages = "com.rrhh.repository")
 @EnableTransactionManagement
+@Import(SecurityConfig.class)
 public class AppConfig {
 
     // Se reutiliza el EntityManagerFactory de JPAUtil: una sola configuración de BD.

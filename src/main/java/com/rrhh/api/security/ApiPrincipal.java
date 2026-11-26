@@ -1,5 +1,8 @@
 package com.rrhh.api.security;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import javax.ws.rs.core.SecurityContext;
 import java.security.Principal;
 
@@ -12,9 +15,20 @@ public final class ApiPrincipal implements Principal {
     }
 
     public static ApiPrincipal desde(SecurityContext contexto) {
-        if (contexto != null
-                && contexto.getUserPrincipal() instanceof ApiPrincipal) {
-            return (ApiPrincipal) contexto.getUserPrincipal();
+        if (contexto != null) {
+            Principal principal = contexto.getUserPrincipal();
+            if (principal instanceof ApiPrincipal) {
+                return (ApiPrincipal) principal;
+            }
+            // Spring Security entrega el usuario dentro de un Authentication
+            if (principal instanceof Authentication
+                    && ((Authentication) principal).getPrincipal() instanceof ApiPrincipal) {
+                return (ApiPrincipal) ((Authentication) principal).getPrincipal();
+            }
+            Authentication actual = SecurityContextHolder.getContext().getAuthentication();
+            if (actual != null && actual.getPrincipal() instanceof ApiPrincipal) {
+                return (ApiPrincipal) actual.getPrincipal();
+            }
         }
         return null;
     }

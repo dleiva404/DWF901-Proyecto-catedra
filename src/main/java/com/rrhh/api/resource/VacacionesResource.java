@@ -5,7 +5,6 @@ import com.permisos.service.SolicitudEmpleadoService;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.SaldoVacacionesMapper;
 import com.rrhh.api.security.ApiPrincipal;
 
@@ -28,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Path("/vacaciones")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class VacacionesResource {
 
     @Autowired

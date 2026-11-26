@@ -13,7 +13,6 @@ import com.rrhh.api.dto.SolicitudDTO;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.HistorialSolicitudMapper;
 import com.rrhh.api.mapper.SolicitudMapper;
 import com.rrhh.api.security.ApiPrincipal;
@@ -51,7 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Path("/solicitudes")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class SolicitudResource {
 
     @Autowired
@@ -186,7 +184,6 @@ public class SolicitudResource {
     // Endpoints agregados para aprobar, rechazar e historial utilizando SolicitudService
     @POST
     @Path("/{id}/aprobar")
-    @RequiresRole({"JEFATURA"})
     public Response aprobar(@PathParam("id") String idTexto) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
@@ -202,7 +199,6 @@ public class SolicitudResource {
     @POST
     @Path("/{id}/rechazar")
     @Consumes(MediaType.APPLICATION_JSON)
-    @RequiresRole({"JEFATURA"})
     public Response rechazar(@PathParam("id") String idTexto, RechazoSolicitudDTO datos) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();

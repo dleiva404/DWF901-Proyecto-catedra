@@ -4,7 +4,6 @@ package com.rrhh.api.resource;
 import com.permisos.dao.EmpleadoDAO;
 import com.permisos.model.Empleado;
 import com.rrhh.api.dto.EmpleadoDTO;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.EmpleadoMapper;
 
 import javax.ws.rs.GET;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/empleados")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"RRHH"})
 public class EmpleadoResource {
 
     @Autowired
