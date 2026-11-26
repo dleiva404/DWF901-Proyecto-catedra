@@ -1,9 +1,8 @@
 package com.rrhh.api.resource;
 
-import com.permisos.dao.TipoSolicitudDAO;
+import com.rrhh.repository.TipoSolicitudRepository;
 import com.permisos.model.TipoSolicitud;
 import com.rrhh.api.dto.TipoSolicitudDTO;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.TipoSolicitudMapper;
 
 import javax.ws.rs.GET;
@@ -14,6 +13,7 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Catálogo de tipos de solicitud activos (endpoint 4 del contrato), para
@@ -21,15 +21,15 @@ import java.util.List;
  */
 @Path("/tipos-solicitud")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class TipoSolicitudResource {
 
-    private final TipoSolicitudDAO tipoSolicitudDAO = new TipoSolicitudDAO();
+    @Autowired
+    private TipoSolicitudRepository tipoSolicitudRepository;
 
     @GET
     public Response listar() throws SQLException {
         List<TipoSolicitudDTO> respuesta = new ArrayList<>();
-        for (TipoSolicitud tipo : tipoSolicitudDAO.listarActivos()) {
+        for (TipoSolicitud tipo : tipoSolicitudRepository.findByActivoTrueOrderByNombre()) {
             respuesta.add(TipoSolicitudMapper.toDTO(tipo));
         }
         return Response.ok(respuesta).build();

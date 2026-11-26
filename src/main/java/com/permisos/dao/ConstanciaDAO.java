@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class ConstanciaDAO {
 
     private static final Logger LOG = Logger.getLogger(ConstanciaDAO.class.getName());

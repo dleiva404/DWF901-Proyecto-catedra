@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import java.util.List;
 import com.permisos.model.Solicitud;
 import java.time.LocalDateTime;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class IncapacidadDAO {
 
     public int insertar(Incapacidad incapacidad)

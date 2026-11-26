@@ -5,7 +5,6 @@ import com.permisos.service.SolicitudEmpleadoService;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.SaldoVacacionesMapper;
 import com.rrhh.api.security.ApiPrincipal;
 
@@ -20,6 +19,7 @@ import javax.ws.rs.core.SecurityContext;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Saldo de vacaciones del usuario autenticado (endpoint 5 del contrato).
@@ -27,10 +27,10 @@ import java.util.Collections;
  */
 @Path("/vacaciones")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class VacacionesResource {
 
-    private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
+    @Autowired
+    private SolicitudEmpleadoService servicio;
 
     @Context
     private SecurityContext securityContext;

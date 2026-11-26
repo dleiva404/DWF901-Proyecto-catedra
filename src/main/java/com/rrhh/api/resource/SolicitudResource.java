@@ -13,7 +13,6 @@ import com.rrhh.api.dto.SolicitudDTO;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.HistorialSolicitudMapper;
 import com.rrhh.api.mapper.SolicitudMapper;
 import com.rrhh.api.security.ApiPrincipal;
@@ -39,6 +38,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Solicitudes del EMPLEADO autenticado sobre SUS PROPIAS solicitudes
@@ -50,12 +50,13 @@ import java.util.List;
  */
 @Path("/solicitudes")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class SolicitudResource {
 
-    private final SolicitudEmpleadoService servicio = new SolicitudEmpleadoService();
+    @Autowired
+    private SolicitudEmpleadoService servicio;
     // Instancia del servicio de negocio de la parte 4 para aprobaciones y validaciones de jefatura
-    private final SolicitudService solicitudService = new SolicitudService();
+    @Autowired
+    private SolicitudService solicitudService;
 
     @Context
     private SecurityContext securityContext;
@@ -183,7 +184,6 @@ public class SolicitudResource {
     // Endpoints agregados para aprobar, rechazar e historial utilizando SolicitudService
     @POST
     @Path("/{id}/aprobar")
-    @RequiresRole({"JEFATURA"})
     public Response aprobar(@PathParam("id") String idTexto) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();
@@ -199,7 +199,6 @@ public class SolicitudResource {
     @POST
     @Path("/{id}/rechazar")
     @Consumes(MediaType.APPLICATION_JSON)
-    @RequiresRole({"JEFATURA"})
     public Response rechazar(@PathParam("id") String idTexto, RechazoSolicitudDTO datos) throws SQLException {
         int id = leerId(idTexto);
         ApiPrincipal yo = usuarioActual();

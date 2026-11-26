@@ -4,7 +4,6 @@ package com.rrhh.api.resource;
 import com.permisos.dao.EmpleadoDAO;
 import com.permisos.model.Empleado;
 import com.rrhh.api.dto.EmpleadoDTO;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.EmpleadoMapper;
 
 import javax.ws.rs.GET;
@@ -18,13 +17,14 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/empleados")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"RRHH"})
 public class EmpleadoResource {
 
-    private final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
+    @Autowired
+    private EmpleadoDAO empleadoDAO;
 
     @GET
     public Response listarEmpleados() throws SQLException {

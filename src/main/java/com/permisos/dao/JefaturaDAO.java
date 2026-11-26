@@ -6,7 +6,9 @@ import com.permisos.util.JPAUtil;
 import javax.persistence.EntityManager;
 import java.sql.SQLException;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class JefaturaDAO {
 
     public Jefatura buscarPorId(int idJefatura) throws SQLException {

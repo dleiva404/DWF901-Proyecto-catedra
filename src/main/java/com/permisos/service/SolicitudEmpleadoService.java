@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Operaciones de un EMPLEADO sobre SUS PROPIAS solicitudes. Pensado para ser
@@ -36,11 +38,22 @@ import java.util.List;
  * relaciones son LAZY): se pueden convertir a JSON después de cerrar la sesión
  * sin LazyInitializationException.
  */
+@Service
 public class SolicitudEmpleadoService {
 
     private static final String TIPO_INCAPACIDAD = "INCAPACIDAD";
 
-    private final TipoSolicitudDAO tipoSolicitudDAO = new TipoSolicitudDAO();
+    private final TipoSolicitudDAO tipoSolicitudDAO;
+
+    @Autowired
+    public SolicitudEmpleadoService(TipoSolicitudDAO tipoSolicitudDAO) {
+        this.tipoSolicitudDAO = tipoSolicitudDAO;
+    }
+
+    /** Para pruebas que no levantan Spring. */
+    public SolicitudEmpleadoService() {
+        this(new TipoSolicitudDAO());
+    }
 
     // ------------------------------------------------------------------
     // Crear

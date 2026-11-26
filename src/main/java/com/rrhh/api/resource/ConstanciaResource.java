@@ -13,7 +13,6 @@ import com.rrhh.api.dto.ResolverConstanciaDTO;
 import com.rrhh.api.exception.ApiException;
 import com.rrhh.api.exception.TraductorErroresServicio;
 import com.rrhh.api.exception.ValidacionApiException;
-import com.rrhh.api.filter.RequiresRole;
 import com.rrhh.api.mapper.ConstanciaMapper;
 import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.validation.ValidadorApi;
@@ -37,6 +36,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Constancias del usuario autenticado (endpoints 18, 19 y 20 del contrato).
@@ -44,10 +44,10 @@ import java.util.List;
  */
 @Path("/constancias")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiresRole({"EMPLEADO", "JEFATURA", "RRHH"})
 public class ConstanciaResource {
 
-    private final ConstanciaService servicio = new ConstanciaService();
+    @Autowired
+    private ConstanciaService servicio;
 
     @Context
     private SecurityContext securityContext;
@@ -138,7 +138,6 @@ public class ConstanciaResource {
 
         @POST
     @Path("/{id}/aprobar")
-    @RequiresRole({"RRHH"})
     @Consumes(MediaType.APPLICATION_JSON)
     public Response aprobar(@PathParam("id") String idTexto, ResolverConstanciaDTO datos)
             throws SQLException {
@@ -166,7 +165,6 @@ public class ConstanciaResource {
 
     @POST
     @Path("/{id}/rechazar")
-    @RequiresRole({"RRHH"})
     @Consumes(MediaType.APPLICATION_JSON)
     public Response rechazar(@PathParam("id") String idTexto, ResolverConstanciaDTO datos)
             throws SQLException {

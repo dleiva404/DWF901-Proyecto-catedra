@@ -108,7 +108,7 @@ Para preparar un entorno de pruebas nuevo:
 
 ### 3. Configurar la conexión local
 
-Revisar `src/main/resources/db.properties` y adaptar estos valores **solo en el entorno local**:
+Copiar `src/main/resources/db.properties.example` como `src/main/resources/db.properties` y adaptar los valores **solo en el entorno local** (ese archivo no se sube al repositorio). En un servidor se pueden definir las variables de entorno `DB_URL`, `DB_USER` y `DB_PASSWORD`, que tienen prioridad:
 
 ```properties
 db.url=jdbc:mysql://localhost:3306/sistema_permisos

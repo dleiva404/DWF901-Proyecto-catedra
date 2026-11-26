@@ -9,7 +9,6 @@ import com.permisos.model.Usuario;
 import com.rrhh.api.dto.LoginRequestDTO;
 import com.rrhh.api.dto.LoginResponseDTO;
 import com.rrhh.api.exception.ApiException;
-import com.rrhh.api.filter.Publico;
 import com.rrhh.api.security.ApiPrincipal;
 import com.rrhh.api.security.SesionApi;
 import com.rrhh.api.security.TokenService;
@@ -24,21 +23,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.sql.SQLException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
-    private final RolDAO rolDAO = new RolDAO();
-    private final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
+    @Autowired
+    private UsuarioDAO usuarioDAO;
+    @Autowired
+    private RolDAO rolDAO;
+    @Autowired
+    private EmpleadoDAO empleadoDAO;
+    @Autowired
+    private TokenService tokenService;
 
     @Context
     private SecurityContext securityContext;
 
     @POST
     @Path("/login")
-    @Publico
     @Consumes(MediaType.APPLICATION_JSON)
     public Response login(LoginRequestDTO datos) throws SQLException {
 
@@ -68,7 +72,7 @@ public class AuthResource {
 
         usuarioDAO.registrarUltimoAcceso(usuario.getIdUsuario());
 
-        SesionApi sesion = TokenService.getInstance().crear(
+        SesionApi sesion = tokenService.crear(
                 usuario.getIdUsuario(),
                 usuario.getIdEmpleado(),
                 usuario.getUsername(),
@@ -77,7 +81,7 @@ public class AuthResource {
 
         LoginResponseDTO respuesta = new LoginResponseDTO(
                 sesion.getToken(),
-                TokenService.getInstance().getDuracionSegundos(),
+                tokenService.getDuracionSegundos(),
                 new LoginResponseDTO.UsuarioSesionDTO(
                         sesion.getUsuarioId(),
                         sesion.getUsername(),
@@ -94,7 +98,7 @@ public class AuthResource {
         ApiPrincipal yo = ApiPrincipal.desde(securityContext);
 
         if (yo != null) {
-            TokenService.getInstance().invalidar(yo.getToken());
+            tokenService.invalidar(yo.getToken());
         }
 
         return Response.noContent().build();

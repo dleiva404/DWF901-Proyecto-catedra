@@ -10,7 +10,9 @@ import javax.persistence.LockModeType;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class SolicitudDAO {
 
     public int insertar(Solicitud s) throws SQLException {
