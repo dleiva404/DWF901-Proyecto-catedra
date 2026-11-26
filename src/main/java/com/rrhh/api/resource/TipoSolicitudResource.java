@@ -1,6 +1,6 @@
 package com.rrhh.api.resource;
 
-import com.permisos.dao.TipoSolicitudDAO;
+import com.rrhh.repository.TipoSolicitudRepository;
 import com.permisos.model.TipoSolicitud;
 import com.rrhh.api.dto.TipoSolicitudDTO;
 import com.rrhh.api.filter.RequiresRole;
@@ -26,12 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TipoSolicitudResource {
 
     @Autowired
-    private TipoSolicitudDAO tipoSolicitudDAO;
+    private TipoSolicitudRepository tipoSolicitudRepository;
 
     @GET
     public Response listar() throws SQLException {
         List<TipoSolicitudDTO> respuesta = new ArrayList<>();
-        for (TipoSolicitud tipo : tipoSolicitudDAO.listarActivos()) {
+        for (TipoSolicitud tipo : tipoSolicitudRepository.findByActivoTrueOrderByNombre()) {
             respuesta.add(TipoSolicitudMapper.toDTO(tipo));
         }
         return Response.ok(respuesta).build();

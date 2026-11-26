@@ -62,6 +62,10 @@ public class JPAUtil {
         return EMF.createEntityManager();
     }
 
+    public static EntityManagerFactory getEntityManagerFactory() {
+        return EMF;
+    }
+
     public static void cerrar() {
         if (EMF.isOpen()) {
             EMF.close();
