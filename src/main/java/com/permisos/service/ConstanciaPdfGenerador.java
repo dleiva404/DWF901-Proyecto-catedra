@@ -147,7 +147,11 @@ public class ConstanciaPdfGenerador {
             if (archivoLogo.exists()) {
                 try {
                     PDImageXObject pdLogo = PDImageXObject.createFromFile(archivoLogo.getAbsolutePath(), document);
-                    cs.drawImage(pdLogo, 50, 690, 140, 55);
+                    // el logo conserva su proporcion dentro de un espacio maximo de 260 x 60
+                    float escala = Math.min(260f / pdLogo.getWidth(), 60f / pdLogo.getHeight());
+                    float ancho = pdLogo.getWidth() * escala;
+                    float alto = pdLogo.getHeight() * escala;
+                    cs.drawImage(pdLogo, 50, 750 - alto, ancho, alto);
                     return;
                 } catch (IOException e) {
                     // se usa el texto de abajo
@@ -163,22 +167,7 @@ public class ConstanciaPdfGenerador {
     }
 
     private String nombreLogo(String empresaEmisora) {
-        String emp = empresaEmisora.toLowerCase();
-
-        if (emp.contains("didelco")) {
-            return "LogoDidelco.png";
-        } else if (emp.contains("copro")) {
-            return "LogoCopro.png";
-        } else if (emp.contains("dca")) {
-            return "LogoDCA-pmg.png";
-        } else if (emp.contains("elf")) {
-            return "LogoElf.png";
-        } else if (emp.contains("propultran")) {
-            return "LogoPropultran.png";
-        } else if (emp.contains("steel")) {
-            return "LogoSteel.png";
-        }
-        return "logoGC.png";
+        return EmpresasGrupo.logo(empresaEmisora);
     }
 
     private void escribirParrafoJustificado(PDPageContentStream cs, String texto, float x, float y,

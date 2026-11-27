@@ -5,6 +5,7 @@ import com.permisos.dao.SucursalAreaDAO;
 import com.permisos.model.Constancia;
 import com.permisos.model.Empleado;
 import com.permisos.model.SucursalArea;
+import com.permisos.service.EmpresasGrupo;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -77,20 +78,18 @@ public class ConstanciasBean implements Serializable {
     }
 
     private String calcularEmpresaEmisora() {
-        if (empleado.getEmpresa() != null && !empleado.getEmpresa().trim().isEmpty()) {
-            return empleado.getEmpresa();
-        }
         String nombreSucursal = null;
-        try {
-            SucursalArea sucursal = new SucursalAreaDAO().buscarPorId(empleado.getIdSucursalArea());
-            if (sucursal != null) {
-                nombreSucursal = sucursal.getNombre();
+        if (empleado.getEmpresa() == null || empleado.getEmpresa().trim().isEmpty()) {
+            try {
+                SucursalArea sucursal = new SucursalAreaDAO().buscarPorId(empleado.getIdSucursalArea());
+                if (sucursal != null) {
+                    nombreSucursal = sucursal.getNombre();
+                }
+            } catch (Exception e) {
+                nombreSucursal = null;
             }
-        } catch (Exception e) {
-            nombreSucursal = null;
         }
-        String base = (nombreSucursal != null) ? nombreSucursal : "Central";
-        return base.toLowerCase().startsWith("didelco") ? base : "Didelco " + base;
+        return EmpresasGrupo.emisora(empleado.getEmpresa(), nombreSucursal);
     }
 
     public String enviar() {
