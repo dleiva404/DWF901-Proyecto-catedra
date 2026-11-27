@@ -18,15 +18,18 @@ import org.springframework.stereotype.Service;
 public class ConstanciaService {
 
     private final ConstanciaDAO constanciaDAO;
+    private final NotificacionService notificacionService;
 
     @Autowired
-    public ConstanciaService(ConstanciaDAO constanciaDAO) {
+    public ConstanciaService(ConstanciaDAO constanciaDAO,
+                             NotificacionService notificacionService) {
         this.constanciaDAO = constanciaDAO;
+        this.notificacionService = notificacionService;
     }
 
     /** Para pruebas que no levantan Spring. */
     public ConstanciaService() {
-        this(new ConstanciaDAO());
+        this(new ConstanciaDAO(), new NotificacionService());
     }
 
     public List<Constancia> listar(int idEmpleado, boolean verTodas) throws SQLException {
@@ -112,26 +115,40 @@ public class ConstanciaService {
     public void aprobar(int idConstancia, int idUsuarioRrhh, String observaciones)
             throws ReglaNegocioException, SQLException {
 
-        validarPendiente(idConstancia);
+        Constancia constancia = validarPendiente(idConstancia);
         constanciaDAO.aprobar(idConstancia, idUsuarioRrhh, observaciones);
+        notificacionService.constanciaResuelta(
+                constancia.getEmpleado().getCorreo(),
+                nombreEmpleado(constancia), constancia.getTipo(), true, null);
     }
 
     // RRHH rechaza una constancia pendiente
     public void rechazar(int idConstancia, int idUsuarioRrhh, String motivoRechazo, String observaciones)
             throws ReglaNegocioException, SQLException {
 
-        validarPendiente(idConstancia);
+        Constancia constancia = validarPendiente(idConstancia);
         constanciaDAO.rechazar(idConstancia, idUsuarioRrhh, motivoRechazo, observaciones);
+        notificacionService.constanciaResuelta(
+                constancia.getEmpleado().getCorreo(),
+                nombreEmpleado(constancia), constancia.getTipo(), false,
+                motivoRechazo);
     }
 
     // 404 si no existe, 409 si ya fue aprobada o rechazada
-    private void validarPendiente(int idConstancia) throws ReglaNegocioException, SQLException {
+    private Constancia validarPendiente(int idConstancia)
+            throws ReglaNegocioException, SQLException {
 
         Constancia c = detalle(0, true, idConstancia);
 
         if (!Constancia.ESTADO_PENDIENTE.equals(c.getEstado())) {
             throw new ConflictoException("La constancia ya fue procesada.");
         }
+        return c;
+    }
+
+    private String nombreEmpleado(Constancia constancia) {
+        return constancia.getEmpleado().getNombre() + " "
+                + constancia.getEmpleado().getApellido();
     }
 
     // misma regla de ConstanciaServlet: empresa afiliada, o "Didelco " + sucursal

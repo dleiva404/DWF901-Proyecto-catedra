@@ -29,9 +29,11 @@ La API y el cliente consumidor funcionan como componentes separados: el backend 
 ### Autenticación y control de acceso
 
 - Inicio y cierre de sesión mediante la API REST.
+- Cambio de contraseña con sesión y recuperación por correo mediante un código de un solo uso.
 - Emisión y validación de un token Bearer para las operaciones protegidas.
 - Restricción de recursos y operaciones según el rol del usuario.
 - Manejo de respuestas HTTP ante ausencia de token, token inválido o permisos insuficientes.
+- Avisos por correo cuando se crea una solicitud pendiente, se aprueba o rechaza una solicitud, y se aprueba o rechaza una constancia.
 
 ### Solicitudes de Recursos Humanos
 
@@ -117,6 +119,12 @@ db.password=CLAVE_LOCAL
 ```
 
 Los valores mostrados son ejemplos, **no credenciales reales**. Evitar publicar contraseñas o sobrescribir la configuración local de otros integrantes. La configuración general de la API (incluidos los orígenes CORS y la duración de los tokens) está en `src/main/resources/api.properties`.
+
+### 3.1. Configurar correo para notificaciones (opcional)
+
+Copiar `src/main/resources/mail.properties.example` como `src/main/resources/mail.properties` y configurar una cuenta dedicada al proyecto. Para Gmail, activar la verificación en dos pasos y usar una clave de aplicación. El archivo real está ignorado por Git; nunca subir contraseñas ni claves de aplicación. También se pueden definir `MAIL_HABILITADO`, `MAIL_HOST`, `MAIL_PUERTO`, `MAIL_USUARIO`, `MAIL_CLAVE` y `MAIL_REMITENTE` como variables de entorno; estas prevalecen sobre `-Dmail.*` y `mail.properties`. El correo está deshabilitado por defecto (`mail.habilitado=false`); reiniciar Tomcat después de cambiar la configuración.
+
+Para una base ya creada, ejecutar únicamente [la migración de recuperación de contraseñas](docs/sql/recuperacion_contrasena.sql). No volver a ejecutar `sistema_permisos.sql` sobre una base que contenga datos: ese script elimina y recrea la base.
 
 ### 4. Compilar y ejecutar la API REST
 
@@ -208,6 +216,8 @@ El servidor publica los recursos bajo el prefijo `/SistemaRRHH/api`.
 | --- | --- |
 | `/ping` | Comprobar la disponibilidad del servicio. |
 | `/auth/login`, `/auth/logout` | Iniciar y cerrar sesión. |
+| `/auth/cambiar-contrasena` | Cambiar la contraseña de la sesión autenticada. |
+| `/auth/recuperar`, `/auth/restablecer` | Solicitar y completar la recuperación por correo. |
 | `/tipos-solicitud` | Consultar el catálogo de tipos de solicitud. |
 | `/vacaciones/saldo` | Consultar los días de vacaciones. |
 | `/solicitudes` | Registrar y consultar solicitudes. |
@@ -232,6 +242,9 @@ Documentación disponible:
 - [Colección Postman — Sprint III](docs/DWF901_SprintIII_Postman_Limpio_Entrega.json).
 - [Matriz de pruebas REST — Excel](docs/DWF901%20Matriz%20de%20Pruebas.xlsx).
 - [Contrato de la API REST](docs/contrato-api-rest.md).
+- [Manual de correo y contraseñas](docs/manual-correo-y-contrasena.md).
+- [Notas de versión de la Fase 4](docs/notas-version-fase4.md).
+- [Migración de recuperación de contraseñas](docs/sql/recuperacion_contrasena.sql).
 - [Documentación de endpoints de Empleado](docs/endpoints-empleado.md).
 - Scripts de comprobación: [`prueba-api.ps1`](docs/prueba-api.ps1) y [`prueba-constancias.ps1`](docs/prueba-constancias.ps1).
 
@@ -254,7 +267,8 @@ Para importar la colección en Postman:
 **Institución:** Universidad Don Bosco  
 **Asignatura:** Desarrollo de Aplicaciones Web con Framework (DWF901)  
 **Proyecto:** Sistema de Gestión de Recursos Humanos  
-**Etapa:** Sprint III — API REST y cliente consumidor  
+**Etapa:** Sprint III — API REST y cliente consumidor; Fase 4 — correo y contraseñas
+
 **Año:** 2026
 
 ---

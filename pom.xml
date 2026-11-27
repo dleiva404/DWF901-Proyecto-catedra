@@ -85,6 +85,13 @@
             <version>2.2</version>
         </dependency>
 
+        <!-- Correo SMTP compatible con Java 8 y Tomcat 9 -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
         <dependency>
             <groupId>com.sun.faces</groupId>
             <artifactId>jsf-api</artifactId>
