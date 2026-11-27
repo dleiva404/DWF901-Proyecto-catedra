@@ -1,6 +1,7 @@
 package com.permisos.service;
 
 import com.permisos.dao.TipoSolicitudDAO;
+import com.permisos.dao.JefaturaDAO;
 import com.permisos.model.Empleado;
 import com.permisos.model.HistorialSolicitud;
 import com.permisos.model.Solicitud;
@@ -16,6 +17,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,17 +45,26 @@ import org.springframework.stereotype.Service;
 public class SolicitudEmpleadoService {
 
     private static final String TIPO_INCAPACIDAD = "INCAPACIDAD";
+    private static final Logger LOG =
+            Logger.getLogger(SolicitudEmpleadoService.class.getName());
 
     private final TipoSolicitudDAO tipoSolicitudDAO;
+    private final JefaturaDAO jefaturaDAO;
+    private final NotificacionService notificacionService;
 
     @Autowired
-    public SolicitudEmpleadoService(TipoSolicitudDAO tipoSolicitudDAO) {
+    public SolicitudEmpleadoService(TipoSolicitudDAO tipoSolicitudDAO,
+                                    JefaturaDAO jefaturaDAO,
+                                    NotificacionService notificacionService) {
         this.tipoSolicitudDAO = tipoSolicitudDAO;
+        this.jefaturaDAO = jefaturaDAO;
+        this.notificacionService = notificacionService;
     }
 
     /** Para pruebas que no levantan Spring. */
     public SolicitudEmpleadoService() {
-        this(new TipoSolicitudDAO());
+        this(new TipoSolicitudDAO(), new JefaturaDAO(),
+                new NotificacionService());
     }
 
     // ------------------------------------------------------------------
@@ -127,7 +139,31 @@ public class SolicitudEmpleadoService {
         }
 
         // Se vuelve a leer con las relaciones cargadas, lista para convertir a JSON.
-        return detalle(idEmpleado, idSolicitud);
+        Solicitud creada = detalle(idEmpleado, idSolicitud);
+        notificarJefatura(creada);
+        return creada;
+    }
+
+    private void notificarJefatura(Solicitud solicitud) {
+        try {
+            List<String> correos = jefaturaDAO.correosActivosPorDepartamento(
+                    solicitud.getEmpleado().getIdDepartamento());
+            String empleado = solicitud.getEmpleado().getNombre() + " "
+                    + solicitud.getEmpleado().getApellido();
+            for (String correo : correos) {
+                notificacionService.solicitudPorRevisar(correo, empleado,
+                        solicitud.getTipoSolicitud().getNombre(),
+                        solicitud.getFechaInicio(), solicitud.getFechaFin());
+            }
+        } catch (SQLException ex) {
+            LOG.log(Level.WARNING,
+                    "No se pudieron consultar los destinatarios de la solicitud "
+                            + solicitud.getIdSolicitud() + ".", ex);
+        } catch (RuntimeException ex) {
+            LOG.log(Level.WARNING,
+                    "No se pudieron consultar los destinatarios de la solicitud "
+                            + solicitud.getIdSolicitud() + ".", ex);
+        }
     }
 
     // ------------------------------------------------------------------
@@ -212,7 +248,8 @@ public class SolicitudEmpleadoService {
 
         try {
             List<Solicitud> encontradas = em.createQuery(
-                            "SELECT s FROM Solicitud s JOIN FETCH s.tipoSolicitud JOIN FETCH s.empleado "
+                            "SELECT s FROM Solicitud s JOIN FETCH s.tipoSolicitud "
+                                    + "JOIN FETCH s.empleado e JOIN FETCH e.departamento "
                                     + "WHERE s.idSolicitud = :idSolicitud "
                                     + "AND s.empleado.idEmpleado = :idEmpleado",
                             Solicitud.class)

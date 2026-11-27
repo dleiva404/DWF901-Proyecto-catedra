@@ -82,6 +82,26 @@ public class JefaturaDAO {
         }
     }
 
+    public List<String> correosActivosPorDepartamento(int idDepartamento)
+            throws SQLException {
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            return em.createQuery(
+                            "SELECT j.empleado.correo FROM Jefatura j "
+                                    + "WHERE j.departamento.idDepartamento = :idDepartamento "
+                                    + "AND j.activo = true AND j.empleado.activo = true "
+                                    + "AND j.empleado.correo IS NOT NULL "
+                                    + "AND TRIM(j.empleado.correo) <> ''",
+                            String.class)
+                    .setParameter("idDepartamento", idDepartamento)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
     public List<Jefatura> listarPorSucursalArea(int idSucursalArea)
             throws SQLException {
 

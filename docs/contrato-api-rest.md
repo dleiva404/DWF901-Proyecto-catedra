@@ -26,7 +26,7 @@ Authorization: Bearer <token>
 
 > > **Decisión:** el token es opaco: una cadena aleatoria sin contenido que el servidor guarda en memoria. El cliente lo guarda y lo envía tal cual, sin leer su contenido. Si el servidor se reinicia, los tokens dejan de ser válidos y hay que iniciar sesión de nuevo. Si más adelante se adopta JWT, solo cambia el contenido de `token` y su duración; las rutas y los cuerpos de este contrato no cambian.
 
-El token dura 30 minutos (`expiraEnSegundos: 1800`; el valor se configura en el servidor) y termina antes si el cliente llama a `POST /auth/logout`. Solo `GET /ping` y `POST /auth/login` se pueden llamar sin token.
+El token dura 30 minutos (`expiraEnSegundos: 1800`; el valor se configura en el servidor) y termina antes si el cliente llama a `POST /auth/logout` o cambia su contraseña. `GET /ping`, `POST /auth/login`, `POST /auth/recuperar` y `POST /auth/restablecer` se pueden llamar sin token.
 
 Respuestas `401` de autenticación, siempre con la cabecera `WWW-Authenticate: Bearer`:
 
@@ -82,6 +82,9 @@ Un cliente en otro origen (Parte 5) necesita CORS: el servidor debe permitir su 
 | 21 | POST | `/constancias/{id}/aprobar` | RRHH | 204 | 400, 401, 403, 404, 409 |
 | 22 | POST | `/constancias/{id}/rechazar` | RRHH | 204 | 400, 401, 403, 404, 409 |
 | 23 | GET | `/constancias/{id}/pdf` | Dueño o RRHH | 200 `application/pdf` | 400, 401, 404, 409 |
+| 24 | POST | `/auth/cambiar-contrasena` | Autenticado | 204 | 400, 401 |
+| 25 | POST | `/auth/recuperar` | Público | 204 sin revelar si existe el usuario | 400 |
+| 26 | POST | `/auth/restablecer` | Público | 204 | 400 |
 
 Qué ve cada rol en las listas (endpoints 8, 15 y 18):
 
@@ -136,6 +139,46 @@ Errores: `400` si falta `username` o `password` (la respuesta lista los campos f
 ### 5.3. Logout — `POST /auth/logout`
 
 Sin cuerpo. Respuesta `204`. El token deja de ser válido.
+
+### 5.3.1. Cambiar contraseña — `POST /auth/cambiar-contrasena`
+
+Requiere un token Bearer válido. El usuario autenticado solo puede cambiar su propia contraseña; el servidor obtiene su identificador del token.
+
+Solicitud:
+
+```json
+{
+  "actual": "contraseñaActual",
+  "nueva": "contraseñaNueva"
+}
+```
+
+La nueva contraseña debe tener entre 8 y 128 caracteres, ser distinta de la actual y del nombre de usuario. Respuesta correcta: `204`; el token usado queda invalidado y el cliente debe iniciar sesión nuevamente. Una contraseña actual incorrecta responde `400`.
+
+### 5.3.2. Solicitar recuperación — `POST /auth/recuperar`
+
+No requiere autenticación.
+
+```json
+{
+  "username": "usuario"
+}
+```
+
+Responde `204` tanto si la cuenta existe como si no, para no revelar nombres de usuario. Si la cuenta está activa y tiene un correo registrado, el servidor envía un código aleatorio de un solo uso, válido durante 30 minutos. Solo se conserva su hash.
+
+### 5.3.3. Restablecer contraseña — `POST /auth/restablecer`
+
+No requiere autenticación. El código se obtiene del correo de recuperación.
+
+```json
+{
+  "token": "codigoRecibidoPorCorreo",
+  "nueva": "contraseñaNueva"
+}
+```
+
+La nueva contraseña debe tener entre 8 y 128 caracteres y no puede ser el nombre de usuario. Respuesta correcta: `204`. Un código inexistente, vencido o ya usado responde `400` con el mismo mensaje; los códigos se consumen al restablecer la contraseña.
 
 ### 5.4. Catálogo de tipos — `GET /tipos-solicitud`
 

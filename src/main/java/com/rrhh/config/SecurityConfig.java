@@ -58,8 +58,11 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/ping").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/auth/recuperar").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/auth/restablecer").permitAll()
                 // cualquier usuario autenticado
                 .antMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
+                .antMatchers(HttpMethod.POST, "/api/auth/cambiar-contrasena").authenticated()
                 // catálogo y saldo
                 .antMatchers(HttpMethod.GET, "/api/tipos-solicitud").hasAnyRole(EMPLEADO, JEFATURA, RRHH)
                 .antMatchers(HttpMethod.GET, "/api/vacaciones/saldo").hasAnyRole(EMPLEADO, JEFATURA, RRHH)

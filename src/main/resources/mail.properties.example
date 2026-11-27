@@ -1,0 +1,7 @@
+# El correo permanece deshabilitado hasta que se configure una cuenta local.
+mail.habilitado=false
+mail.host=smtp.gmail.com
+mail.puerto=587
+mail.usuario=CORREO_DEL_SISTEMA
+mail.clave=CLAVE_DE_APLICACION
+mail.remitente=CORREO_DEL_SISTEMA

@@ -11,11 +11,24 @@ import javax.persistence.LockModeType;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class SolicitudService {
+
+    private final NotificacionService notificacionService;
+
+    @Autowired
+    public SolicitudService(NotificacionService notificacionService) {
+        this.notificacionService = notificacionService;
+    }
+
+    /** Para pruebas que no levantan Spring. */
+    public SolicitudService() {
+        this(new NotificacionService());
+    }
 
   /**
  * @throws ReglaNegocioException si el rango es inválido o no alcanza el saldo
@@ -62,6 +75,7 @@ public class SolicitudService {
     public void aprobar(int idSolicitud, int idEmpleadoJefe, int idUsuarioJefatura)
             throws ReglaNegocioException, SQLException {
 
+        DatosNotificacion notificacion = null;
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
@@ -117,6 +131,7 @@ public class SolicitudService {
             h.setFecha(ahora);
 
             em.persist(h);
+            notificacion = datosNotificacion(solicitud, null);
 
             em.getTransaction().commit();
 
@@ -131,11 +146,16 @@ public class SolicitudService {
         } finally {
             em.close();
         }
+
+        notificacionService.solicitudAprobada(notificacion.correo,
+                notificacion.empleado, notificacion.tipo,
+                notificacion.inicio, notificacion.fin);
     }
 
     public void rechazar(int idSolicitud, int idEmpleadoJefe, String motivoRechazo, int idUsuarioJefatura)
             throws ReglaNegocioException, SQLException {
 
+        DatosNotificacion notificacion = null;
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
@@ -169,6 +189,7 @@ public class SolicitudService {
             h.setFecha(ahora);
 
             em.persist(h);
+            notificacion = datosNotificacion(solicitud, motivoRechazo);
 
             em.getTransaction().commit();
 
@@ -182,6 +203,41 @@ public class SolicitudService {
 
         } finally {
             em.close();
+        }
+
+        notificacionService.solicitudRechazada(notificacion.correo,
+                notificacion.empleado, notificacion.tipo,
+                notificacion.inicio, notificacion.fin,
+                notificacion.motivo);
+    }
+
+    private DatosNotificacion datosNotificacion(Solicitud solicitud,
+                                               String motivo) {
+        String correo = solicitud.getEmpleado().getCorreo();
+        String empleado = solicitud.getEmpleado().getNombre() + " "
+                + solicitud.getEmpleado().getApellido();
+        String tipo = solicitud.getTipoSolicitud().getNombre();
+        return new DatosNotificacion(correo, empleado, tipo,
+                solicitud.getFechaInicio(), solicitud.getFechaFin(), motivo);
+    }
+
+    private static final class DatosNotificacion {
+        private final String correo;
+        private final String empleado;
+        private final String tipo;
+        private final LocalDate inicio;
+        private final LocalDate fin;
+        private final String motivo;
+
+        private DatosNotificacion(String correo, String empleado,
+                                  String tipo, LocalDate inicio, LocalDate fin,
+                                  String motivo) {
+            this.correo = correo;
+            this.empleado = empleado;
+            this.tipo = tipo;
+            this.inicio = inicio;
+            this.fin = fin;
+            this.motivo = motivo;
         }
     }
 
