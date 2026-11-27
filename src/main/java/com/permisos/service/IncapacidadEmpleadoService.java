@@ -54,6 +54,7 @@ public class IncapacidadEmpleadoService {
             throws ReglaNegocioException, SQLException {
 
         int dias = ReglasSolicitud.validarIncapacidad(numeroDocumento, observaciones, inicio, fin);
+        ValidacionTraslape.validar(idEmpleado, inicio, fin);
 
         TipoSolicitud tipo = tipoSolicitudDAO.buscarPorNombre(TIPO_INCAPACIDAD);
         if (tipo == null) {

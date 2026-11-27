@@ -10,6 +10,7 @@ import com.permisos.model.VacacionesEmpleado;
 import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.SolicitudService;
 import com.permisos.service.ReglasVacaciones;
+import com.permisos.service.ValidacionTraslape;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -165,6 +166,14 @@ public class SolicitudServlet extends HttpServlet {
                     errores.append(e.getMessage()).append(" ");
                 }
 
+            }
+
+            if (errores.length() == 0 && tipoSeleccionado != null) {
+                try {
+                    ValidacionTraslape.validar(usuario.getIdEmpleado(), inicio, fin);
+                } catch (ReglaNegocioException e) {
+                    errores.append(e.getMessage()).append(" ");
+                }
             }
 
             if (errores.length() > 0) {

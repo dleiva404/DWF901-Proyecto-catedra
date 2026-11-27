@@ -7,7 +7,9 @@ import com.permisos.model.Solicitud;
 import com.permisos.model.TipoSolicitud;
 import com.permisos.model.Usuario;
 import com.permisos.dao.SolicitudDAO;
+import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.ReglasVacaciones;
+import com.permisos.service.ValidacionTraslape;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -91,6 +93,14 @@ private static final Logger LOG = Logger.getLogger(IncapacidadServlet.class.getN
 
         if (errores.length() > 0) {
             request.setAttribute("error", errores.toString());
+            request.getRequestDispatcher("/vistas/incapacidad.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            ValidacionTraslape.validar(usuario.getIdEmpleado(), inicio, fin);
+        } catch (ReglaNegocioException e) {
+            request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/vistas/incapacidad.jsp").forward(request, response);
             return;
         }

@@ -6,7 +6,9 @@ import com.permisos.model.Incapacidad;
 import com.permisos.model.Solicitud;
 import com.permisos.model.TipoSolicitud;
 import com.permisos.model.Usuario;
+import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.ReglasVacaciones;
+import com.permisos.service.ValidacionTraslape;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -96,6 +98,13 @@ public class IncapacidadBean implements Serializable {
             for (String e : errores) {
                 error(fc, e);
             }
+            return null;
+        }
+
+        try {
+            ValidacionTraslape.validar(usuario.getIdEmpleado(), inicio, fin);
+        } catch (ReglaNegocioException e) {
+            error(fc, e.getMessage());
             return null;
         }
 
