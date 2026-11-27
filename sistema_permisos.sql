@@ -221,7 +221,7 @@ INSERT INTO usuarios (username, password, id_empleado, id_rol) VALUES
     ('juan', 'pbkdf2$600000$oqJA6fVHbwQIGpNIHR66Zg==$5zy6vAp8If+fnVCKCeoz+F86yICSftlFxvw8Kgf/CCE=', 1, 2),
     ('carlos', 'pbkdf2$600000$iMMXSHv1ruoxwBL0lk9KsQ==$E+tiz1M5Iey45rTDH07U6QUu/MBZGTF45UNBIjqpn4U=', 2, 3),
     ('ana', 'pbkdf2$600000$yRa28mERxM/ah3ubpQcqxQ==$vQreyS4jgWrMJTTeYmMXX9yYHThTOXX+PwyfYwiVVD4=', 3, 4),
-    ('carlos.cornejo', 'pbkdf2$600000$Cn/yUwAXufwzKhGvbL3VoA==$5Wd1YwLPwSvpUnF+ICyGugHk+3HrcFNjAZRs6mI1cg4=', 4, 3),
+    ('carlos.cornejo', 'pbkdf2$600000$Cn/yUwAXufwzKhGvbL3VoA==$5Wd1YwLPwSvpUnF+ICyGugHk+3HrcFNjAZRs6mI1cg4=', 4, 1),
     ('david.leiva', 'pbkdf2$600000$EC2FxQJR/G6pH2A1XSTeww==$NXZGmWZkvX8XJbD+p/O4GEx5JQdnXDCIQDU4qsYymSo=', 5, 2),
     ('moises.garcia', 'pbkdf2$600000$Do/sFqW45qjqRIlyCSXNjg==$j6TSKwiZEKRpamCsb2Alh7hSn3tKHqwKXVZ1gnRW8aY=', 6, 2),
     ('alcyr.figueroa', 'pbkdf2$600000$r4xnNHQIzdEnrI5DA/ll2A==$D3sH8L1Wk7HyMbAnlIhOD2EyuqeR7uXMYQOkzSpeEMY=', 7, 2),
