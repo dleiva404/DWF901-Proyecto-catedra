@@ -20,7 +20,7 @@ import java.util.Locale;
 
 /**
  * Bean del detalle de una constancia (admin-constancias-detalle.xhtml?id=N).
- * RRHH puede aprobarla o rechazarla con motivo; ADMIN solo la consulta.
+ * RRHH puede aprobarla o rechazarla con motivo. ADMIN no entra.
  */
 @ManagedBean(name = "adminConstanciaDetalleBean")
 @ViewScoped
@@ -51,7 +51,7 @@ public class AdminConstanciaDetalleBean implements Serializable {
 
         String nombreRol = rol.getNombre() == null ? "" : rol.getNombre().toUpperCase(Locale.ROOT);
         boolean esRrhh = nombreRol.contains("RRHH");
-        if (!esRrhh && !nombreRol.contains("ADMIN")) {
+        if (!esRrhh) {
             redirigir(fc, "/solicitudes.xhtml");
             return;
         }

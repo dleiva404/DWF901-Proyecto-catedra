@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * Bean de la bandeja de solicitudes (jefatura.xhtml).
- * Jefatura ve las pendientes de su equipo; RRHH y ADMIN ven todas.
+ * Jefatura ve las pendientes de su equipo; RRHH ve todas. ADMIN no entra.
  * La búsqueda, el tipo, el estado y la paginación se resuelven en memoria por AJAX.
  */
 @ManagedBean(name = "jefaturaBean")
@@ -57,7 +57,7 @@ public class JefaturaBean implements Serializable {
         }
 
         String nombreRol = rol.getNombre() == null ? "" : rol.getNombre().toUpperCase(Locale.ROOT);
-        verTodas = nombreRol.contains("RRHH") || nombreRol.contains("ADMIN");
+        verTodas = nombreRol.contains("RRHH");
 
         if (!verTodas && !nombreRol.contains("JEFATURA")) {
             redirigir(fc, "/solicitudes.xhtml");
