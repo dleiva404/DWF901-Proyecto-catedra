@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+
+<ui:composition template="/WEB-INF/templates/template.xhtml">
+    <ui:param name="activo" value="adminUsuarios"/>
+
+    <ui:define name="contenido">
+
+        <div>
+            <h1 class="rh-titulo">Usuarios del sistema</h1>
+        </div>
+
+        <h:messages globalOnly="true" layout="list" errorClass="rh-msg rh-msg-error" infoClass="rh-msg rh-msg-ok"/>
+
+        <div class="rh-tiles">
+            <div class="rh-tile">
+                <div class="rh-tile-etq">Usuarios</div>
+                <div class="rh-tile-num">#{adminUsuariosBean.total}</div>
+            </div>
+            <div class="rh-tile">
+                <div class="rh-tile-etq">Activos</div>
+                <div class="rh-tile-num">#{adminUsuariosBean.activos}</div>
+            </div>
+            <div class="rh-tile">
+                <div class="rh-tile-etq">Inactivos</div>
+                <div class="rh-tile-num">#{adminUsuariosBean.inactivos}</div>
+            </div>
+        </div>
+
+        <section class="rh-col-form">
+            <h2 class="rh-h2">Nuevo usuario</h2>
+
+            <h:panelGroup layout="block" styleClass="rh-vacio" rendered="#{not adminUsuariosBean.hayEmpleadosSinUsuario}">
+                Todos los empleados activos ya tienen usuario.
+            </h:panelGroup>
+
+            <h:form id="formNuevo" styleClass="rh-form" rendered="#{adminUsuariosBean.hayEmpleadosSinUsuario}">
+                <div class="rh-dos-col">
+                    <label class="rh-select">
+                        Empleado
+                        <h:selectOneMenu id="empleado" value="#{adminUsuariosBean.nuevoEmpleadoId}">
+                            <f:selectItem itemValue="" itemLabel="Seleccione..."/>
+                            <f:selectItems value="#{adminUsuariosBean.empleadosSinUsuario}"/>
+                        </h:selectOneMenu>
+                    </label>
+                    <label class="rh-select">
+                        Rol
+                        <h:selectOneMenu id="rol" value="#{adminUsuariosBean.nuevoRolId}">
+                            <f:selectItem itemValue="" itemLabel="Seleccione..."/>
+                            <f:selectItems value="#{adminUsuariosBean.roles}"/>
+                        </h:selectOneMenu>
+                    </label>
+                    <label class="rh-campo">
+                        Usuario
+                        <h:inputText id="username" value="#{adminUsuariosBean.nuevoUsername}" p:placeholder="nombre.apellido" p:autocomplete="off" p:maxlength="50"/>
+                    </label>
+                    <label class="rh-campo">
+                        Contraseña temporal
+                        <h:inputSecret id="contrasena" value="#{adminUsuariosBean.nuevaContrasena}" p:placeholder="Mínimo 8 caracteres" p:autocomplete="new-password" p:maxlength="128"/>
+                    </label>
+                </div>
+                <h:commandButton value="Crear usuario" action="#{adminUsuariosBean.crear}" styleClass="rh-btn-enviar"/>
+            </h:form>
+        </section>
+
+        <section class="rh-panel-tabla rh-panel-hist">
+            <h:form id="formUsuarios">
+                <div class="rh-tabla-scroll">
+                    <table class="rh-tabla rh-tabla-hist">
+                        <thead>
+                            <tr>
+                                <th>USUARIO</th>
+                                <th>EMPLEADO</th>
+                                <th>ROL</th>
+                                <th>ESTADO</th>
+                                <th>ÚLTIMO ACCESO</th>
+                                <th class="rh-der">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{adminUsuariosBean.filas}" var="u">
+                                <tr>
+                                    <td class="rh-td-tipo">#{u.username}</td>
+                                    <td>#{u.empleado}</td>
+                                    <td>
+                                        <span class="rh-select">
+                                            <h:selectOneMenu value="#{adminUsuariosBean.rolPorUsuario[u.id]}">
+                                                <f:selectItems value="#{adminUsuariosBean.roles}"/>
+                                            </h:selectOneMenu>
+                                            <h:commandButton value="Guardar" action="#{adminUsuariosBean.cambiarRol(u.id)}" styleClass="rh-btn-pag"/>
+                                        </span>
+                                    </td>
+                                    <td><span class="rh-chip rh-chip-#{u.claseEstado}"><span class="rh-punto"></span>#{u.estado}</span></td>
+                                    <td class="rh-nowrap">#{u.ultimoAcceso}</td>
+                                    <td class="rh-der">
+                                        <h:commandButton value="Desactivar" action="#{adminUsuariosBean.desactivar(u.id)}" styleClass="rh-btn-cancelar-sol" rendered="#{u.activo}"/>
+                                        <h:commandButton value="Activar" action="#{adminUsuariosBean.activar(u.id)}" styleClass="rh-btn-ver" rendered="#{not u.activo}"/>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                </div>
+            </h:form>
+        </section>
+    </ui:define>
+</ui:composition>
+</html>

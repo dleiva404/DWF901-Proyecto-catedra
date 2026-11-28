@@ -60,6 +60,9 @@ public class LoginBean {
             if (rol != null && "JEFATURA".equalsIgnoreCase(rol.getNombre())) {
                 return "jefatura?faces-redirect=true";
             }
+            if (rol != null && "ADMIN".equalsIgnoreCase(rol.getNombre())) {
+                return "admin-usuarios?faces-redirect=true";
+            }
             return "solicitudes?faces-redirect=true";
 
         } catch (SQLException e) {

@@ -54,7 +54,7 @@ public class JefaturaDetalleBean implements Serializable {
         }
 
         String nombreRol = rol.getNombre() == null ? "" : rol.getNombre().toUpperCase(Locale.ROOT);
-        soloLectura = nombreRol.contains("RRHH") || nombreRol.contains("ADMIN");
+        soloLectura = nombreRol.contains("RRHH");
         if (!soloLectura && !nombreRol.contains("JEFATURA")) {
             redirigir(fc, "/solicitudes.xhtml");
             return;

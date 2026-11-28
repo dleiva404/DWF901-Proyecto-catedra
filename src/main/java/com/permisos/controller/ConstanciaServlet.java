@@ -5,6 +5,7 @@ import com.permisos.dao.SucursalAreaDAO;
 import com.permisos.model.Constancia;
 import com.permisos.model.Empleado;
 import com.permisos.model.SucursalArea;
+import com.permisos.service.EmpresasGrupo;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -55,21 +56,13 @@ public class ConstanciaServlet extends HttpServlet {
             String institucion = request.getParameter("institucion");
             String motivo = request.getParameter("motivo");
 
-            // Determinamos la empresa o sucursal emisora de forma dinámica
-            String empresaEmisoraFinal;
-
-            if (empleado.getEmpresa() != null && !empleado.getEmpresa().trim().isEmpty()) {
-                // Si pertenece a una empresa afiliada (Copro, Steel, Inver Calma, etc.)
-                empresaEmisoraFinal = empleado.getEmpresa();
-            } else {
-                // Si es de Didelco, usamos tu SucursalAreaDAO existente con buscarPorId
-                SucursalAreaDAO sucursalDAO = new SucursalAreaDAO();
-                SucursalArea sucursal = sucursalDAO.buscarPorId(empleado.getIdSucursalArea());
-
-                String nombreSucursal = (sucursal != null) ? sucursal.getNombre() : null;
-                String base = (nombreSucursal != null) ? nombreSucursal : "Central";
-                empresaEmisoraFinal = base.toLowerCase().startsWith("didelco") ? base : "Didelco " + base;
+            // Determinamos la empresa o sucursal emisora (regla unica en EmpresasGrupo)
+            String nombreSucursal = null;
+            if (empleado.getEmpresa() == null || empleado.getEmpresa().trim().isEmpty()) {
+                SucursalArea sucursal = new SucursalAreaDAO().buscarPorId(empleado.getIdSucursalArea());
+                nombreSucursal = (sucursal != null) ? sucursal.getNombre() : null;
             }
+            String empresaEmisoraFinal = EmpresasGrupo.emisora(empleado.getEmpresa(), nombreSucursal);
 
             // Creamos el objeto Constancia con los datos recolectados
             Constancia nuevaConstancia = new Constancia();

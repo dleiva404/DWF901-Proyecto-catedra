@@ -103,6 +103,7 @@ public class SolicitudEmpleadoService {
 
         try {
             em.getTransaction().begin();
+            ValidacionTraslape.validar(em, idEmpleado, inicio, fin);
 
             if (ReglasVacaciones.TIPO_VACACIONES.equals(tipo.getNombre())) {
                 int anio = inicio.getYear();

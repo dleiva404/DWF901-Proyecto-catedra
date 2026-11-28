@@ -32,6 +32,7 @@ public class SecurityConfig {
     private static final String EMPLEADO = "EMPLEADO";
     private static final String JEFATURA = "JEFATURA";
     private static final String RRHH = "RRHH";
+    private static final String ADMIN = "ADMIN";
 
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http, TokenService tokenService)
@@ -88,6 +89,13 @@ public class SecurityConfig {
                 // empleados (solo RRHH)
                 .antMatchers(HttpMethod.GET, "/api/empleados").hasRole(RRHH)
                 .antMatchers(HttpMethod.GET, "/api/empleados/*").hasRole(RRHH)
+                // panel Admin TI (solo ADMIN)
+                .antMatchers(HttpMethod.GET, "/api/admin/usuarios").hasRole(ADMIN)
+                .antMatchers(HttpMethod.GET, "/api/admin/roles").hasRole(ADMIN)
+                .antMatchers(HttpMethod.POST, "/api/admin/usuarios").hasRole(ADMIN)
+                .antMatchers(HttpMethod.POST, "/api/admin/usuarios/*/rol").hasRole(ADMIN)
+                .antMatchers(HttpMethod.POST, "/api/admin/usuarios/*/activar").hasRole(ADMIN)
+                .antMatchers(HttpMethod.POST, "/api/admin/usuarios/*/desactivar").hasRole(ADMIN)
                 // todo lo demás, denegado
                 .anyRequest().denyAll();
 

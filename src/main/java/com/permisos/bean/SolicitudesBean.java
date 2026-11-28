@@ -10,6 +10,7 @@ import com.permisos.model.VacacionesEmpleado;
 import com.permisos.service.ReglaNegocioException;
 import com.permisos.service.SolicitudService;
 import com.permisos.service.ReglasVacaciones;
+import com.permisos.service.ValidacionTraslape;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -183,6 +184,14 @@ public class SolicitudesBean implements Serializable {
                 errores.add(e.getMessage());
             } catch (SQLException e) {
                 errores.add("No se pudo validar el saldo de vacaciones.");
+            }
+        }
+
+        if (errores.isEmpty()) {
+            try {
+                ValidacionTraslape.validar(usuario.getIdEmpleado(), inicio, fin);
+            } catch (ReglaNegocioException e) {
+                errores.add(e.getMessage());
             }
         }
 

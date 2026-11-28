@@ -205,13 +205,13 @@ INSERT INTO empleados
     (nombre, apellido, dui, correo, telefono, id_sucursal_area, empresa, id_departamento, cargo, fecha_ingreso)
 VALUES
     ('Juan', 'Pérez', '01234567-8', 'juan.perez@empresa.com', '70000000', 1, NULL, 4, 'Analista de Sistemas', '2024-01-15'),
-    ('Carlos', 'Gómez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, NULL, 4, 'Jefe de Informática', '2020-03-10'),
-    ('Ana', 'Martínez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, NULL, 1, 'Analista de Recursos Humanos', '2021-06-01'),
+    ('Carlos', 'Gómez', '12345678-9', 'carlos.gomez@empresa.com', '71111111', 1, 'Invercalma', 4, 'Jefe de Informática', '2020-03-10'),
+    ('Ana', 'Martínez', '23456789-0', 'ana.martinez@empresa.com', '72222222', 1, 'Propultran', 1, 'Analista de Recursos Humanos', '2021-06-01'),
     ('Carlos', 'Cornejo', '34567890-1', 'carlos.cornejo@empresa.com', '73333333', 1, NULL, 4, 'Jefe de Informática', '2021-02-01'),
-    ('David', 'Leiva', '45678901-2', 'david.leiva@empresa.com', '74444444', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
-    ('Moisés', 'García', '56789012-3', 'moises.garcia@empresa.com', '75555555', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
-    ('Alcyr', 'Figueroa', '67890123-4', 'alcyr.figueroa@empresa.com', '76666666', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01'),
-    ('Nelson', 'Solano', '78901234-5', 'nelson.solano@empresa.com', '77777777', 1, NULL, 4, 'Analista de Sistemas', '2024-02-01');
+    ('David', 'Leiva', '45678901-2', 'david.leiva@empresa.com', '74444444', 1, 'Copro', 4, 'Analista de Sistemas', '2024-02-01'),
+    ('Moisés', 'García', '56789012-3', 'moises.garcia@empresa.com', '75555555', 1, 'Steel', 4, 'Analista de Sistemas', '2024-02-01'),
+    ('Alcyr', 'Figueroa', '67890123-4', 'alcyr.figueroa@empresa.com', '76666666', 1, 'DCA', 4, 'Analista de Sistemas', '2024-02-01'),
+    ('Nelson', 'Solano', '78901234-5', 'nelson.solano@empresa.com', '77777777', 1, 'Elf', 4, 'Analista de Sistemas', '2024-02-01');
 
 INSERT INTO jefaturas (id_empleado, id_departamento, id_sucursal_area) VALUES
     (2, 4, 1),
@@ -221,7 +221,7 @@ INSERT INTO usuarios (username, password, id_empleado, id_rol) VALUES
     ('juan', 'pbkdf2$600000$oqJA6fVHbwQIGpNIHR66Zg==$5zy6vAp8If+fnVCKCeoz+F86yICSftlFxvw8Kgf/CCE=', 1, 2),
     ('carlos', 'pbkdf2$600000$iMMXSHv1ruoxwBL0lk9KsQ==$E+tiz1M5Iey45rTDH07U6QUu/MBZGTF45UNBIjqpn4U=', 2, 3),
     ('ana', 'pbkdf2$600000$yRa28mERxM/ah3ubpQcqxQ==$vQreyS4jgWrMJTTeYmMXX9yYHThTOXX+PwyfYwiVVD4=', 3, 4),
-    ('carlos.cornejo', 'pbkdf2$600000$Cn/yUwAXufwzKhGvbL3VoA==$5Wd1YwLPwSvpUnF+ICyGugHk+3HrcFNjAZRs6mI1cg4=', 4, 3),
+    ('carlos.cornejo', 'pbkdf2$600000$Cn/yUwAXufwzKhGvbL3VoA==$5Wd1YwLPwSvpUnF+ICyGugHk+3HrcFNjAZRs6mI1cg4=', 4, 1),
     ('david.leiva', 'pbkdf2$600000$EC2FxQJR/G6pH2A1XSTeww==$NXZGmWZkvX8XJbD+p/O4GEx5JQdnXDCIQDU4qsYymSo=', 5, 2),
     ('moises.garcia', 'pbkdf2$600000$Do/sFqW45qjqRIlyCSXNjg==$j6TSKwiZEKRpamCsb2Alh7hSn3tKHqwKXVZ1gnRW8aY=', 6, 2),
     ('alcyr.figueroa', 'pbkdf2$600000$r4xnNHQIzdEnrI5DA/ll2A==$D3sH8L1Wk7HyMbAnlIhOD2EyuqeR7uXMYQOkzSpeEMY=', 7, 2),

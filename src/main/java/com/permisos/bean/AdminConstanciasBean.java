@@ -53,7 +53,7 @@ public class AdminConstanciasBean implements Serializable {
         }
 
         String nombreRol = rol.getNombre() == null ? "" : rol.getNombre().toUpperCase(Locale.ROOT);
-        if (!nombreRol.contains("RRHH") && !nombreRol.contains("ADMIN")) {
+        if (!nombreRol.contains("RRHH")) {
             redirigir(fc, "/solicitudes.xhtml");
             return;
         }

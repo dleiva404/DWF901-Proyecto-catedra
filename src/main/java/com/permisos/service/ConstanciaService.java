@@ -151,7 +151,7 @@ public class ConstanciaService {
                 + constancia.getEmpleado().getApellido();
     }
 
-    // misma regla de ConstanciaServlet: empresa afiliada, o "Didelco " + sucursal
+    // empresa afiliada, o "Didelco " + sucursal (regla unica en EmpresasGrupo)
     private String empresaEmisora(int idEmpleado) throws SQLException {
 
         EntityManager em = JPAUtil.getEntityManager();
@@ -166,12 +166,7 @@ public class ConstanciaService {
             String empresa = filas.isEmpty() ? null : (String) filas.get(0)[0];
             String sucursal = filas.isEmpty() ? null : (String) filas.get(0)[1];
 
-            if (empresa != null && !empresa.trim().isEmpty()) {
-                return empresa;
-            }
-
-            String base = (sucursal != null) ? sucursal : "Central";
-            return base.toLowerCase().startsWith("didelco") ? base : "Didelco " + base;
+            return EmpresasGrupo.emisora(empresa, sucursal);
 
         } catch (RuntimeException ex) {
             throw new SQLException("No se pudo determinar la empresa emisora.", ex);

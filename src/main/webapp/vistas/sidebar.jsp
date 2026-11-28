@@ -48,8 +48,8 @@
             MENÚ PRINCIPAL
         </span>
 
-        <%-- Si el rol es JEFATURA, RRHH o ADMIN, mostramos la gestión de solicitudes de empleados --%>
-        <c:if test="${fn:contains(rolUpper, 'JEFATURA') || fn:contains(rolUpper, 'RRHH') || fn:contains(rolUpper, 'ADMIN')}">
+        <%-- Si el rol es JEFATURA o RRHH, mostramos la gestión de solicitudes de empleados --%>
+        <c:if test="${fn:contains(rolUpper, 'JEFATURA') || fn:contains(rolUpper, 'RRHH')}">
             <a href="${pageContext.request.contextPath}/jefatura"
                class="sidebar-link ${fn:contains(uriLower, 'jefatura') || fn:contains(uriLower, 'pendiente') || fn:contains(uriLower, 'detalle') ? 'active' : ''}">
                Solicitudes Empleados
@@ -67,7 +67,7 @@
            Mis Constancias
         </a>
 
-        <c:if test="${fn:contains(rolUpper, 'RRHH') || fn:contains(rolUpper, 'ADMIN')}">
+        <c:if test="${fn:contains(rolUpper, 'RRHH')}">
             <a href="${pageContext.request.contextPath}/AdminConstanciaServlet"
                class="sidebar-link ${fn:contains(uriLower, 'adminconstancia') ? 'active' : ''}">
                Gestión Constancias
